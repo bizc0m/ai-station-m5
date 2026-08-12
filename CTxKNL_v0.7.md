@@ -772,6 +772,8 @@ Documentation, rapports, livrables textuels, formats copiables, liens, tests et 
 
 LIVRABLES :
 - [DELIV-001] Tout lien GitHub, fichier ou URL utile doit être cliquable en Markdown ; jamais seulement mentionné en texte.
+- [DELIV-002] Quand un bash est nécessaire, fournir toujours deux sorties : un bloc bash copiable-collable et un lien de lancement automatique iTerm si l'environnement local le permet.
+- [DELIV-003] Le lien iTerm doit pointer vers un fichier `.command` ou une route locale contrôlée qui génère ce fichier ; ne jamais encoder ni lancer du bash arbitraire non validé dans une URL.
 - [CORE-235] Produire uniquement des rendus utilisables et optimisés : `.app` macOS optimisée pour application, HTML optimisé pour site/dashboard.
 - [CORE-236] Format par défaut des outils : HTML single-file autonome, sauf demande contraire explicite.
 - [CORE-237] Inclure quand pertinent : description, About, post court réseau, présentation courte.
