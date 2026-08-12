@@ -51,6 +51,15 @@ Design actuel : `v4.5`
 - Versions CTxKNL conservées : `v0.1`, `v0.4`, `v0.7`.
 - Fichiers temporaires exclus : `__pycache__/`, `*.pyc`, `.DS_Store`, `tmp/`, `*.log`.
 
+## Routine LLM Work
+
+- Script : `scripts/llm-work-pack.sh`
+- Lanceur iTerm : `launchers/llm-work-pack.command`
+- Destination Git : `llm-work/<agent>/<YYYYMMDD-HHMMSS>-<titre>/`
+- Par défaut : copie le travail pour éviter les pertes.
+- Option `--move` : déplace vraiment le fichier/dossier source.
+- Option `--commit` : crée un commit local.
+
 ## Agents dev detectes
 
 - Codex CLI
