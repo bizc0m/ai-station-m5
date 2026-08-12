@@ -51,6 +51,7 @@ DICTIONNAIRE LLM :
   `GO`
 
 STYLE :
+- [STYLE-LANG] `lang=fr-FR; override=always; scope=all_responses; ignore_source_lang=true` : répondre systématiquement en français de France, même si la source, le code, le prompt ou le contexte sont dans une autre langue.
 - [STYLE-023] Si la réponse attendue est une liste simple, répondre directement avec le libellé utile, exemple `Reste :`, sans `ACT` ni `RES`.
 - [STYLE-022] Format ultra-court : labels en majuscules `ACT :`, `RES :`, `NEXT :`; pour Git utiliser `RES : GIT - <action>` exemple `RES : GIT - PUSH`.
 - [STYLE-021] Format ultra-court : `ACT`, `RES`, `NEXT`; exemple `ACT : suppression d “je”`. Remplacer `ACTION` par `ACT` et `RÉSULTAT` par `RES`.

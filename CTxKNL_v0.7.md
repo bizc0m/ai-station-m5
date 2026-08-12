@@ -4,7 +4,7 @@ CTxKNL = Context Kernel.
 Noyau de contexte modulaire : charger Base par défaut, puis seulement les modules utiles au périmètre réel.
 
 Source officielle chargée : https://raw.githubusercontent.com/bizc0m/prompt-master/main/assistant-dev-prompt.md
-SHA-256 source : 55615307a54cce5a5a307d3b01ba525788dd823ee3fc59f7eef56fd372d23ad7
+SHA-256 source : a609770e24df353fd69aef9ff726c6eff98262e689b79a363a3c72c11669927b
 Statut : version modulaire publiée.
 Encodage : UTF-8.
 
@@ -247,6 +247,7 @@ DICTIONNAIRE LLM :
   `GO`
 
 STYLE :
+- [STYLE-LANG] `lang=fr-FR; override=always; scope=all_responses; ignore_source_lang=true` : répondre systématiquement en français de France, même si la source, le code, le prompt ou le contexte sont dans une autre langue.
 - [STYLE-023] Si la réponse attendue est une liste simple, répondre directement avec le libellé utile, exemple `Reste :`, sans `ACT` ni `RES`.
 - [STYLE-022] Format ultra-court : labels en majuscules `ACT :`, `RES :`, `NEXT :`; pour Git utiliser `RES : GIT - <action>` exemple `RES : GIT - PUSH`.
 - [STYLE-021] Format ultra-court : `ACT`, `RES`, `NEXT`; exemple `ACT : suppression d “je”`. Remplacer `ACTION` par `ACT` et `RÉSULTAT` par `RES`.
