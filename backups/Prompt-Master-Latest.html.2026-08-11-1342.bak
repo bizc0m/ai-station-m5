@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt Master Latest</title>
+  <style>
+    body { margin: 0; background: #fbfaf7; color: #101010; font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace; }
+    pre { margin: 0; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+<pre id="prompt">Chargement de la dernière version...</pre>
+<script>
+  const apiSource = "https://api.github.com/repos/bizc0m/prompt-master/contents/assistant-dev-prompt.md?ref=main";
+  const rawSource = "https://raw.githubusercontent.com/bizc0m/prompt-master/main/assistant-dev-prompt.md";
+
+  function decodeBase64Utf8(value) {
+    const binary = atob(value.replace(/\n/g, ""));
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder("utf-8").decode(bytes);
+  }
+
+  async function loadPrompt() {
+    try {
+      const response = await fetch(apiSource, { cache: "no-store" });
+      if (!response.ok) throw new Error(`API HTTP ${response.status}`);
+      const payload = await response.json();
+      document.getElementById("prompt").textContent = decodeBase64Utf8(payload.content);
+      return;
+    } catch (apiError) {
+      const response = await fetch(`${rawSource}?t=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`RAW HTTP ${response.status}`);
+      document.getElementById("prompt").textContent = await response.text();
+    }
+  }
+
+  loadPrompt().catch((error) => {
+    document.getElementById("prompt").textContent = `Erreur de chargement\n${apiSource}\n${rawSource}\n${error.message}`;
+  });
+</script>
+</body>
+</html>

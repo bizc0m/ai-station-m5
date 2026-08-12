@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CTxKNL - Prompt Master</title>
+  <meta name="description" content="CTxKNL, Context Kernel modulaire pour charger le Prompt Master selon le besoin.">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #111827;
+      --muted: #5b6472;
+      --line: #d9dee7;
+      --paper: #f7f8fb;
+      --panel: #ffffff;
+      --accent: #0f7a3b;
+      --accent-strong: #08612c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.5;
+    }
+    main {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 44px 0;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+      max-width: 720px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    a.button,
+    button.button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      font: inherit;
+    }
+    button.button:disabled { cursor: default; }
+    a.primary {
+      color: #ffffff;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    button.primary {
+      color: #ffffff;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    a.primary:hover { background: var(--accent-strong); }
+    button.primary:hover { background: var(--accent-strong); }
+    section {
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1.25rem;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .section-head h2 { margin: 0; }
+    .copy-status {
+      min-height: 20px;
+      margin: 8px 0 0;
+      color: var(--accent-strong);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .module-option {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      min-height: 48px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      font-weight: 700;
+    }
+    .module-option:hover,
+    .module-option:focus-within {
+      border-color: var(--accent);
+    }
+    .module-option::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: calc(100% + 8px);
+      z-index: 5;
+      display: none;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      box-shadow: 0 10px 24px rgba(17, 24, 39, .12);
+      font-size: .86rem;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+    .module-option:hover::after,
+    .module-option:focus-within::after {
+      display: block;
+    }
+    .module-option input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--accent);
+    }
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      resize: vertical;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      font: inherit;
+    }
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+    label.field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    input,
+    select {
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      font: inherit;
+      text-transform: none;
+    }
+    .live-label {
+      margin: 12px 0 8px;
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .help-text {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      margin: 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      font-size: .94rem;
+    }
+    ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    li { margin: 7px 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>CTxKNL</h1>
+      <p class="subtitle">Context Kernel modulaire pour charger le Prompt Master : base minimale par défaut, modules spécialisés uniquement quand ils sont utiles.</p>
+      <nav class="actions" aria-label="Liens principaux">
+        <a class="button primary" href="CTxKNL_v0.7.md">Ouvrir CTxKNL</a>
+        <a class="button primary" href="prompt.html">Prompt pure latest</a>
+        <a class="button primary" href="latest.md">latest.md</a>
+        <a class="button" href="prompt.md">prompt.md</a>
+        <a class="button" href="VERSIONS.md">Versions</a>
+        <a class="button" href="CTxKNL-launcher-prompt.txt">Prompt à copier</a>
+        <a class="button" href="assistant-dev-prompt.md">Source officielle</a>
+        <a class="button" href="https://github.com/bizc0m/prompt-master">GitHub</a>
+      </nav>
+    </header>
+
+    <section>
+      <div class="section-head">
+        <h2>Générer un Prompt Master</h2>
+        <button class="button primary" type="button" id="copyCustomPrompt">Copier</button>
+      </div>
+      <p class="help-text">Simulation projet : remplir, choisir cartouches, copier prompt total.</p>
+      <div class="field-grid">
+        <label class="field">Mode
+          <select id="projectMode">
+            <option value="A Chat">A Chat</option>
+            <option value="B Dev">B Dev</option>
+            <option value="C App">C App</option>
+            <option value="D Dashboard">D Dashboard</option>
+          </select>
+        </label>
+        <label class="field">Type
+          <select id="projectType">
+            <option value="Chat">Chat</option>
+            <option value="Dev">Dev</option>
+            <option value="App">App</option>
+            <option value="Dashboard">Dashboard</option>
+          </select>
+        </label>
+        <label class="field">Nom
+          <input id="projectName" type="text" placeholder="Nom projet">
+        </label>
+        <label class="field">Path
+          <input id="projectPath" type="text" placeholder="/Users/JOB/#DEV/...">
+        </label>
+        <label class="field">Repo
+          <input id="projectRepo" type="text" placeholder="https://github.com/...">
+        </label>
+        <label class="field">Fonction
+          <input id="projectFunction" type="text" placeholder="But principal">
+        </label>
+      </div>
+      <textarea id="userRequest" placeholder="Écris la demande ici, ou laisse vide et colle-la plus tard."></textarea>
+      <p class="live-label">Choix lancement</p>
+      <pre><code>A = Chat       [BASE] [MODUL]
+B = Dev        [BASE] [MODUL] [PTHCOD] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+C = App        [BASE] [MODUL] [PTHCOD] [APP] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+D = Dashboard  [BASE] [MODUL] [PTHCOD] [DASHUX] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+Entrée = Chat  [BASE] [MODUL]</code></pre>
+      <p class="live-label">Cartouches</p>
+      <div class="module-grid" aria-label="Modules CTxKNL">
+        <label class="module-option" data-tip="Style, sécurité, vérité."><input type="checkbox" value="[BASE]" checked disabled>[BASE]</label>
+        <label class="module-option" data-tip="Mode, modules, questions."><input type="checkbox" value="[MODUL]" checked disabled>[MODUL]</label>
+        <label class="module-option" data-tip="Path, code, tests."><input type="checkbox" value="[PTHCOD]">[PTHCOD]</label>
+        <label class="module-option" data-tip="macOS, runtime, fenêtres."><input type="checkbox" value="[APP]">[APP]</label>
+        <label class="module-option" data-tip="HTML, UI, responsive."><input type="checkbox" value="[DASHUX]">[DASHUX]</label>
+        <label class="module-option" data-tip="Status, commit, push."><input type="checkbox" value="[GIT]">[GIT]</label>
+        <label class="module-option" data-tip="Sources, réutilisation."><input type="checkbox" value="[SOURCE]">[SOURCE]</label>
+        <label class="module-option" data-tip="Docs, livrables."><input type="checkbox" value="[DELIV]">[DELIV]</label>
+        <label class="module-option" data-tip="Réponse par points : type A-E, 25 mots max, 1-3 libs libres."><input type="checkbox" value="[PTLIB]">[PTLIB]</label>
+      </div>
+      <p class="live-label">Bookmarks / services</p>
+      <div class="module-grid" aria-label="Bookmarks et services">
+        <label class="module-option" data-tip="Page publique avec générateur et bouton copier."><input type="checkbox" value="Prompt Master Page" data-url="https://bizc0m.github.io/prompt-master/">Prompt Master Page</label>
+        <label class="module-option" data-tip="Prompt CTxKNL complet en Markdown public."><input type="checkbox" value="CTxKNL Public" data-url="https://bizc0m.github.io/prompt-master/CTxKNL_v0.7.md">CTxKNL Public</label>
+        <label class="module-option" data-tip="Prompt court à coller dans n'importe quel LLM."><input type="checkbox" value="Launcher TXT" data-url="https://bizc0m.github.io/prompt-master/CTxKNL-launcher-prompt.txt">Launcher TXT</label>
+        <label class="module-option" data-tip="Dépôt GitHub officiel du projet."><input type="checkbox" value="GitHub Repo" data-url="https://github.com/bizc0m/prompt-master">GitHub Repo</label>
+        <label class="module-option" data-tip="Source brute utile si GitHub Pages ne répond pas."><input type="checkbox" value="Raw CTxKNL" data-url="https://raw.githubusercontent.com/bizc0m/prompt-master/main/CTxKNL_v0.7.md">Raw CTxKNL</label>
+        <label class="module-option" data-tip="Page locale servie par AI-Station sur ce Mac."><input type="checkbox" value="Local CTxKNL" data-url="http://127.0.0.1:8765/CTxKNL_v0.7.md">Local CTxKNL</label>
+      </div>
+      <div class="actions">
+        <button class="button" type="button" id="generatePrompt">Générer</button>
+        <button class="button" type="button" id="clearModules">Reset</button>
+      </div>
+      <p class="live-label">Prompt construit en direct</p>
+      <pre><code id="customPrompt"></code></pre>
+      <p class="copy-status" id="customStatus" aria-live="polite"></p>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Deeplink et bookmarklet</h2>
+        <button class="button primary" type="button" id="copyDeeplink">Copier commande</button>
+      </div>
+      <p class="help-text">Commande macOS pour ouvrir le générateur depuis un terminal, un script ou un autre LLM capable de proposer une commande.</p>
+      <pre><code id="deeplinkCommand">open "https://bizc0m.github.io/prompt-master/"</code></pre>
+      <p class="copy-status" id="deeplinkStatus" aria-live="polite"></p>
+
+      <p class="live-label">Bookmarklet</p>
+      <div class="actions">
+        <a class="button primary" id="bookmarkletLink" href="javascript:(()=>{window.open('https://bizc0m.github.io/prompt-master/','_blank','noopener');})();">Prompt Master</a>
+        <button class="button" type="button" id="copyBookmarklet">Copier bookmarklet</button>
+      </div>
+      <p class="help-text">Glisse le bouton “Prompt Master” dans ta barre de favoris. Sinon copie le code ci-dessous dans l'URL d'un favori.</p>
+      <pre><code id="bookmarkletCode">javascript:(()=>{window.open('https://bizc0m.github.io/prompt-master/','_blank','noopener');})();</code></pre>
+      <p class="copy-status" id="bookmarkletStatus" aria-live="polite"></p>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Prompt à lancer</h2>
+        <button class="button primary" type="button" id="copyPrompt">Copier</button>
+      </div>
+      <pre><code id="launcherPrompt">Charge CTxKNL avant de répondre.
+
+Source :
+https://bizc0m.github.io/prompt-master/CTxKNL_v0.7.md
+
+Si cette URL ne marche pas, utilise :
+https://raw.githubusercontent.com/bizc0m/prompt-master/main/CTxKNL_v0.7.md
+
+Procédure :
+1. Charge la Base minimale.
+2. Lis ma demande.
+3. Déduis le mode :
+   - A Chat : question simple, explication, commande à fournir.
+   - B Dev : code, bug, repo, Git, tests.
+   - C App : app macOS, runtime, fenêtre, lancement.
+   - D Dashboard : site, dashboard, page, UI web.
+4. Au lancement, proposer `A=Chat | B=Dev | C=App | D=Dashboard | Entrée=Chat`.
+5. Afficher les modules qui seront chargés pour chaque mode :
+   - A Chat : [BASE] [MODUL]
+   - B Dev : [BASE] [MODUL] [PTHCOD] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+   - C App : [BASE] [MODUL] [PTHCOD] [APP] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+   - D Dashboard : [BASE] [MODUL] [PTHCOD] [DASHUX] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+6. Si la demande est vide ou si l&#x27;utilisateur fait Entrée : mode Chat.
+7. Cartouches modules :
+   - [BASE] style, sécurité, vérité
+   - [MODUL] mode, modules, questions
+   - [PTHCOD] path, code, tests
+   - [APP] macOS, runtime, fenêtres
+   - [DASHUX] HTML, UI, responsive
+   - [GIT] status, commit, push
+   - [SOURCE] sources, réutilisation
+   - [DELIV] docs, livrables
+   - [PTLIB] réponse par points avec type A-E et 1-3 librairies
+8. Propose modules nécessaires seulement si demande implique Dev, App ou Dashboard.
+9. Affiche avant action : `BASE + modules:&lt;cartouches&gt; | libs:&lt;liste|—&gt; | mode:&lt;mode&gt; | path:&lt;path|?&gt;`.
+10. Si mode Dev, App ou Dashboard et repo/chemin manque, demande-le avant d&#x27;agir.
+11. Ne charge pas de module inutile.
+12. Pour demande simple, réponds directement sans commentaire sur modules.
+13. Compter chaque prompt utilisateur dès que CTxKNL est chargé et afficher le footer compteur systématique.
+14. [DELIV] Toujours fournir lien cliquable vers rendu et chemin local cliquable si disponibles. Jamais chemin brut seul.
+15. Si compteur exact indisponible, afficher `📊 ?/30` plutôt qu'inventer.
+16. [PTLIB] Si activé, répondre à chaque point sous ce format strict :
+    **Point X — titre court**
+    Type : [A] Solution code/librairie | [B] Architecture/design system | [C] Data/dashboard/visualisation | [D] Automation/workflow/CLI | [E] Autre
+    Réponse : 1 phrase technique directe, max 25 mots.
+    Librairies : 1-3 libs libres/matures avec nom, lien court, langage ; sinon `Aucune lib pertinente`.
+17. Si Mode DEV strict actif, footer strict obligatoire.
+18. Si aucune URL inaccessible, demande-moi coller contenu.
+
+Footer strict :
+Seulement si Mode DEV strict actif :
+📊 XX/30 🟢🟡🔴 | vX.XX
+Con : Excellent | Bon | Moyen | Faible
+GIT : OK | COMMIT RECOMMANDÉ | —
+TEST : PASS | FAIL | —
+Lien : URL | indisponible
+GO | STOP
+
+Style :
+- Réponse minimale.
+- Supprime mots inutiles par défaut.
+- Pas de blabla.
+- Format préféré : `ACT`, `RES`, `NEXT`.
+- Une ligne suffit si une ligne suffit.</code></pre>
+      <p class="copy-status" id="copyStatus" aria-live="polite"></p>
+    </section>
+
+    <section>
+      <h2>Fichiers</h2>
+      <ul>
+        <li><a href="CTxKNL_v0.7.md">CTxKNL_v0.7.md</a> : architecture modulaire.</li>
+        <li><a href="CTxKNL_v0.1.md">CTxKNL_v0.1.md</a> : ancienne version / compat.</li>
+        <li><a href="VERSIONS.md">VERSIONS.md</a> : numerotation.</li>
+        <li><a href="latest.md">latest.md</a> : prompt brut latest.</li>
+        <li><a href="prompt.md">prompt.md</a> : prompt latest source.</li>
+        <li><a href="prompt.html">prompt.html</a> : page pure latest qui lit prompt.md.</li>
+        <li><a href="CTxKNL-launcher-prompt.txt">CTxKNL-launcher-prompt.txt</a> : prompt court à coller dans n'importe quel LLM.</li>
+        <li><a href="assistant-dev-prompt.md">assistant-dev-prompt.md</a> : source officielle complète.</li>
+        <li><a href="README.md">README.md</a> : documentation du dépôt.</li>
+      </ul>
+    </section>
+  </main>
+  <script>
+    const copyButton = document.getElementById('copyPrompt');
+    const copyStatus = document.getElementById('copyStatus');
+    const launcherPrompt = document.getElementById('launcherPrompt');
+    const generatePrompt = document.getElementById('generatePrompt');
+    const clearModules = document.getElementById('clearModules');
+    const copyCustomPrompt = document.getElementById('copyCustomPrompt');
+    const customPrompt = document.getElementById('customPrompt');
+    const customStatus = document.getElementById('customStatus');
+    const userRequest = document.getElementById('userRequest');
+    const projectMode = document.getElementById('projectMode');
+    const projectType = document.getElementById('projectType');
+    const projectName = document.getElementById('projectName');
+    const projectPath = document.getElementById('projectPath');
+    const projectRepo = document.getElementById('projectRepo');
+    const projectFunction = document.getElementById('projectFunction');
+    const moduleInputs = Array.from(document.querySelectorAll('[aria-label="Modules CTxKNL"] input'));
+    const bookmarkInputs = Array.from(document.querySelectorAll('[aria-label="Bookmarks et services"] input'));
+    const copyDeeplink = document.getElementById('copyDeeplink');
+    const deeplinkCommand = document.getElementById('deeplinkCommand');
+    const deeplinkStatus = document.getElementById('deeplinkStatus');
+    const copyBookmarklet = document.getElementById('copyBookmarklet');
+    const bookmarkletCode = document.getElementById('bookmarkletCode');
+    const bookmarkletStatus = document.getElementById('bookmarkletStatus');
+
+    function selectedModules() {
+      return moduleInputs.filter((input) => input.checked).map((input) => input.value);
+    }
+
+    function selectedBookmarks() {
+      return bookmarkInputs.filter((input) => input.checked).map((input) => ({
+        name: input.value,
+        url: input.dataset.url
+      }));
+    }
+
+    function buildCustomPrompt() {
+      const modules = selectedModules();
+      const bookmarks = selectedBookmarks();
+      const request = userRequest.value.trim();
+      const moduleText = modules.length ? modules.join(' ') : '[BASE] [MODUL]';
+      const bookmarkText = bookmarks.length ? bookmarks.map((item) => `- ${item.name} : ${item.url}`).join('\n') : '- Aucun bookmark imposé.';
+      const requestText = request || '[COLLER LA DEMANDE ICI]';
+      const mode = projectMode.value;
+      const type = projectType.value;
+      const name = projectName.value.trim() || '[NOM]';
+      const path = projectPath.value.trim() || '[PATH]';
+      const repo = projectRepo.value.trim() || '[REPO]';
+      const fn = projectFunction.value.trim() || '[FONCTION]';
+
+      return `CARTOUCHES : ${moduleText}
+AV : analyser demande, critiquer périmètre, proposer action minimale, vérifier avant livraison.
+
+PROJET :
+- Mode : ${mode}
+- Type : ${type}
+- Nom : ${name}
+- Path : ${path}
+- Repo : ${repo}
+- Fonction : ${fn}
+
+Charge CTxKNL avant de répondre.
+
+Source :
+https://bizc0m.github.io/prompt-master/CTxKNL_v0.7.md
+
+Si cette URL ne marche pas, utilise :
+https://raw.githubusercontent.com/bizc0m/prompt-master/main/CTxKNL_v0.7.md
+
+Procédure :
+1. Charge la Base minimale.
+2. Lis ma demande.
+3. Déduis le mode : A Chat, B Dev, C App, D Dashboard.
+4. Au lancement, proposer : A=Chat | B=Dev | C=App | D=Dashboard | Entrée=Chat.
+5. Afficher modules chargés par mode :
+   - A Chat : [BASE] [MODUL]
+   - B Dev : [BASE] [MODUL] [PTHCOD] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+   - C App : [BASE] [MODUL] [PTHCOD] [APP] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+   - D Dashboard : [BASE] [MODUL] [PTHCOD] [DASHUX] [GIT?] [SOURCE?] [DELIV?] [PTLIB?]
+6. Si demande vide ou Entrée : mode Chat.
+7. Utilise les cartouches sélectionnées ci-dessous comme préférence, pas comme obligation aveugle.
+8. Si un module nécessaire manque, signale-le et propose de l'ajouter avant d'agir.
+9. Si mode Dev, App ou Dashboard et repo/chemin manque, demande-le avant d'agir.
+10. Pour demande simple, réponds directement sans commentaire sur modules.
+11. Agis.
+
+Modules sélectionnés :
+- ${moduleText}
+
+Bookmarks / services :
+${bookmarkText}
+
+Demande :
+${requestText}`;
+    }
+
+    function refreshCustomPrompt() {
+      customPrompt.textContent = buildCustomPrompt();
+    }
+
+    async function copyText(text, statusEl, buttonEl) {
+      try {
+        await navigator.clipboard.writeText(text.trim());
+        statusEl.textContent = 'Prompt copié.';
+        if (buttonEl) buttonEl.textContent = 'Copié';
+        setTimeout(() => {
+          if (buttonEl) buttonEl.textContent = 'Copier';
+          statusEl.textContent = '';
+        }, 1800);
+      } catch {
+        statusEl.textContent = 'Copie automatique bloquée : texte sélectionné.';
+        return false;
+      }
+      return true;
+    }
+
+    generatePrompt.addEventListener('click', refreshCustomPrompt);
+
+    clearModules.addEventListener('click', () => {
+      moduleInputs.forEach((input) => { input.checked = input.disabled; });
+      bookmarkInputs.forEach((input) => { input.checked = false; });
+      userRequest.value = '';
+      refreshCustomPrompt();
+    });
+
+    moduleInputs.forEach((input) => input.addEventListener('change', refreshCustomPrompt));
+    bookmarkInputs.forEach((input) => input.addEventListener('change', refreshCustomPrompt));
+    [projectMode, projectType, projectName, projectPath, projectRepo, projectFunction].forEach((input) => input.addEventListener('input', refreshCustomPrompt));
+    projectMode.addEventListener('change', () => {
+      if (projectMode.value === 'A Chat') projectType.value = 'Chat';
+      if (projectMode.value === 'B Dev') projectType.value = 'Dev';
+      if (projectMode.value === 'C App') projectType.value = 'App';
+      if (projectMode.value === 'D Dashboard') projectType.value = 'Dashboard';
+      refreshCustomPrompt();
+    });
+    userRequest.addEventListener('input', refreshCustomPrompt);
+
+    copyCustomPrompt.addEventListener('click', async () => {
+      refreshCustomPrompt();
+      const copied = await copyText(customPrompt.textContent, customStatus, copyCustomPrompt);
+      if (!copied) {
+        const range = document.createRange();
+        range.selectNodeContents(customPrompt);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    });
+
+    copyDeeplink.addEventListener('click', async () => {
+      await copyText(deeplinkCommand.textContent, deeplinkStatus, copyDeeplink);
+    });
+
+    copyBookmarklet.addEventListener('click', async () => {
+      await copyText(bookmarkletCode.textContent, bookmarkletStatus, copyBookmarklet);
+    });
+
+    copyButton.addEventListener('click', async () => {
+      const text = launcherPrompt.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        copyStatus.textContent = 'Prompt copié.';
+        copyButton.textContent = 'Copié';
+        setTimeout(() => {
+          copyButton.textContent = 'Copier';
+          copyStatus.textContent = '';
+        }, 1800);
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(launcherPrompt);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        copyStatus.textContent = 'Copie automatique bloquée : texte sélectionné.';
+      }
+    });
+
+    refreshCustomPrompt();
+  </script>
+</body>
+</html>

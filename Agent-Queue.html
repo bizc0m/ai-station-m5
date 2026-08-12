@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Queue</title>
+  <style>
+    :root {
+      --bg: #fbfaf7;
+      --paper: #fff;
+      --ink: #101010;
+      --muted: #66615a;
+      --line: rgba(16,16,16,.14);
+      --red: #c8161d;
+      --green: #1f7a3f;
+      --amber: #9a6a11;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+    header {
+      position: sticky; top: 0; z-index: 1;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 16px 22px; border-bottom: 1px solid var(--line);
+      background: rgba(251,250,247,.94); backdrop-filter: blur(14px);
+    }
+    h1 { margin: 0; font-size: 20px; line-height: 1; }
+    .sub { margin-top: 5px; color: var(--muted); font: 12px/1.35 var(--mono); }
+    .counts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 8px 10px; background: var(--paper); font: 800 11px/1 var(--mono); text-transform: uppercase; }
+    main { width: min(1160px, calc(100% - 28px)); margin: 18px auto 40px; }
+    .compose { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) 180px 110px; padding: 14px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+    textarea, input, select, button { width: 100%; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); font: 13px/1.35 var(--sans); }
+    textarea { min-height: 84px; resize: vertical; padding: 10px; grid-column: 1 / -1; }
+    input, select { min-height: 38px; padding: 0 10px; }
+    button { min-height: 38px; background: var(--green); color: #fff; font: 800 11px/1 var(--mono); text-transform: uppercase; cursor: pointer; }
+    .dropzone { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; min-height: 92px; border: 1px dashed rgba(16,16,16,.28); border-radius: 8px; color: var(--muted); font: 12px/1.35 var(--mono); text-align: center; padding: 12px; }
+    .dropzone.drag { border-color: var(--green); color: var(--green); background: rgba(31,122,63,.06); }
+    .form-status { grid-column: 1 / -1; color: var(--muted); font: 12px/1.35 var(--mono); min-height: 16px; }
+    .tasks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .task { border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 8px; background: var(--paper); padding: 14px; min-height: 160px; }
+    .task.doing { border-left-color: var(--green); }
+    .task.blocked { border-left-color: var(--amber); }
+    .task.done { opacity: .72; }
+    .task-top { display: flex; align-items: center; gap: 8px; font: 800 11px/1 var(--mono); text-transform: uppercase; }
+    .status, .priority { border: 1px solid var(--line); border-radius: 999px; padding: 5px 7px; }
+    h2 { margin: 12px 0 7px; font-size: 16px; line-height: 1.2; }
+    p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.35; }
+    .meta { margin-top: 10px; color: var(--muted); font: 11px/1.35 var(--mono); overflow-wrap: anywhere; }
+    .attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .attachment { border: 1px solid var(--line); border-radius: 999px; padding: 6px 8px; color: var(--ink); text-decoration: none; font: 11px/1 var(--mono); }
+    ul { margin: 10px 0 0; padding-left: 16px; color: var(--muted); font: 11px/1.4 var(--mono); }
+    .empty { border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: var(--paper); color: var(--muted); }
+    @media (max-width: 760px) { header { align-items: flex-start; flex-direction: column; } .counts { justify-content: flex-start; } .tasks { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Agent Queue</h1>
+      <div class="sub">Dernière mise à jour : 2026-08-10T14:21:48+02:00</div>
+    </div>
+    <div class="counts">
+      <span class="pill">pending 2</span>
+      <span class="pill">doing 0</span>
+      <span class="pill">blocked 0</span>
+      <span class="pill">done 11</span>
+    </div>
+  </header>
+  <main>
+    <form class="compose" id="queue-form">
+      <textarea name="request" placeholder="Requête pour les agents" required></textarea>
+      <input name="agent" placeholder="agent: codex">
+      <select name="priority">
+        <option value="5">Priorité 5</option>
+        <option value="4">Priorité 4</option>
+        <option value="3" selected>Priorité 3</option>
+        <option value="2">Priorité 2</option>
+        <option value="1">Priorité 1</option>
+      </select>
+      <button type="submit">Ajouter</button>
+      <div class="dropzone" id="dropzone">Glisse un document ici, ou clique pour choisir un fichier</div>
+      <input type="file" id="file-input" name="documents" multiple hidden>
+      <div class="form-status" id="form-status"></div>
+    </form>
+    <div class="tasks">
+        <article class="task pending">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0001</strong>
+              <span class="status">pending</span>
+              <span class="priority">P5</span>
+            </div>
+            <h2>Brancher Prompt Master sur GitHub officiel</h2>
+            <p>Créer/cloner le repo local prompt-master, puis appliquer la cadence: commit chaque prompt, push tous les 5, autoanalyse tous les 10.</p>
+            <div class="meta">codex · /Users/JOB/#DEV/_Agents/task-queue</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-09T08:23:42+02:00 · created</li></ul>
+          </div>
+        </article>
+        
+        <article class="task pending">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0010</strong>
+              <span class="status">pending</span>
+              <span class="priority">P3</span>
+            </div>
+            <h2>c&#x27;est quel projet cette page ?</h2>
+            <p>c&#x27;est quel projet cette page ?</p>
+            <div class="meta">agent libre · sans projet</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-10T09:40:31+02:00 · created</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0008</strong>
+              <span class="status">done</span>
+              <span class="priority">P5</span>
+            </div>
+            <h2>Ajouter canaux Stable Dev Exp dans Prompt Master</h2>
+            <p>Intégrer règle générale Stable/Dev/Exp, régénérer HTML, vérifier, puis pousser vers bizc0m/prompt-master si possible.</p>
+            <div class="meta">codex · /Users/JOB/#DEV/01-projets/Tools/ai-station-m5</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-09T10:34:53+02:00 · Canaux Stable/Dev/Exp intégrés, HTML régénéré</li><li>2026-08-09T10:35:51+02:00 · Canaux Stable/Dev/Exp intégrés et poussés sur GitHub commit 20beaeb</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0009</strong>
+              <span class="status">done</span>
+              <span class="priority">P5</span>
+            </div>
+            <h2>Créer prompt de démarrage dernière version Prompt Master</h2>
+            <p>Ajouter un prompt bootstrap qui force les agents à charger la dernière version du Prompt Master, mettre le haut du README GitHub à jour, créer TXT/HTML local uniquement pour ce prompt.</p>
+            <div class="meta">codex · /Users/JOB/#DEV/01-projets/Tools/ai-station-m5</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-10T09:40:08+02:00 · started by codex</li><li>2026-08-10T09:41:35+02:00 · Prompt latest loader créé, README GitHub mis à jour, GitHub push OK</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0012</strong>
+              <span class="status">done</span>
+              <span class="priority">P5</span>
+            </div>
+            <h2>Refondre Prompt Master en architecture modulaire</h2>
+            <p>Créer une nouvelle version Markdown modulaire sans push: Base + modules projet/dev, app/runtime, site/dashboard, git, KM, skill/agent, automation, document/report. Vérifier IDs, liens, UTF-8.</p>
+            <div class="meta">codex · /Users/JOB/#DEV/01-projets/Tools/ai-station-m5</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-10T11:36:56+02:00 · Version modulaire créée, 340 IDs conservés, Markdown et liens vérifiés</li><li>2026-08-10T11:37:05+02:00 · Refonte modulaire locale créée sans push, 340 IDs préservés</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0013</strong>
+              <span class="status">done</span>
+              <span class="priority">P5</span>
+            </div>
+            <h2>Publier CTxKNL Context Kernel</h2>
+            <p>Renommer la version modulaire en CTxKNL_v0.1.md, mettre à jour liens locaux/README GitHub, pousser dans bizc0m/prompt-master.</p>
+            <div class="meta">codex · /Users/JOB/#DEV/01-projets/Tools/ai-station-m5</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-10T14:20:43+02:00 · started by codex</li><li>2026-08-10T14:21:48+02:00 · Publié CTxKNL_v0.1.md sur GitHub, README mis à jour, lien local ajouté dans AI-Station. Vérifications: local 200, GitHub 200, UTF-8, 340 IDs conservés.</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0003</strong>
+              <span class="status">done</span>
+              <span class="priority">P4</span>
+            </div>
+            <h2>Optimiser les règles projet/dev dans Prompt Master</h2>
+            <p>Structurer la demande utilisateur en règles Prompt Master compactes: path, app/site/dashboard, version, git, docs, UX, KM/GitHub reuse, setup, backups, release, quotas.</p>
+            <div class="meta">codex · /Users/JOB/#DEV/01-projets/Tools/ai-station-m5</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-09T08:30:29+02:00 · Prompt Master HTML régénéré depuis le texte source</li><li>2026-08-09T08:30:43+02:00 · Règles projet/dev optimisées et ajoutées au Prompt Master</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0004</strong>
+              <span class="status">done</span>
+              <span class="priority">P4</span>
+            </div>
+            <h2>MAJ Prompt Master</h2>
+            <p></p>
+            <div class="meta">codex · sans projet</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-09T08:36:53+02:00 · Source texte mise à jour et HTML autonome régénéré</li><li>2026-08-09T08:37:29+02:00 · Prompt Master source + HTML mis à jour, UTF-8 vérifié, URL locale 200 OK</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0005</strong>
+              <span class="status">done</span>
+              <span class="priority">P4</span>
+            </div>
+            <h2>MAJ Prompt Master - Prompt Generale 2</h2>
+            <p></p>
+            <div class="meta">codex · sans projet</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-09T08:38:38+02:00 · Règles Prompt Generale 2 fusionnées, HTML régénéré</li><li>2026-08-09T08:38:49+02:00 · Prompt Generale 2 intégré dans le Prompt Master, HTML régénéré, UTF-8 et URL locale validés</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0006</strong>
+              <span class="status">done</span>
+              <span class="priority">P4</span>
+            </div>
+            <h2>MAJ Prompt Master - Base Dev</h2>
+            <p></p>
+            <div class="meta">codex · sans projet</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-09T08:41:30+02:00 · Base Dev fusionnée, HTML régénéré, prompt copié dans le presse-papier</li><li>2026-08-09T08:41:44+02:00 · Base Dev intégrée, HTML régénéré, URL locale et presse-papier validés</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0007</strong>
+              <span class="status">done</span>
+              <span class="priority">P4</span>
+            </div>
+            <h2>MAJ Prompt Master - Strict v3</h2>
+            <p></p>
+            <div class="meta">codex · sans projet</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-09T08:43:39+02:00 · Strict v3 intégré, HTML régénéré, prompt copié dans le presse-papier</li><li>2026-08-09T08:43:51+02:00 · Strict v3 intégré, GitHub consulté, HTML/UTF-8/URL/presse-papier validés</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0011</strong>
+              <span class="status">done</span>
+              <span class="priority">P4</span>
+            </div>
+            <h2>Ajouter règle IDs articles références chapitres</h2>
+            <p>Ajouter en haut du Prompt Master que les IDs type [CORE-201] sont des articles/références/chapitres stables, et signaler les violations en retour prompt.</p>
+            <div class="meta">codex · /Users/JOB/#DEV/01-projets/Tools/ai-station-m5</div>
+            <div class="attachments"></div>
+            <ul><li>2026-08-10T09:55:25+02:00 · Règle CORE-000 ajoutée, HTML régénéré</li><li>2026-08-10T09:56:45+02:00 · CORE-000 ajouté, latest loader corrigé API GitHub, GitHub push OK</li></ul>
+          </div>
+        </article>
+        
+        <article class="task done">
+          <div class="task-main">
+            <div class="task-top">
+              <strong>TASK-0002</strong>
+              <span class="status">done</span>
+              <span class="priority">P2</span>
+            </div>
+            <h2>Test drag and drop Agent Queue avec document attaché</h2>
+            <p>Test drag and drop Agent Queue avec document attaché</p>
+            <div class="meta">codex · sans projet</div>
+            <div class="attachments"><a class="attachment" href="/open-path?path=/Users/JOB/%23DEV/_Agents/task-queue/attachments/TASK-0002/README.md">README.md</a></div>
+            <ul><li>2026-08-09T08:26:19+02:00 · 1 attachment(s)</li><li>2026-08-09T08:26:27+02:00 · Test drag-and-drop POST OK</li></ul>
+          </div>
+        </article>
+        </div>
+  </main>
+  <script>
+    const form = document.getElementById("queue-form");
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("file-input");
+    const statusEl = document.getElementById("form-status");
+    let files = [];
+
+    function renderFiles() {
+      dropzone.textContent = files.length ? files.map((file) => file.name).join(" · ") : "Glisse un document ici, ou clique pour choisir un fichier";
+    }
+
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      dropzone.classList.add("drag");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
+    dropzone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      dropzone.classList.remove("drag");
+      files = [...event.dataTransfer.files];
+      renderFiles();
+    });
+    fileInput.addEventListener("change", () => {
+      files = [...fileInput.files];
+      renderFiles();
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      statusEl.textContent = "Ajout...";
+      const data = new FormData(form);
+      data.delete("documents");
+      files.forEach((file) => data.append("documents", file));
+      const response = await fetch("/queue/add", { method: "POST", body: data });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        statusEl.textContent = result.error || "Erreur ajout tâche";
+        return;
+      }
+      statusEl.textContent = `Ajouté : ${result.task_id}`;
+      setTimeout(() => window.location.reload(), 450);
+    });
+  </script>
+</body>
+</html>

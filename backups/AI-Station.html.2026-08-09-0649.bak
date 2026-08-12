@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="ai-station-design-version" content="4.4">
+  <title>AI-STATION · M5 — Dev IA local</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --paper: #fafaf8;
+      --paper-2: #f5f5f3;
+      --line: rgba(12,12,12,.14);
+      --line-strong: rgba(12,12,12,.28);
+      --ink: #0c0c0c;
+      --ink-2: #2a2825;
+      --muted: #6f6a62;
+      --faint: #8a8278;
+      --red: #c8161d;
+      --red-deep: #9a1117;
+      --red-soft: #fbe8ea;
+      --ok: #1f7a3f;
+      --warn: #9a6a11;
+      --radius: 12px;
+      --display: "Instrument Serif", "Times New Roman", Georgia, serif;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+      --sans: "Helvetica Neue", Helvetica, Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      letter-spacing: 0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(transparent calc(100% - 1px), rgba(12,12,12,.035) 100%) 0 0 / 100% 34px,
+        linear-gradient(90deg, transparent calc(100% - 1px), rgba(12,12,12,.035) 100%) 0 0 / 34px 100%;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1220px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 84px 0 44px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 50;
+      min-height: 64px;
+      display: grid;
+      grid-template-columns: auto minmax(220px, 1fr) auto auto;
+      gap: 14px;
+      align-items: center;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--red);
+      box-shadow: 0 0 0 6px rgba(200,22,29,.05);
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .mark::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+    }
+
+    .mark::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font: 700 20px/1 var(--display);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .sub {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font: 600 10px/1.2 var(--mono);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .service-strip {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .pill,
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--ink-2);
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge {
+      justify-self: end;
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+    }
+
+    .button,
+    .top-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--red);
+      color: #fff;
+      text-decoration: none;
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .top-action { border-radius: 999px; min-height: 38px; padding: 0 14px; }
+
+    .button.secondary {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink-2);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 246px minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    .side,
+    .main,
+    .bottom {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(250,250,248,.84);
+    }
+
+    .side {
+      padding: 12px;
+      min-height: 640px;
+      position: sticky;
+      top: 78px;
+      align-self: start;
+    }
+
+    .sigil {
+      height: 168px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: radial-gradient(circle, rgba(200,22,29,.08), transparent 62%);
+    }
+
+    .sigil svg {
+      width: 128px;
+      height: 128px;
+      color: var(--ink);
+    }
+
+    .tabs {
+      display: grid;
+      gap: 6px;
+    }
+
+    .tab {
+      appearance: none;
+      width: 100%;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font: 700 12px/1 var(--sans);
+      letter-spacing: .08em;
+      text-align: left;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      color: var(--ink);
+      border-color: var(--line);
+      background: var(--paper-2);
+    }
+
+    .tab[aria-selected="true"] {
+      color: #fff;
+      border-color: var(--red);
+      background: var(--red);
+      box-shadow: 0 0 0 1px var(--red);
+    }
+
+    .main {
+      min-height: 640px;
+      padding: 14px;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 12px 12px 18px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .eyebrow,
+    .kicker {
+      margin: 0;
+      color: var(--red);
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .kicker { color: var(--muted); }
+
+    h2 {
+      margin: 8px 0 0;
+      color: var(--ink);
+      font: 600 clamp(34px, 5vw, 58px)/1.02 var(--display);
+      letter-spacing: -.02em;
+    }
+
+    h2::after {
+      content: "";
+      display: block;
+      width: 74px;
+      height: 2px;
+      margin-top: 18px;
+      background: linear-gradient(90deg, var(--muted), var(--red));
+    }
+
+    h3 {
+      margin: 0;
+      color: var(--ink);
+      font: 600 22px/1.15 var(--display);
+      letter-spacing: .01em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .hint {
+      margin-top: 10px;
+      max-width: 760px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+    }
+
+    .card {
+      grid-column: span 4;
+      min-height: 168px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--red);
+      border-radius: 8px;
+      background: var(--paper);
+      min-width: 0;
+    }
+
+    .wide { grid-column: span 6; }
+    .full { grid-column: 1 / -1; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 168px minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--red);
+      border-radius: 4px;
+      background: rgba(255,255,255,.7);
+      min-width: 0;
+    }
+
+    .label {
+      color: var(--ink);
+      font: 800 11px/1.35 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    code {
+      color: var(--ink);
+      font: 12px/1.5 var(--mono);
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .state {
+      display: inline-flex;
+      width: max-content;
+      min-height: 24px;
+      align-items: center;
+      gap: 6px;
+      padding: 0 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .state.ok { color: var(--ok); background: rgba(31,122,63,.08); }
+    .state.warn { color: var(--warn); background: rgba(154,106,17,.08); }
+    .state.missing { color: var(--red); background: var(--red-soft); }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 96px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.74);
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 7px;
+      color: var(--ink);
+      font: 600 28px/1 var(--display);
+    }
+
+    .home-board { display: grid; gap: 8px; }
+
+    .compact-section {
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--red);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 9px;
+      min-width: 0;
+    }
+
+    .compact-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+    }
+
+    .compact-head h3 {
+      margin: 0;
+      font: 800 13px/1.2 var(--sans);
+      letter-spacing: 0;
+    }
+
+    .compact-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .tool {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: center;
+      min-height: 32px;
+      padding: 5px 6px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(255,255,255,.76);
+      min-width: 0;
+    }
+
+    .tool-title {
+      color: var(--ink);
+      font: 800 11px/1.1 var(--sans);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tool-sub {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font: 9px/1.1 var(--mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tool .button,
+    .tool .state {
+      min-height: 22px;
+      padding: 0 6px;
+      font-size: 9px;
+    }
+
+    .model-strip {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .model-pill {
+      min-height: 34px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(255,255,255,.76);
+      min-width: 0;
+    }
+
+    .model-pill strong {
+      display: block;
+      color: var(--ink);
+      font: 800 10px/1.1 var(--mono);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .model-pill span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font: 9px/1.1 var(--mono);
+    }
+
+    .bottom {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      padding: 10px 12px;
+      color: var(--faint);
+      font: 700 10px/1.3 var(--mono);
+      letter-spacing: .10em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 980px) {
+      .shell { padding-top: 12px; }
+      .topbar {
+        position: static;
+        grid-template-columns: 1fr;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 12px;
+        margin-bottom: 14px;
+      }
+      .service-strip { justify-content: flex-start; }
+      .badge,
+      .top-action { justify-self: start; }
+      .layout { grid-template-columns: 1fr; }
+      .side { position: static; min-height: 0; }
+      .sigil { display: none; }
+      .tabs { display: flex; overflow-x: auto; padding-bottom: 4px; }
+      .tab { width: auto; flex: 0 0 auto; }
+      .card,
+      .wide { grid-column: 1 / -1; }
+      .matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .compact-grid,
+      .model-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 18px, 1220px); }
+      h1 { font-size: 15px; }
+      h2 { font-size: 26px; }
+      .main,
+      .side { padding: 10px; }
+      .panel-head { padding: 8px 4px 14px; }
+      .row { grid-template-columns: 1fr; }
+      .matrix { grid-template-columns: 1fr; }
+      .compact-grid,
+      .model-strip,
+      .tool { grid-template-columns: 1fr; }
+      .bottom { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div>
+          <h1>AI-STATION · M5</h1>
+          <p class="sub">Digital Athanor · dev IA local</p>
+        </div>
+      </div>
+      <div class="service-strip" aria-label="Services locaux">
+        <span class="pill"><span class="dot"></span>ComfyUI 8188</span>
+        <span class="pill"><span class="dot"></span>Ollama 11434</span>
+        <span class="pill"><span class="dot"></span>Station 8765</span>
+      </div>
+      <div class="badge" aria-label="Version design">DESIGN v4.5</div>
+      <a class="top-action" href="http://127.0.0.1:8188/">ComfyUI</a>
+    </header>
+
+    <div class="layout">
+      <aside class="side">
+        <div class="sigil" aria-hidden="true">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="50" cy="50" r="42" opacity=".32"></circle>
+            <circle cx="50" cy="50" r="30" opacity=".18"></circle>
+            <line x1="50" y1="16" x2="50" y2="84"></line>
+            <line x1="16" y1="50" x2="84" y2="50"></line>
+            <line x1="28" y1="28" x2="72" y2="72"></line>
+            <line x1="72" y1="28" x2="28" y2="72"></line>
+            <circle cx="50" cy="50" r="5" fill="currentColor" stroke="none"></circle>
+          </svg>
+        </div>
+
+        <nav class="tabs" role="tablist" aria-label="Navigation services">
+          <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="tab-accueil" id="tab-btn-accueil" data-tab="accueil">Accueil</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-agents" id="tab-btn-agents" data-tab="agents">Agents Dev</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-images" id="tab-btn-images" data-tab="images">Images</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-chat" id="tab-btn-chat" data-tab="chat">Chat</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-api" id="tab-btn-api" data-tab="api">API</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-erotique" id="tab-btn-erotique" data-tab="erotique">BDSM 18+</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-dossiers" id="tab-btn-dossiers" data-tab="dossiers">Dossiers</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-commandes" id="tab-btn-commandes" data-tab="commandes">Commandes</button>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <section class="tab-panel active" id="tab-accueil" role="tabpanel" aria-labelledby="tab-btn-accueil">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Cockpit</p>
+              <h2>Tout lancer</h2>
+              <p class="hint">Services, agents et modèles locaux validés.</p>
+            </div>
+          </div>
+          <div class="home-board">
+            <section class="compact-section">
+              <div class="compact-head"><h3>Services</h3><span class="state ok">3 actifs</span></div>
+              <div class="compact-grid">
+                <div class="tool"><div><span class="tool-title">Ollama</span><span class="tool-sub">http://127.0.0.1:11434/api/tags</span></div><a class="button secondary" href="http://127.0.0.1:11434/api/tags">JSON</a></div>
+                <div class="tool"><div><span class="tool-title">ComfyUI</span><span class="tool-sub">/Users/JOB/#DEV/02-apps/ComfyUI</span></div><a class="button" href="/launch/comfyui">Start</a></div>
+                <div class="tool"><div><span class="tool-title">Comfy UI</span><span class="tool-sub">http://127.0.0.1:8188/</span></div><a class="button secondary" href="http://127.0.0.1:8188/">Open</a></div>
+                <div class="tool"><div><span class="tool-title">Outputs</span><span class="tool-sub">/Users/JOB/#DEV/02-apps/ComfyUI-output</span></div><a class="button secondary" href="/open/comfy-output">Open</a></div>
+                <div class="tool"><div><span class="tool-title">Station</span><span class="tool-sub">http://192.168.1.120:8765/AI-Station.html</span></div><span class="state ok">on</span></div>
+                <div class="tool"><div><span class="tool-title">Open WebUI</span><span class="tool-sub">absent</span></div><span class="state warn">off</span></div>
+                <div class="tool"><div><span class="tool-title">Continue</span><span class="tool-sub">CLI absent</span></div><span class="state warn">off</span></div>
+              </div>
+            </section>
+
+            <section class="compact-section">
+              <div class="compact-head"><h3>Agents / IDE</h3><span class="state ok">12 launchers</span></div>
+              <div class="compact-grid">
+                <div class="tool"><div><span class="tool-title">Codex</span><span class="tool-sub">/Users/JOB/.local/bin/codex</span></div><a class="button" href="/launch/codex">Run</a></div>
+                <div class="tool"><div><span class="tool-title">Claude</span><span class="tool-sub">/Users/JOB/.local/bin/claude</span></div><a class="button" href="/launch/claude">Run</a></div>
+                <div class="tool"><div><span class="tool-title">Caveman</span><span class="tool-sub">/Users/JOB/.local/bin/claude 'caveman mode'</span></div><a class="button" href="/launch/claude-caveman">Run</a></div>
+                <div class="tool"><div><span class="tool-title">Aider 14B</span><span class="tool-sub">/Users/JOB/.local/bin/aider --model ollama/qwen2.5-coder:14b</span></div><a class="button" href="/launch/aider-fast">Run</a></div>
+                <div class="tool"><div><span class="tool-title">Aider 32B</span><span class="tool-sub">/Users/JOB/.local/bin/aider --model ollama/qwen2.5-coder:32b</span></div><a class="button" href="/launch/aider">Run</a></div>
+                <div class="tool"><div><span class="tool-title">Hermes</span><span class="tool-sub">/Users/JOB/.local/bin/hermes -m qwen3-coder:30b</span></div><a class="button" href="/launch/hermes-qwen3-coder">Run</a></div>
+                <div class="tool"><div><span class="tool-title">Cursor</span><span class="tool-sub">/Applications/Cursor.app</span></div><a class="button" href="/launch/cursor">Open</a></div>
+                <div class="tool"><div><span class="tool-title">ZCode</span><span class="tool-sub">/Applications/ZCode.app</span></div><a class="button" href="/launch/zcode">Open</a></div>
+                <div class="tool"><div><span class="tool-title">Cline</span><span class="tool-sub">/Users/JOB/.local/bin/cline</span></div><a class="button secondary" href="/launch/cline">Run</a></div>
+                <div class="tool"><div><span class="tool-title">Goose</span><span class="tool-sub">/opt/homebrew/bin/goose session</span></div><a class="button secondary" href="/launch/goose">Run</a></div>
+                <div class="tool"><div><span class="tool-title">OpenHands</span><span class="tool-sub">/Users/JOB/.local/bin/openhands</span></div><a class="button secondary" href="/launch/openhands">Run</a></div>
+                <div class="tool"><div><span class="tool-title">OpenCode</span><span class="tool-sub">/Users/JOB/.local/bin/opencode</span></div><a class="button secondary" href="/launch/opencode">Run</a></div>
+              </div>
+            </section>
+
+            <section class="compact-section">
+              <div class="compact-head"><h3>LLM locaux</h3><a class="button secondary" href="http://127.0.0.1:11434/api/tags">JSON</a></div>
+              <div class="model-strip">
+                <div class="model-pill"><strong>qwen3-coder:30b</strong><span>code · 18G</span></div>
+                <div class="model-pill"><strong>qwen2.5-coder:32b</strong><span>code · 19G</span></div>
+                <div class="model-pill"><strong>qwen2.5-coder:14b</strong><span>fast · 9G</span></div>
+                <div class="model-pill"><strong>qwen3:32b</strong><span>general · 20G</span></div>
+                <div class="model-pill"><strong>deepseek-r1:32b</strong><span>reason · 19G</span></div>
+                <div class="model-pill"><strong>gemma3:27b</strong><span>general · 17G</span></div>
+                <div class="model-pill"><strong>dolphin-mistral</strong><span>light · 4G</span></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-agents" role="tabpanel" aria-labelledby="tab-btn-agents">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Agent stack</p>
+              <h2>Agents Dev</h2>
+              <p class="hint">État réel du poste : les agents installés, les manquants utiles, et le rôle recommandé pour chacun.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Codex CLI</h3>
+              <p>Agent principal pour gros dev, refactor, debug et tâches longues.</p>
+              <div class="actions"><a class="button" href="/launch/codex">Lancer iTerm</a></div>
+              <div class="list"><div class="row"><div class="label">Version</div><code>codex-cli 0.140.0-alpha.2</code></div><div class="row"><div class="label">CLI</div><code>/Users/JOB/.local/bin/codex</code></div><div class="row"><div class="label">LLM local</div><code>/Users/JOB/.ollama/models</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Claude Code</h3>
+              <p>Agent premium cloud très fort en raisonnement et code.</p>
+              <div class="actions"><a class="button" href="/launch/claude">Lancer iTerm</a><a class="button secondary" href="/launch/claude-caveman">Caveman</a></div>
+              <div class="list"><div class="row"><div class="label">Version</div><code>2.1.220</code></div><div class="row"><div class="label">CLI</div><code>/Users/JOB/.local/bin/claude</code></div><div class="row"><div class="label">Plugin</div><code>caveman@caveman actif</code></div><div class="row"><div class="label">LLM</div><code>cloud Anthropic, pas stocké localement</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Aider</h3>
+              <p>CLI Git simple et solide pour coder avec modèles locaux/cloud.</p>
+              <div class="actions"><a class="button" href="/launch/aider-fast">Aider rapide</a><a class="button secondary" href="/launch/aider">Aider 32B</a></div>
+              <div class="list"><div class="row"><div class="label">Version</div><code>aider 0.86.2</code></div><div class="row"><div class="label">Rapide</div><code>aider --model ollama/qwen2.5-coder:14b</code></div><div class="row"><div class="label">Qualité</div><code>aider --model ollama/qwen2.5-coder:32b</code></div><div class="row"><div class="label">LLM rapide</div><code>/Users/JOB/.ollama/models/manifests/registry.ollama.ai/library/qwen2.5-coder/14b</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Hermes</h3>
+              <p>Agent local général, gateway, MCP, outils système. Modèle par défaut : qwen3-coder 30B, meilleur pour agent/code.</p>
+              <div class="actions"><a class="button" href="/launch/hermes-qwen3-coder">Hermes Qwen3</a><a class="button secondary" href="/launch/aider-fast">Alternative rapide</a></div>
+              <div class="list"><div class="row"><div class="label">Version</div><code>Hermes Agent v0.15.1</code></div><div class="row"><div class="label">CLI</div><code>/Users/JOB/.local/bin/hermes</code></div><div class="row"><div class="label">Contexte</div><code>65536 tokens requis par Hermes</code></div><div class="row"><div class="label">LLM</div><code>/Users/JOB/.ollama/models/manifests/registry.ollama.ai/library/qwen3-coder/30b</code></div><div class="row"><div class="label">Poids</div><code>/Users/JOB/.ollama/models/blobs</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state warn">Non actif</span>
+              <h3>Continue</h3>
+              <p>CLI non détecté : `continue` est un builtin shell sur ce poste, pas un launcher IA utilisable.</p>
+              <div class="list"><div class="row"><div class="label">Statut</div><code>non installé comme commande</code></div><div class="row"><div class="label">Action</div><code>installer Continue avant d'ajouter un bouton actif</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Cursor / ZCode / Cline / Goose / OpenHands / OpenCode</h3>
+              <p>Agents additionnels disponibles pour IDE, sessions locales, sandbox dev et alternatives CLI.</p>
+              <div class="actions"><a class="button" href="/launch/cursor">Cursor</a><a class="button" href="/launch/zcode">ZCode</a><a class="button" href="/launch/cline">Cline</a><a class="button" href="/launch/goose">Goose</a><a class="button" href="/launch/openhands">OpenHands</a><a class="button" href="/launch/opencode">OpenCode</a></div>
+              <div class="list"><div class="row"><div class="label">Commandes</div><code>Cursor · ZCode · cline · goose session · openhands · opencode</code></div><div class="row"><div class="label">Scripts</div><code>/Users/JOB/#DEV/01-projets/Tools/ai-station-m5/launchers</code></div><div class="row"><div class="label">LLM local</div><code>/Users/JOB/.ollama/models</code></div><div class="row"><div class="label">Option lourd</div><code>TabbyML serveur autocomplete</code></div></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-images" role="tabpanel" aria-labelledby="tab-btn-images">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Image lab</p>
+              <h2>Prompt → image</h2>
+              <p class="hint">ComfyUI pour génération, édition, upscale et workflows SDXL/Z-Image.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <span class="state warn">À démarrer</span>
+              <h3>ComfyUI</h3>
+              <p>Workflow conseillé : <code>Text to Image (Z-Image-Turbo)</code>. Alternative : SDXL base/refiner.</p>
+              <div class="actions"><a class="button" href="/launch/comfyui">Démarrer ComfyUI</a><a class="button secondary" href="http://127.0.0.1:8188/">Ouvrir ComfyUI</a><a class="button secondary" href="/open/comfy-output">Voir sorties</a></div>
+            </article>
+            <article class="card wide">
+              <p class="kicker">Modèles image</p>
+              <div class="list">
+                <div class="row"><div class="label">Z-Image</div><code>z_image_turbo_bf16.safetensors</code></div>
+                <div class="row"><div class="label">Encoder</div><code>qwen_3_4b.safetensors</code></div>
+                <div class="row"><div class="label">SDXL</div><code>sd_xl_base_1.0.safetensors + sd_xl_refiner_1.0.safetensors</code></div>
+                <div class="row"><div class="label">Upscale</div><code>4x-UltraSharp.pth</code></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-chat" role="tabpanel" aria-labelledby="tab-btn-chat">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Text ops</p>
+              <h2>Chat local</h2>
+              <p class="hint">Ollama est actif. Open WebUI n'est pas actif sur ce poste.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <span class="state warn">Non actif</span>
+              <h3>Open WebUI</h3>
+              <p>Interface web non disponible actuellement. Le port 3000 retourne autre chose qu'Open WebUI.</p>
+              <div class="list"><div class="row"><div class="label">Statut</div><code>non actif</code></div></div>
+            </article>
+            <article class="card wide">
+              <p class="kicker">Modèles texte</p>
+              <div class="list">
+                <div class="row"><div class="label">Général</div><code>qwen3:32b</code></div>
+                <div class="row"><div class="label">Raisonner</div><code>deepseek-r1:32b</code></div>
+                <div class="row"><div class="label">Coder agent</div><code>qwen3-coder:30b</code></div>
+                <div class="row"><div class="label">Coder qualité</div><code>qwen2.5-coder:32b</code></div>
+                <div class="row"><div class="label">Léger</div><code>dolphin-mistral:latest</code></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-api" role="tabpanel" aria-labelledby="tab-btn-api">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Local API</p>
+              <h2>Endpoints</h2>
+              <p class="hint">Ports et URLs stables de la station locale.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <span class="state ok">OK</span>
+              <h3>Ollama API</h3>
+              <p>Point d’entrée local pour scripts, agents et outils compatibles OpenAI.</p>
+              <div class="actions"><a class="button secondary" href="http://127.0.0.1:11434/api/tags">Voir modèles</a></div>
+            </article>
+            <article class="card wide">
+              <p class="kicker">Services</p>
+              <div class="list">
+                <div class="row"><div class="label">Ollama</div><code>http://127.0.0.1:11434/api/tags</code></div>
+                <div class="row"><div class="label">ComfyUI</div><code>http://127.0.0.1:8188/</code></div>
+                <div class="row"><div class="label">WebUI</div><code>non actif</code></div>
+                <div class="row"><div class="label">Station</div><code>http://127.0.0.1:8765/AI-Station.html</code></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-erotique" role="tabpanel" aria-labelledby="tab-btn-erotique">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Adult only</p>
+              <h2>BDSM 18+ consensuel</h2>
+              <p class="hint">Image adulte stylisée uniquement : adultes 18+, consentement clair, pas de personne réelle sans accord.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <h3>ComfyUI + SDXL</h3>
+              <p>Base recommandée : SDXL pour rendu photo/editorial. Z-Image-Turbo sert aux essais de composition.</p>
+              <div class="actions"><a class="button" href="/launch/comfyui">Démarrer ComfyUI</a><a class="button secondary" href="http://127.0.0.1:8188/">Ouvrir ComfyUI</a><a class="button secondary" href="/open/comfy-output">Voir sorties</a></div>
+            </article>
+            <article class="card wide">
+              <p class="kicker">Pack prompts</p>
+              <div class="list">
+                <div class="row"><div class="label">Fichier</div><code>/Users/JOB/#AI/_Tools/ai-station-m5/BDSM-18-consensuel-prompt-pack.md</code></div>
+                <div class="row"><div class="label">Négatif</div><code>minor, teen, child, underage, coercion, non-consensual, forced, injury, abuse, violence, real person, celebrity, deepfake</code></div>
+              </div>
+            </article>
+            <article class="card full">
+              <p class="kicker">Limites</p>
+              <div class="list">
+                <div class="row"><div class="label">OK</div><p>Adultes 18+, consentement clair, esthétique BDSM stylisée, mode latex/cuir, bondage artistique non violent.</p></div>
+                <div class="row"><div class="label">Non</div><p>Mineurs ou apparence mineure, contrainte réelle, blessure, violence sexuelle, deepfake/personne réelle sans accord.</p></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-dossiers" role="tabpanel" aria-labelledby="tab-btn-dossiers">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Filesystem</p>
+              <h2>Dossiers</h2>
+              <p class="hint">Chemins locaux utiles pour maintenance et GitHub.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card full">
+              <div class="list">
+                <div class="row"><div class="label">Projet dashboard</div><code>/Users/JOB/#AI/_Tools/ai-station-m5</code></div>
+                <div class="row"><div class="label">ComfyUI models</div><code>/Users/JOB/#AI/Images/ComfyUI/models</code></div>
+                <div class="row"><div class="label">SDXL</div><code>/Users/JOB/#AI/Images/Models</code></div>
+                <div class="row"><div class="label">Sorties</div><code>/Users/JOB/#AI/Images/outputs</code></div>
+                <div class="row"><div class="label">Scripts</div><code>/Users/JOB/#AI/scripts</code></div>
+                <div class="row"><div class="label">Hermes</div><code>/Users/JOB/_Hermes/hermes-agent</code></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-commandes" role="tabpanel" aria-labelledby="tab-btn-commandes">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Control room</p>
+              <h2>Commandes</h2>
+              <p class="hint">Commandes sûres à lancer dans le terminal pour diagnostiquer ou compléter la station.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card full">
+              <p class="kicker">Maintenance station</p>
+              <div class="list">
+                <div class="row"><div class="label">Tout lancer</div><code>"/Users/JOB/#AI/scripts/start_everything.sh"</code></div>
+                <div class="row"><div class="label">ComfyUI</div><code>"/Users/JOB/#AI/scripts/start_comfyui.sh" background</code></div>
+                <div class="row"><div class="label">Open WebUI</div><code>"/Users/JOB/#AI/scripts/start_openwebui.sh"</code></div>
+                <div class="row"><div class="label">Diagnostic</div><code>"/Users/JOB/#AI/scripts/diagnostic.sh"</code></div>
+              </div>
+            </article>
+            <article class="card full">
+              <p class="kicker">Agents dev</p>
+              <div class="list">
+                <div class="row"><div class="label">Hermes modèle</div><code>qwen3-coder:30b configuré</code></div>
+                <div class="row"><div class="label">Hermes test</div><code>/Users/JOB/.local/bin/hermes -z "Réponds : Hermes OK"</code></div>
+                <div class="row"><div class="label">Hermes direct</div><code>/Users/JOB/.local/bin/hermes -m qwen3-coder:30b</code></div>
+                <div class="row"><div class="label">Aider local</div><code>aider --model ollama/qwen2.5-coder:32b</code></div>
+                <div class="row"><div class="label">Agents extra</div><code>cline · goose session · openhands · opencode</code></div>
+                <div class="row"><div class="label">Modèles</div><code>ollama list</code></div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="bottom">
+      <span>AI-STATION · DEV IA LOCAL · DESIGN v4.5</span>
+      <span>Codex · Claude · Aider · Hermes · Continue · Cline · Goose · OpenHands · OpenCode · ComfyUI · Open WebUI · Ollama</span>
+    </footer>
+  </div>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const panels = Array.from(document.querySelectorAll(".tab-panel"));
+
+    function activateTab(name) {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === name;
+        tab.setAttribute("aria-selected", String(active));
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("active", panel.id === `tab-${name}`);
+      });
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+    });
+
+    document.querySelectorAll("[data-jump]").forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        activateTab(link.dataset.jump);
+      });
+    });
+  </script>
+</body>
+</html>

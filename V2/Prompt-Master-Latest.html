@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt Master Latest</title>
+  <style>
+    :root {
+      --paper: #fbfaf7;
+      --ink: #101010;
+      --muted: #69645d;
+      --line: #d9d2c6;
+      --panel: #fffdf8;
+      --accent: #1b6d50;
+      --accent-dark: #104a36;
+      --warn: #8a5a12;
+      --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--mono);
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 92%, #fff);
+    }
+    h1 {
+      margin: 0;
+      font: 800 16px/1.1 var(--sans);
+      letter-spacing: 0;
+    }
+    .status {
+      margin-top: 4px;
+      color: var(--muted);
+      font: 12px/1.3 var(--mono);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    button,
+    a.button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 11px;
+      background: #fff;
+      color: var(--ink);
+      font: 800 11px/1 var(--mono);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    button.primary:hover { background: var(--accent-dark); }
+    main {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      min-height: calc(100vh - 64px);
+    }
+    aside {
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+      padding: 16px;
+    }
+    section + section { margin-top: 16px; }
+    h2 {
+      margin: 0 0 9px;
+      font: 800 13px/1.2 var(--sans);
+      letter-spacing: 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font: 800 11px/1 var(--mono);
+      text-transform: uppercase;
+    }
+    select,
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: 13px/1.4 var(--mono);
+    }
+    select,
+    input { height: 36px; padding: 0 10px; }
+    textarea {
+      min-height: 118px;
+      padding: 10px;
+      resize: vertical;
+    }
+    .field + .field { margin-top: 12px; }
+    .checks {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .check {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      color: var(--ink);
+      font: 12px/1.35 var(--mono);
+      text-transform: none;
+    }
+    .check input {
+      width: 15px;
+      height: 15px;
+      margin-top: 1px;
+    }
+    pre {
+      margin: 0;
+      padding: 18px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .preview {
+      min-height: 220px;
+      max-height: 42vh;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .prompt-pane {
+      min-width: 0;
+      overflow: auto;
+    }
+    .hint {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font: 12px/1.4 var(--mono);
+    }
+    .status.ok { color: var(--accent); }
+    .status.warn { color: var(--warn); }
+
+    @media (max-width: 860px) {
+      header,
+      main { display: block; }
+      aside { border-right: 0; border-bottom: 1px solid var(--line); }
+      .actions { justify-content: flex-start; margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Prompt Master Latest</h1>
+      <div class="status" id="sourceStatus">Chargement de la derniere version...</div>
+    </div>
+    <div class="actions">
+      <a class="button" href="AI-Station.html">AI-Station</a>
+      <button type="button" id="copyOfficial">Copier officiel</button>
+      <button class="primary" type="button" id="copyInject">Copier envoi</button>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <section>
+        <h2>Setup envoi</h2>
+        <div class="field">
+          <label for="setupMode">Setup</label>
+          <select id="setupMode">
+            <option value="auto">Auto - deduis le mode utile</option>
+            <option value="dev">Dev - repo/code/tests</option>
+            <option value="app">App - UX/runtime/packaging</option>
+            <option value="dash">Dashboard - data/vue/action</option>
+            <option value="strict">Strict - fiabilite maximale</option>
+            <option value="chat">Chat - reponse simple</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="projectPath">Chemin / cible</label>
+          <input id="projectPath" placeholder="/Users/JOB/#DEV/... ou URL">
+        </div>
+        <div class="field">
+          <label for="userRequest">Demande a envoyer</label>
+          <textarea id="userRequest" placeholder="Ecris la demande ici. Elle sera marquee et preparee pour envoi vers app ou browser compatible."></textarea>
+        </div>
+        <label class="check">
+          <input type="checkbox" id="includeOfficial" checked>
+          Inclure le prompt officiel charge dans le bloc copie.
+        </label>
+        <label class="check">
+          <input type="checkbox" id="markRequest" checked>
+          Marquer explicitement la demande avec DEMANDE A TRAITER.
+        </label>
+        <p class="hint">Le bouton prepare un bloc a envoyer vers app, browser ou LLM compatible. Sinon copie-colle.</p>
+      </section>
+
+      <section>
+        <h2>Apercu envoi</h2>
+        <div class="preview"><pre id="injectPreview">En attente du prompt officiel...</pre></div>
+        <div class="status" id="copyStatus" aria-live="polite"></div>
+      </section>
+    </aside>
+
+    <div class="prompt-pane">
+      <pre id="prompt">Chargement de la derniere version...</pre>
+    </div>
+  </main>
+
+  <script>
+    const localSource = "latest.md";
+    const apiSource = "https://api.github.com/repos/bizc0m/prompt-master/contents/latest.md?ref=main";
+    const rawSource = "https://raw.githubusercontent.com/bizc0m/prompt-master/main/latest.md";
+    const promptEl = document.getElementById("prompt");
+    const sourceStatus = document.getElementById("sourceStatus");
+    const copyStatus = document.getElementById("copyStatus");
+    const sendPreview = document.getElementById("injectPreview");
+    const setupMode = document.getElementById("setupMode");
+    const projectPath = document.getElementById("projectPath");
+    const userRequest = document.getElementById("userRequest");
+    const includeOfficial = document.getElementById("includeOfficial");
+    const markRequest = document.getElementById("markRequest");
+    let officialPrompt = "";
+    let officialSource = "";
+
+    const setupLabels = {
+      auto: "AUTO : lis la demande, deduis Chat/Dev/App/Dash, charge seulement les sections utiles.",
+      dev: "DEV : verifier dossier, Git, code, tests, runtime et preuves avant conclusion.",
+      app: "APP : verifier UX, lancement reel, runtime, packaging et surface utilisateur.",
+      dash: "DASHBOARD : verifier donnees, filtres, vues, liens, et etat persistant.",
+      strict: "STRICT : fiabilite maximale, preuves concretes, questions seulement si bloque.",
+      chat: "CHAT : reponse directe, pas de protocole DEV si la demande est simple."
+    };
+
+    function decodeBase64Utf8(value) {
+      const binary = atob(value.replace(/\n/g, ""));
+      const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+      return new TextDecoder("utf-8").decode(bytes);
+    }
+
+    function buildSendPrompt() {
+      const request = userRequest.value.trim() || "[COLLER LA DEMANDE ICI]";
+      const target = projectPath.value.trim() || "[AUCUN CHEMIN/CIBLE IMPOSE]";
+      const setup = setupLabels[setupMode.value] || setupLabels.auto;
+      const requestBlock = markRequest.checked
+        ? `DEMANDE A TRAITER :\n${request}`
+        : request;
+      const officialBlock = includeOfficial.checked
+        ? `\n\nPROMPT MASTER OFFICIEL CHARGE :\n${officialPrompt || "[PROMPT OFFICIEL PAS ENCORE CHARGE]"}`
+        : "";
+
+      return `SETUP :
+${setup}
+
+SOURCE PROMPT MASTER :
+${officialSource || apiSource}
+
+CIBLE :
+${target}
+
+INSTRUCTIONS :
+1. Applique le setup ci-dessus.
+2. Traite uniquement la demande marquee.
+3. N'elargis pas le scope sans necessite.
+4. Si le chemin ou l'acces manque pour Dev/App/Dash, demande uniquement cette info.
+5. Donne une sortie courte : ACTION / RESULTAT / NEXT.
+
+${requestBlock}${officialBlock}`;
+    }
+
+    function refreshSendPreview() {
+      sendPreview.textContent = buildSendPrompt();
+    }
+
+    async function copyText(text, buttonLabel) {
+      try {
+        await navigator.clipboard.writeText(text.trim());
+        copyStatus.textContent = `${buttonLabel} copie.`;
+        copyStatus.className = "status ok";
+      } catch (error) {
+        copyStatus.textContent = `Copie impossible : ${error.message}`;
+        copyStatus.className = "status warn";
+      }
+    }
+
+    async function loadPrompt() {
+      try {
+        const localResponse = await fetch(`${localSource}?t=${Date.now()}`, { cache: "no-store" });
+        if (!localResponse.ok) throw new Error(`LOCAL HTTP ${localResponse.status}`);
+        officialPrompt = await localResponse.text();
+        officialSource = localSource;
+      } catch (localError) {
+      try {
+        const response = await fetch(apiSource, { cache: "no-store" });
+        if (!response.ok) throw new Error(`API HTTP ${response.status}`);
+        const payload = await response.json();
+        officialPrompt = decodeBase64Utf8(payload.content);
+        officialSource = apiSource;
+      } catch (apiError) {
+        const response = await fetch(`${rawSource}?t=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`RAW HTTP ${response.status}`);
+        officialPrompt = await response.text();
+        officialSource = rawSource;
+      }
+      }
+      promptEl.textContent = officialPrompt;
+      sourceStatus.textContent = `Source chargee : ${officialSource}`;
+      sourceStatus.className = "status ok";
+      refreshSendPreview();
+    }
+
+    [setupMode, projectPath, userRequest, includeOfficial, markRequest].forEach((element) => {
+      element.addEventListener("input", refreshSendPreview);
+      element.addEventListener("change", refreshSendPreview);
+    });
+
+    document.getElementById("copyOfficial").addEventListener("click", () => {
+      copyText(officialPrompt || promptEl.textContent, "Prompt officiel");
+    });
+
+    document.getElementById("copyInject").addEventListener("click", () => {
+      copyText(buildSendPrompt(), "Prompt d'envoi");
+    });
+
+    refreshSendPreview();
+    loadPrompt().catch((error) => {
+      promptEl.textContent = `Erreur de chargement\n${apiSource}\n${rawSource}\n${error.message}`;
+      sourceStatus.textContent = `Erreur : ${error.message}`;
+      sourceStatus.className = "status warn";
+      refreshSendPreview();
+    });
+  </script>
+</body>
+</html>

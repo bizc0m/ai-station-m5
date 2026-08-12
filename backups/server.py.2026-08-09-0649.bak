@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+import subprocess
+import urllib.parse
+
+ROOT = Path(__file__).resolve().parent
+COMFY_OUTPUT = Path("/Users/JOB/#DEV/02-apps/ComfyUI-output")
+LAUNCHERS = {
+    "aider": "aider.command",
+    "aider-fast": "aider-fast.command",
+    "claude": "claude.command",
+    "claude-caveman": "claude-caveman.command",
+    "cline": "cline.command",
+    "codex": "codex.command",
+    "comfyui": "comfyui.command",
+    "cursor": "cursor.command",
+    "goose": "goose.command",
+    "hermes": "hermes.command",
+    "hermes-fast": "hermes-fast.command",
+    "hermes-lite": "hermes-lite.command",
+    "hermes-qwen3-coder": "hermes-qwen3-coder.command",
+    "opencode": "opencode.command",
+    "openhands": "openhands.command",
+    "zcode": "zcode.command",
+}
+
+
+class Handler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=str(ROOT), **kwargs)
+
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/open/comfy-output":
+            subprocess.Popen(["open", str(COMFY_OUTPUT)])
+            self.send_response(303)
+            self.send_header("Location", "/AI-Station.html")
+            self.end_headers()
+            return
+        if parsed.path.startswith("/launch/"):
+            name = parsed.path.removeprefix("/launch/")
+            script = LAUNCHERS.get(name)
+            if not script:
+                self.send_error(404, "Unknown launcher")
+                return
+            target = ROOT / "launchers" / script
+            subprocess.Popen(["open", str(target)])
+            self.send_response(303)
+            self.send_header("Location", "/AI-Station.html")
+            self.end_headers()
+            return
+        return super().do_GET()
+
+    def do_HEAD(self):
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/open/comfy-output":
+            self.send_response(204)
+            self.end_headers()
+            return
+        if parsed.path.startswith("/launch/"):
+            name = parsed.path.removeprefix("/launch/")
+            if name not in LAUNCHERS:
+                self.send_error(404, "Unknown launcher")
+                return
+            self.send_response(204)
+            self.end_headers()
+            return
+        return super().do_HEAD()
+
+
+if __name__ == "__main__":
+    ThreadingHTTPServer(("0.0.0.0", 8765), Handler).serve_forever()

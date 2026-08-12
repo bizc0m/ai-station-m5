@@ -1,0 +1,1676 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="ai-station-design-version" content="4.4">
+  <title>AI-STATION · M5 — Dev IA local</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --paper: #fafaf8;
+      --paper-2: #f5f5f3;
+      --line: rgba(12,12,12,.14);
+      --line-strong: rgba(12,12,12,.28);
+      --ink: #0c0c0c;
+      --ink-2: #2a2825;
+      --muted: #6f6a62;
+      --faint: #8a8278;
+      --red: #c8161d;
+      --red-deep: #9a1117;
+      --red-soft: #fbe8ea;
+      --ok: #1f7a3f;
+      --warn: #9a6a11;
+      --radius: 12px;
+      --display: "Instrument Serif", "Times New Roman", Georgia, serif;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+      --sans: "Helvetica Neue", Helvetica, Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      letter-spacing: 0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(transparent calc(100% - 1px), rgba(12,12,12,.035) 100%) 0 0 / 100% 34px,
+        linear-gradient(90deg, transparent calc(100% - 1px), rgba(12,12,12,.035) 100%) 0 0 / 34px 100%;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1320px, calc(100% - 16px));
+      margin: 0 auto;
+      padding: 84px 0 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      position: fixed;
+      inset: 36px 0 auto;
+      z-index: 50;
+      min-height: 38px;
+      display: grid;
+      grid-template-columns: auto minmax(160px, 1fr) auto auto auto auto;
+      gap: 7px;
+      align-items: center;
+      padding: 0 10px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(14px);
+    }
+
+    .quick-compose {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 60;
+      display: grid;
+      grid-template-columns: 64px 72px 90px 96px 128px minmax(130px, 210px) minmax(210px, 1fr) 48px;
+      gap: 4px;
+      align-items: center;
+      min-height: 36px;
+      padding: 4px 10px;
+      border-bottom: 2px solid var(--red);
+      background: #fff;
+      box-shadow: 0 2px 14px rgba(0,0,0,.08);
+    }
+
+    .quick-label {
+      color: var(--red);
+      font: 900 11px/1 var(--mono);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .quick-compose select,
+    .quick-compose input {
+      min-width: 0;
+      min-height: 26px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 6px;
+      font: 800 10px/1 var(--mono);
+    }
+
+    .quick-compose .go {
+      min-height: 26px;
+      border: 1px solid var(--ok);
+      border-radius: 5px;
+      background: var(--ok);
+      color: #fff;
+      cursor: pointer;
+      font: 900 11px/1 var(--mono);
+      letter-spacing: .1em;
+    }
+
+    .quick-compose .status {
+      display: none;
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font: 700 10px/1 var(--mono);
+      min-height: 10px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--red);
+      box-shadow: 0 0 0 6px rgba(200,22,29,.05);
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .mark::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+    }
+
+    .mark::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font: 700 20px/1 var(--display);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .sub {
+      margin: 1px 0 0;
+      color: var(--muted);
+      font: 700 8px/1.1 var(--mono);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .service-strip {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .pill,
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 22px;
+      padding: 0 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--ink-2);
+      font: 800 8px/1 var(--mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge {
+      justify-self: end;
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+    }
+
+    .button,
+    .top-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 0 9px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--red);
+      color: #fff;
+      text-decoration: none;
+      font: 800 9px/1 var(--mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .top-action { border-radius: 999px; min-height: 24px; padding: 0 8px; }
+
+    .button.secondary {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink-2);
+    }
+
+    .button.green,
+    .tool.is-favorite .launch-button {
+      background: var(--ok);
+      color: #fff;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 178px minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .side,
+    .main,
+    .bottom {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(250,250,248,.84);
+    }
+
+    .side {
+      padding: 8px;
+      min-height: 0;
+      position: sticky;
+      top: 82px;
+      align-self: start;
+    }
+
+    .sigil {
+      height: 0;
+      display: none;
+      place-items: center;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: radial-gradient(circle, rgba(200,22,29,.08), transparent 62%);
+    }
+
+    .sigil svg {
+      width: 128px;
+      height: 128px;
+      color: var(--ink);
+    }
+
+    .tabs {
+      display: grid;
+      gap: 4px;
+    }
+
+    .tab {
+      appearance: none;
+      width: 100%;
+      min-height: 28px;
+      padding: 0 8px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font: 800 10px/1 var(--sans);
+      letter-spacing: .04em;
+      text-align: left;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      color: var(--ink);
+      border-color: var(--line);
+      background: var(--paper-2);
+    }
+
+    .tab[aria-selected="true"] {
+      color: #fff;
+      border-color: var(--red);
+      background: var(--red);
+      box-shadow: 0 0 0 1px var(--red);
+    }
+
+    .main {
+      min-height: 0;
+      padding: 8px;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 6px 8px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 8px;
+    }
+
+    .cockpit-head {
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 5px 6px;
+    }
+
+    .cockpit-line {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .cockpit-line h2 {
+      margin: 0;
+      font: 800 18px/1 var(--sans);
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .cockpit-line h2::after {
+      display: none;
+    }
+
+    .cockpit-line .hint {
+      margin: 0;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .home-favorites {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      flex: 1 1 280px;
+      min-width: 0;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .home-favorites:empty {
+      display: none;
+    }
+
+    .favorite-launch {
+      flex: 0 0 auto;
+      min-height: 22px;
+      padding: 0 7px;
+      border-radius: 6px;
+      background: var(--ok);
+      color: #fff;
+      text-decoration: none;
+      font: 800 9px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .eyebrow,
+    .kicker {
+      margin: 0;
+      color: var(--red);
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .kicker { color: var(--muted); }
+
+    h2 {
+      margin: 8px 0 0;
+      color: var(--ink);
+      font: 600 clamp(34px, 5vw, 58px)/1.02 var(--display);
+      letter-spacing: -.02em;
+    }
+
+    h2::after {
+      content: "";
+      display: block;
+      width: 74px;
+      height: 2px;
+      margin-top: 18px;
+      background: linear-gradient(90deg, var(--muted), var(--red));
+    }
+
+    h3 {
+      margin: 0;
+      color: var(--ink);
+      font: 600 22px/1.15 var(--display);
+      letter-spacing: .01em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .hint {
+      margin-top: 10px;
+      max-width: 760px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+    }
+
+    .card {
+      grid-column: span 4;
+      min-height: 168px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--red);
+      border-radius: 8px;
+      background: var(--paper);
+      min-width: 0;
+    }
+
+    .wide { grid-column: span 6; }
+    .full { grid-column: 1 / -1; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 168px minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--red);
+      border-radius: 4px;
+      background: rgba(255,255,255,.7);
+      min-width: 0;
+    }
+
+    .label {
+      color: var(--ink);
+      font: 800 11px/1.35 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    code {
+      color: var(--ink);
+      font: 12px/1.5 var(--mono);
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .path-editor {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .path-input {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0 9px;
+      background: #fff;
+      color: var(--ink);
+      font: 12px/1.5 var(--mono);
+      min-width: 0;
+    }
+
+    .path-input:focus {
+      outline: 2px solid rgba(200,22,29,.18);
+      border-color: var(--red);
+    }
+
+    .script-workbench {
+      display: grid;
+      grid-template-columns: minmax(260px, 390px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .script-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .script-tab {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--ink-2);
+      cursor: pointer;
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .script-tab[aria-selected="true"] {
+      border-color: var(--red);
+      background: var(--red);
+      color: #fff;
+    }
+
+    .field-grid,
+    .field {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .field select,
+    .field input,
+    .field textarea {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 10px;
+      font: 600 12px/1.35 var(--sans);
+    }
+
+    .field textarea {
+      min-height: 142px;
+      resize: vertical;
+      font-family: var(--mono);
+      font-weight: 500;
+    }
+
+    .generated-script {
+      min-height: 520px;
+      margin: 0;
+      overflow: auto;
+      white-space: pre;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #0c0c0c;
+      color: #f7f2e8;
+      padding: 16px;
+      font: 12px/1.55 var(--mono);
+    }
+
+    .path-status {
+      color: var(--muted);
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .state {
+      display: inline-flex;
+      width: max-content;
+      min-height: 24px;
+      align-items: center;
+      gap: 6px;
+      padding: 0 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font: 800 10px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .state.ok { color: var(--ok); background: rgba(31,122,63,.08); }
+    .state.warn { color: var(--warn); background: rgba(154,106,17,.08); }
+    .state.missing { color: var(--red); background: var(--red-soft); }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 96px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.74);
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 7px;
+      color: var(--ink);
+      font: 600 28px/1 var(--display);
+    }
+
+    .home-board { display: grid; gap: 6px; }
+
+    .compact-section {
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--red);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 6px;
+      min-width: 0;
+    }
+
+    .compact-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .compact-head h3 {
+      margin: 0;
+      font: 800 13px/1.2 var(--sans);
+      letter-spacing: 0;
+    }
+
+    .compact-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .tool {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 38px 38px;
+      grid-template-areas:
+        "body fav launch";
+      gap: 4px;
+      align-items: center;
+      min-height: 48px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(255,255,255,.76);
+      min-width: 0;
+    }
+
+    .tool > div:first-child {
+      grid-area: body;
+      min-width: 0;
+    }
+
+    .tool-title {
+      display: block;
+      color: var(--ink);
+      font: 800 11px/1.1 var(--sans);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tool-sub {
+      display: block;
+      margin-top: 1px;
+      color: var(--muted);
+      font: 8px/1.15 var(--mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    a.tool-sub {
+      text-decoration: none;
+    }
+
+    a.tool-sub:hover {
+      color: var(--red);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .tool .button,
+    .tool .state,
+    .fav-toggle {
+      min-height: 22px;
+      min-width: 36px;
+      padding: 0 5px;
+      font-size: 8px;
+    }
+
+    .tool .button,
+    .tool .state {
+      grid-area: launch;
+      align-self: center;
+      justify-self: stretch;
+    }
+
+    .tool .button.secondary:not(.launch-button) {
+      display: none;
+    }
+
+    .fav-toggle {
+      grid-area: fav;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--ink-2);
+      font: 800 8px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      align-self: center;
+      justify-self: stretch;
+    }
+
+    .tool.is-favorite .fav-toggle {
+      border-color: rgba(31,122,63,.35);
+      color: var(--ok);
+      background: rgba(31,122,63,.08);
+    }
+
+    .model-strip {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .model-pill {
+      min-height: 30px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(255,255,255,.76);
+      min-width: 0;
+    }
+
+    .model-pill strong {
+      display: block;
+      color: var(--ink);
+      font: 800 9px/1.05 var(--mono);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .model-pill span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font: 8px/1.1 var(--mono);
+    }
+
+    .bottom {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      padding: 10px 12px;
+      color: var(--faint);
+      font: 700 10px/1.3 var(--mono);
+      letter-spacing: .10em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 980px) {
+      .shell { width: min(100% - 12px, 1320px); padding-top: 84px; }
+      .topbar {
+        position: fixed;
+        grid-template-columns: auto 1fr auto auto;
+        min-height: 38px;
+        padding: 0 8px;
+        margin: 0;
+      }
+      .quick-compose {
+        position: fixed;
+        grid-template-columns: 52px 72px 88px 90px minmax(104px, 1fr) 44px;
+        min-height: 36px;
+        padding: 4px 8px;
+        margin: 0;
+      }
+      .quick-compose #quickMode,
+      .quick-compose #quickModel { display: none; }
+      .service-strip { justify-content: flex-start; }
+      .top-action[href="http://127.0.0.1:8188/"] { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      .side { position: static; min-height: 0; padding: 5px; }
+      .sigil { display: none; }
+      .tabs { display: flex; overflow-x: auto; padding-bottom: 2px; }
+      .tab { width: auto; flex: 0 0 auto; }
+      .card,
+      .wide { grid-column: 1 / -1; }
+      .matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .compact-grid,
+      .model-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .script-workbench { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 8px, 1320px); padding-top: 108px; }
+      .quick-compose { grid-template-columns: 42px 1fr 42px; min-height: 58px; }
+      .quick-compose #quickIntent,
+      .quick-compose #quickCli,
+      .quick-compose #quickPath { display: none; }
+      .quick-compose #quickRequest { grid-column: 2; }
+      h1 { font-size: 15px; }
+      h2 { font-size: 22px; }
+      .main,
+      .side { padding: 6px; }
+      .panel-head { padding: 5px 4px 7px; }
+      .cockpit-line .hint { white-space: normal; }
+      .home-favorites { justify-content: flex-start; flex-basis: 100%; }
+      .row { grid-template-columns: 1fr; }
+      .matrix { grid-template-columns: 1fr; }
+      .compact-grid,
+      .model-strip { grid-template-columns: 1fr; }
+      .tool { grid-template-columns: minmax(0, 1fr) 38px 38px; }
+      .script-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bottom { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div>
+          <h1>AI-STATION · M5</h1>
+          <p class="sub">Digital Athanor · dev IA local</p>
+        </div>
+      </div>
+      <div class="service-strip" aria-label="Services locaux">
+        <span class="pill"><span class="dot"></span>ComfyUI 8188</span>
+        <span class="pill"><span class="dot"></span>Ollama 11434</span>
+        <span class="pill"><span class="dot"></span>Station 8765</span>
+      </div>
+      <div class="badge" aria-label="Version design">DESIGN v4.5</div>
+      <a class="top-action" href="/Agent-Queue.html">Queue</a>
+      <a class="top-action" href="/Prompt-Master-Latest.html">Prompt</a>
+      <a class="top-action" href="http://127.0.0.1:8188/">ComfyUI</a>
+    </header>
+
+    <div class="quick-compose" aria-label="Composeur Bash ultra compact">
+      <span class="quick-label">BASH GO</span>
+      <select id="quickMode" title="Mode">
+        <option value="chat">Chat</option>
+        <option value="dev">Dev</option>
+        <option value="app">App</option>
+        <option value="dash">Dashboard</option>
+      </select>
+      <select id="quickIntent" title="Objectif">
+        <option value="execute">Exécuter</option>
+        <option value="audit">Audit</option>
+        <option value="fix">Bugfix</option>
+        <option value="build">Feature</option>
+        <option value="doc">Doc</option>
+        <option value="summary">Résumé</option>
+      </select>
+      <select id="quickCli" title="CLI">
+        <option value="ollama">Ollama</option>
+        <option value="hermes">Hermes</option>
+        <option value="aider">Aider</option>
+        <option value="codex">Codex</option>
+        <option value="opencode">OpenCode</option>
+        <option value="claude">Claude</option>
+      </select>
+      <select id="quickModel" title="Modèle">
+        <option value="qwen3-coder:30b">qwen3-coder:30b</option>
+        <option value="devstral-small-2:24b">devstral-small-2:24b</option>
+        <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
+        <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
+        <option value="qwen3:32b">qwen3:32b</option>
+        <option value="qwen3:8b">qwen3:8b</option>
+        <option value="deepseek-r1:32b">deepseek-r1:32b</option>
+        <option value="gemma3:27b">gemma3:27b</option>
+      </select>
+      <input id="quickPath" type="text" value="/Users/JOB/#DEV" aria-label="Chemin projet">
+      <input id="quickRequest" type="text" value="Explique puis exécute proprement." aria-label="Requête">
+      <button class="go" type="button" id="quickGo">GO</button>
+      <div class="status" id="quickStatus">GO lance direct via AI-Station.</div>
+    </div>
+
+    <div class="layout">
+      <aside class="side">
+        <div class="sigil" aria-hidden="true">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="50" cy="50" r="42" opacity=".32"></circle>
+            <circle cx="50" cy="50" r="30" opacity=".18"></circle>
+            <line x1="50" y1="16" x2="50" y2="84"></line>
+            <line x1="16" y1="50" x2="84" y2="50"></line>
+            <line x1="28" y1="28" x2="72" y2="72"></line>
+            <line x1="72" y1="28" x2="28" y2="72"></line>
+            <circle cx="50" cy="50" r="5" fill="currentColor" stroke="none"></circle>
+          </svg>
+        </div>
+
+        <nav class="tabs" role="tablist" aria-label="Navigation services">
+          <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="tab-accueil" id="tab-btn-accueil" data-tab="accueil">Accueil</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-agents" id="tab-btn-agents" data-tab="agents">Agents Dev</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-images" id="tab-btn-images" data-tab="images">Images</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-chat" id="tab-btn-chat" data-tab="chat">Chat</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-api" id="tab-btn-api" data-tab="api">API</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-llm-script" id="tab-btn-llm-script" data-tab="llm-script">LLM Script</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-dossiers" id="tab-btn-dossiers" data-tab="dossiers">Dossiers</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-commandes" id="tab-btn-commandes" data-tab="commandes">Commandes</button>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <section class="tab-panel active" id="tab-accueil" role="tabpanel" aria-labelledby="tab-btn-accueil">
+          <div class="panel-head cockpit-head">
+            <div class="cockpit-line">
+              <p class="eyebrow">Cockpit</p>
+              <h2>Tout lancer</h2>
+              <p class="hint">Services, agents et modèles locaux validés.</p>
+            </div>
+            <div class="home-favorites" aria-label="Favoris agents"></div>
+          </div>
+          <div class="home-board">
+            <section class="compact-section">
+              <div class="compact-head"><h3>Services</h3><span class="state ok">3 actifs</span></div>
+              <div class="compact-grid">
+                <div class="tool"><div><span class="tool-title">Ollama</span><span class="tool-sub">http://127.0.0.1:11434/api/tags</span></div><a class="button secondary" href="http://127.0.0.1:11434/api/tags">JSON</a></div>
+                <div class="tool"><div><span class="tool-title">ComfyUI</span><span class="tool-sub">/Users/JOB/#DEV/02-apps/ComfyUI</span></div><a class="button" href="/launch/comfyui">Start</a></div>
+                <div class="tool"><div><span class="tool-title">Comfy UI</span><span class="tool-sub">http://127.0.0.1:8188/</span></div><a class="button secondary" href="http://127.0.0.1:8188/">Open</a></div>
+                <div class="tool"><div><span class="tool-title">Outputs</span><span class="tool-sub">/Users/JOB/#DEV/02-apps/ComfyUI-output</span></div><a class="button secondary" href="/open/comfy-output">Open</a></div>
+                <div class="tool"><div><span class="tool-title">Station</span><span class="tool-sub">http://192.168.1.120:8765/AI-Station.html</span></div><span class="state ok">on</span></div>
+                <div class="tool"><div><span class="tool-title">Open WebUI</span><span class="tool-sub">absent</span></div><span class="state warn">off</span></div>
+                <div class="tool"><div><span class="tool-title">Continue</span><span class="tool-sub">CLI absent</span></div><span class="state warn">off</span></div>
+              </div>
+            </section>
+
+            <section class="compact-section">
+              <div class="compact-head"><h3>Agents / IDE</h3><span class="state ok">16 launchers</span></div>
+              <div class="compact-grid agent-grid">
+                <div class="tool" data-favorite-id="agent-queue"><div><span class="tool-title">Agent Queue</span><a class="tool-sub" href="/Agent-Queue.html">Tâches agents persistantes</a><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F%23DEV%2F_Agents%2Ftask-queue">/Users/JOB/#DEV/_Agents/task-queue</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/agent-queue">Run</a></div>
+                <div class="tool" data-favorite-id="codex"><div><span class="tool-title">Codex</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fcodex">/Users/JOB/.local/bin/codex</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/codex">Run</a></div>
+                <div class="tool" data-favorite-id="codeman"><div><span class="tool-title">Codeman</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fcodeman">/Users/JOB/.local/bin/codeman</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/codeman">Run</a></div>
+                <div class="tool" data-favorite-id="claude"><div><span class="tool-title">Claude</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fclaude">/Users/JOB/.local/bin/claude</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/claude">Run</a></div>
+                <div class="tool" data-favorite-id="caveman"><div><span class="tool-title">Caveman</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fclaude">/Users/JOB/.local/bin/claude 'caveman mode'</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/claude-caveman">Run</a></div>
+                <div class="tool" data-favorite-id="aider-fast"><div><span class="tool-title">Aider 14B</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Faider">/Users/JOB/.local/bin/aider --model ollama/qwen2.5-coder:14b</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/aider-fast">Run</a></div>
+                <div class="tool" data-favorite-id="aider"><div><span class="tool-title">Aider 32B</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Faider">/Users/JOB/.local/bin/aider --model ollama/qwen2.5-coder:32b</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/aider">Run</a></div>
+                <div class="tool" data-favorite-id="hermes"><div><span class="tool-title">Hermes</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fhermes">/Users/JOB/.local/bin/hermes -m qwen3-coder:30b</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/hermes-qwen3-coder">Run</a></div>
+                <div class="tool" data-favorite-id="ollama-menu"><div><span class="tool-title">Ollama Menu</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Follama-menu">/Users/JOB/.local/bin/ollama-menu</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/ollama-menu">Run</a></div>
+                <div class="tool" data-favorite-id="prompt-master"><div><span class="tool-title">Prompt Master</span><a class="tool-sub" href="/Prompt-Master-Latest.html">Dernière version</a><a class="tool-sub" href="/index.html">Index CTxKNL</a><a class="tool-sub" href="/V2/index.html">Index V2</a><a class="tool-sub" href="/CTxKNL_v0.7.md">CTxKNL Context Kernel</a><a class="tool-sub" href="/Prompt-Master.html">HTML local autonome</a><a class="tool-sub" href="https://github.com/bizc0m/prompt-master" target="_blank" rel="noopener noreferrer">github.com/bizc0m/prompt-master</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/Prompt-Master-Latest.html">Open</a></div>
+                <div class="tool" data-favorite-id="cursor"><div><span class="tool-title">Cursor</span><a class="tool-sub" href="/open-path?path=%2FApplications%2FCursor.app">/Applications/Cursor.app</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/cursor">Open</a></div>
+                <div class="tool" data-favorite-id="zcode"><div><span class="tool-title">ZCode</span><a class="tool-sub" href="/open-path?path=%2FApplications%2FZCode.app">/Applications/ZCode.app</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/zcode">Open</a></div>
+                <div class="tool" data-favorite-id="cline"><div><span class="tool-title">Cline</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fcline">/Users/JOB/.local/bin/cline</a></div><button class="fav-toggle" type="button">Fav</button><a class="button secondary launch-button" href="/launch/cline">Run</a></div>
+                <div class="tool" data-favorite-id="goose"><div><span class="tool-title">Goose</span><a class="tool-sub" href="/open-path?path=%2Fopt%2Fhomebrew%2Fbin%2Fgoose">/opt/homebrew/bin/goose session</a></div><button class="fav-toggle" type="button">Fav</button><a class="button secondary launch-button" href="/launch/goose">Run</a></div>
+                <div class="tool" data-favorite-id="openhands"><div><span class="tool-title">OpenHands</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fopenhands">/Users/JOB/.local/bin/openhands</a></div><button class="fav-toggle" type="button">Fav</button><a class="button secondary launch-button" href="/launch/openhands">Run</a></div>
+                <div class="tool" data-favorite-id="opencode"><div><span class="tool-title">OpenCode</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fopencode">/Users/JOB/.local/bin/opencode</a></div><button class="fav-toggle" type="button">Fav</button><a class="button secondary launch-button" href="/launch/opencode">Run</a></div>
+              </div>
+            </section>
+
+            <section class="compact-section">
+              <div class="compact-head"><h3>LLM locaux</h3><div class="actions"><a class="button" href="/launch/ollama-menu">Menu</a><a class="button secondary" href="http://127.0.0.1:11434/api/tags">JSON</a></div></div>
+              <div class="model-strip">
+                <div class="model-pill"><strong>qwen3-coder:30b</strong><span>code · 18G</span></div>
+                <div class="model-pill"><strong>devstral-small-2:24b</strong><span>agent · 14G</span></div>
+                <div class="model-pill"><strong>qwen2.5-coder:32b</strong><span>code · 19G</span></div>
+                <div class="model-pill"><strong>qwen2.5-coder:14b</strong><span>fast · 9G</span></div>
+                <div class="model-pill"><strong>qwen3:32b</strong><span>general · 20G</span></div>
+                <div class="model-pill"><strong>qwen3:8b</strong><span>fast · 5G</span></div>
+                <div class="model-pill"><strong>deepseek-r1:32b</strong><span>reason · 19G</span></div>
+                <div class="model-pill"><strong>gemma3:27b</strong><span>general · 17G</span></div>
+                <div class="model-pill"><strong>dolphin-mistral</strong><span>light · 4G</span></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-agents" role="tabpanel" aria-labelledby="tab-btn-agents">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Agent stack</p>
+              <h2>Agents Dev</h2>
+              <p class="hint">État réel du poste : les agents installés, les manquants utiles, et le rôle recommandé pour chacun.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Codex CLI</h3>
+              <p>Agent principal pour gros dev, refactor, debug et tâches longues.</p>
+              <div class="actions"><a class="button" href="/launch/codex">Lancer terminal</a></div>
+              <div class="list"><div class="row"><div class="label">Version</div><code>codex-cli 0.140.0-alpha.2</code></div><div class="row"><div class="label">CLI</div><code>/Users/JOB/.local/bin/codex</code></div><div class="row"><div class="label">LLM local</div><code>/Users/JOB/.ollama/models</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Claude Code</h3>
+              <p>Agent premium cloud très fort en raisonnement et code.</p>
+              <div class="actions"><a class="button" href="/launch/claude">Lancer terminal</a><a class="button secondary" href="/launch/claude-caveman">Caveman</a></div>
+              <div class="list"><div class="row"><div class="label">Version</div><code>2.1.220</code></div><div class="row"><div class="label">CLI</div><code>/Users/JOB/.local/bin/claude</code></div><div class="row"><div class="label">Plugin</div><code>caveman@caveman actif</code></div><div class="row"><div class="label">LLM</div><code>cloud Anthropic, pas stocké localement</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Aider</h3>
+              <p>CLI Git simple et solide pour coder avec modèles locaux/cloud.</p>
+              <div class="actions"><a class="button" href="/launch/aider-fast">Aider rapide</a><a class="button secondary" href="/launch/aider">Aider 32B</a></div>
+              <div class="list"><div class="row"><div class="label">Version</div><code>aider 0.86.2</code></div><div class="row"><div class="label">Rapide</div><code>aider --model ollama/qwen2.5-coder:14b</code></div><div class="row"><div class="label">Qualité</div><code>aider --model ollama/qwen2.5-coder:32b</code></div><div class="row"><div class="label">LLM rapide</div><code>/Users/JOB/.ollama/models/manifests/registry.ollama.ai/library/qwen2.5-coder/14b</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Hermes</h3>
+              <p>Agent local général, gateway, MCP, outils système. Modèle par défaut : qwen3-coder 30B, meilleur pour agent/code.</p>
+              <div class="actions"><a class="button" href="/launch/hermes-qwen3-coder">Hermes Qwen3</a><a class="button secondary" href="/launch/aider-fast">Alternative rapide</a></div>
+              <div class="list"><div class="row"><div class="label">Version</div><code>Hermes Agent v0.15.1</code></div><div class="row"><div class="label">CLI</div><code>/Users/JOB/.local/bin/hermes</code></div><div class="row"><div class="label">Contexte</div><code>65536 tokens requis par Hermes</code></div><div class="row"><div class="label">LLM</div><code>/Users/JOB/.ollama/models/manifests/registry.ollama.ai/library/qwen3-coder/30b</code></div><div class="row"><div class="label">Poids</div><code>/Users/JOB/.ollama/models/blobs</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state warn">Non actif</span>
+              <h3>Continue</h3>
+              <p>CLI non détecté : `continue` est un builtin shell sur ce poste, pas un launcher IA utilisable.</p>
+              <div class="list"><div class="row"><div class="label">Statut</div><code>non installé comme commande</code></div><div class="row"><div class="label">Action</div><code>installer Continue avant d'ajouter un bouton actif</code></div></div>
+            </article>
+            <article class="card wide">
+              <span class="state ok">Installé</span>
+              <h3>Cursor / ZCode / Cline / Goose / OpenHands / OpenCode</h3>
+              <p>Agents additionnels disponibles pour IDE, sessions locales, sandbox dev et alternatives CLI.</p>
+              <div class="actions"><a class="button" href="/launch/cursor">Cursor</a><a class="button" href="/launch/zcode">ZCode</a><a class="button" href="/launch/cline">Cline</a><a class="button" href="/launch/goose">Goose</a><a class="button" href="/launch/openhands">OpenHands</a><a class="button" href="/launch/opencode">OpenCode</a></div>
+              <div class="list"><div class="row"><div class="label">Commandes</div><code>Cursor · ZCode · cline · goose session · openhands · opencode</code></div><div class="row"><div class="label">Scripts</div><code>/Users/JOB/#DEV/01-projets/Tools/ai-station-m5/launchers</code></div><div class="row"><div class="label">LLM local</div><code>/Users/JOB/.ollama/models</code></div><div class="row"><div class="label">Option lourd</div><code>TabbyML serveur autocomplete</code></div></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-images" role="tabpanel" aria-labelledby="tab-btn-images">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Image lab</p>
+              <h2>Prompt → image</h2>
+              <p class="hint">ComfyUI pour génération, édition, upscale et workflows SDXL/Z-Image.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <span class="state warn">À démarrer</span>
+              <h3>ComfyUI</h3>
+              <p>Workflow conseillé : <code>Text to Image (Z-Image-Turbo)</code>. Alternative : SDXL base/refiner.</p>
+              <div class="actions"><a class="button" href="/launch/comfyui">Démarrer ComfyUI</a><a class="button secondary" href="http://127.0.0.1:8188/">Ouvrir ComfyUI</a><a class="button secondary" href="/open/comfy-output">Voir sorties</a></div>
+            </article>
+            <article class="card wide">
+              <p class="kicker">Modèles image</p>
+              <div class="list">
+                <div class="row"><div class="label">Z-Image</div><code>z_image_turbo_bf16.safetensors</code></div>
+                <div class="row"><div class="label">Encoder</div><code>qwen_3_4b.safetensors</code></div>
+                <div class="row"><div class="label">SDXL</div><code>sd_xl_base_1.0.safetensors + sd_xl_refiner_1.0.safetensors</code></div>
+                <div class="row"><div class="label">Upscale</div><code>4x-UltraSharp.pth</code></div>
+              </div>
+            </article>
+            <article class="card wide">
+              <h3>BDSM 18+ consensuel</h3>
+              <p>Image adulte stylisée uniquement : adultes 18+, consentement clair, pas de personne réelle sans accord.</p>
+              <div class="actions"><a class="button" href="/launch/comfyui">Démarrer ComfyUI</a><a class="button secondary" href="http://127.0.0.1:8188/">Ouvrir ComfyUI</a><a class="button secondary" href="/open/comfy-output">Voir sorties</a></div>
+            </article>
+            <article class="card wide">
+              <p class="kicker">Pack prompts BDSM</p>
+              <div class="list">
+                <div class="row"><div class="label">Fichier</div><code>/Users/JOB/#AI/_Tools/ai-station-m5/BDSM-18-consensuel-prompt-pack.md</code></div>
+                <div class="row"><div class="label">Négatif</div><code>minor, teen, child, underage, coercion, non-consensual, forced, injury, abuse, violence, real person, celebrity, deepfake</code></div>
+              </div>
+            </article>
+            <article class="card full">
+              <p class="kicker">Limites</p>
+              <div class="list">
+                <div class="row"><div class="label">OK</div><p>Adultes 18+, consentement clair, esthétique BDSM stylisée, mode latex/cuir, bondage artistique non violent.</p></div>
+                <div class="row"><div class="label">Non</div><p>Mineurs ou apparence mineure, contrainte réelle, blessure, violence sexuelle, deepfake/personne réelle sans accord.</p></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-chat" role="tabpanel" aria-labelledby="tab-btn-chat">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Text ops</p>
+              <h2>Chat local</h2>
+              <p class="hint">Ollama est actif. Open WebUI n'est pas actif sur ce poste.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <span class="state warn">Non actif</span>
+              <h3>Open WebUI</h3>
+              <p>Interface web non disponible actuellement. Le port 3000 retourne autre chose qu'Open WebUI.</p>
+              <div class="list"><div class="row"><div class="label">Statut</div><code>non actif</code></div></div>
+            </article>
+            <article class="card wide">
+              <p class="kicker">Modèles texte</p>
+              <div class="list">
+                <div class="row"><div class="label">Général</div><code>qwen3:32b</code></div>
+                <div class="row"><div class="label">Raisonner</div><code>deepseek-r1:32b</code></div>
+                <div class="row"><div class="label">Coder agent</div><code>qwen3-coder:30b</code></div>
+                <div class="row"><div class="label">Agent code</div><code>devstral-small-2:24b</code></div>
+                <div class="row"><div class="label">Coder qualité</div><code>qwen2.5-coder:32b</code></div>
+                <div class="row"><div class="label">Réponse rapide</div><code>qwen3:8b</code></div>
+                <div class="row"><div class="label">Léger</div><code>dolphin-mistral:latest</code></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-api" role="tabpanel" aria-labelledby="tab-btn-api">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Local API</p>
+              <h2>Endpoints</h2>
+              <p class="hint">Ports et URLs stables de la station locale.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card wide">
+              <span class="state ok">OK</span>
+              <h3>Ollama API</h3>
+              <p>Point d’entrée local pour scripts, agents et outils compatibles OpenAI.</p>
+              <div class="actions"><a class="button secondary" href="http://127.0.0.1:11434/api/tags">Voir modèles</a></div>
+            </article>
+            <article class="card wide">
+              <p class="kicker">Services</p>
+              <div class="list">
+                <div class="row"><div class="label">Ollama</div><code>http://127.0.0.1:11434/api/tags</code></div>
+                <div class="row"><div class="label">ComfyUI</div><code>http://127.0.0.1:8188/</code></div>
+                <div class="row"><div class="label">WebUI</div><code>non actif</code></div>
+                <div class="row"><div class="label">Station</div><code>http://127.0.0.1:8765/AI-Station.html</code></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-llm-script" role="tabpanel" aria-labelledby="tab-btn-llm-script">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Prompt launcher</p>
+              <h2>LLM Script</h2>
+              <p class="hint">Onglets, combos et génération Bash pour lancer un LLM ou un CLI avec le prompt adéquat.</p>
+            </div>
+          </div>
+          <div class="script-workbench">
+            <article class="card">
+              <div class="script-tabs" role="tablist" aria-label="Modes script LLM">
+                <button class="script-tab" type="button" aria-selected="true" data-script-mode="chat">Chat</button>
+                <button class="script-tab" type="button" aria-selected="false" data-script-mode="dev">Dev</button>
+                <button class="script-tab" type="button" aria-selected="false" data-script-mode="app">App</button>
+                <button class="script-tab" type="button" aria-selected="false" data-script-mode="dash">Dashboard</button>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="llmCli">CLI</label>
+                  <select id="llmCli">
+                    <option value="ollama">Ollama direct</option>
+                    <option value="hermes">Hermes</option>
+                    <option value="aider">Aider</option>
+                    <option value="codex">Codex CLI</option>
+                    <option value="opencode">OpenCode</option>
+                    <option value="claude">Claude</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="llmOutputKind">Composer</label>
+                  <select id="llmOutputKind">
+                    <option value="bash">Script Bash</option>
+                    <option value="prompt">Requête seulement</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="llmIntent">Objectif</label>
+                  <select id="llmIntent">
+                    <option value="execute">Exécuter proprement</option>
+                    <option value="audit">Auditer et lister manques</option>
+                    <option value="fix">Corriger bug</option>
+                    <option value="build">Créer / améliorer feature</option>
+                    <option value="doc">Documenter</option>
+                    <option value="summary">Résumer / reprise</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="llmModel">Modèle</label>
+                  <select id="llmModel">
+                    <option value="qwen3-coder:30b">qwen3-coder:30b</option>
+                    <option value="devstral-small-2:24b">devstral-small-2:24b</option>
+                    <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
+                    <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
+                    <option value="qwen3:32b">qwen3:32b</option>
+                    <option value="qwen3:8b">qwen3:8b</option>
+                    <option value="deepseek-r1:32b">deepseek-r1:32b</option>
+                    <option value="gemma3:27b">gemma3:27b</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="llmPath">Chemin projet</label>
+                  <input id="llmPath" type="text" value="/Users/JOB/#DEV" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label for="llmPromptSource">Prompt Master</label>
+                  <select id="llmPromptSource">
+                    <option value="latest.md">latest.md local</option>
+                    <option value="CTxKNL-launcher-prompt.txt">launcher local</option>
+                    <option value="CTxKNL_v0.7.md">CTxKNL v0.7 local</option>
+                    <option value="https://bizc0m.github.io/prompt-master/latest.md">latest.md GitHub Pages</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="llmRequest">Requête</label>
+                  <textarea id="llmRequest" spellcheck="false">Explique ce que tu dois faire, puis exécute proprement.</textarea>
+                </div>
+                <div class="actions">
+                  <button class="button green" type="button" id="runLlmScript">Lancer direct</button>
+                  <button class="button" type="button" id="copyLlmScript">Copier script</button>
+                  <button class="button secondary" type="button" id="copyLlmPrompt">Copier prompt</button>
+                </div>
+                <p class="hint" id="llmLaunchStatus">Prêt.</p>
+              </div>
+            </article>
+            <article class="card full">
+              <p class="kicker">Script Bash généré</p>
+              <pre class="generated-script" id="llmScriptOutput"></pre>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-dossiers" role="tabpanel" aria-labelledby="tab-btn-dossiers">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Filesystem</p>
+              <h2>Dossiers</h2>
+              <p class="hint">Chemins locaux utiles pour maintenance et GitHub.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card full">
+              <div class="list editable-paths">
+                <div class="row"><div class="label">Projet dashboard</div><div class="path-editor"><input class="path-input" data-path-key="dashboard" value="/Users/JOB/#AI/_Tools/ai-station-m5"><button class="button secondary save-path" type="button">Valider</button><span class="path-status">defaut</span></div></div>
+                <div class="row"><div class="label">Prompt Master</div><div class="path-editor"><input class="path-input" data-path-key="prompt-master" data-validate-kind="url-or-file" value="https://github.com/bizc0m/prompt-master"><button class="button secondary save-path" type="button">Valider</button><span class="path-status">defaut</span></div></div>
+                <div class="row"><div class="label">ComfyUI models</div><div class="path-editor"><input class="path-input" data-path-key="comfyui-models" value="/Users/JOB/#AI/Images/ComfyUI/models"><button class="button secondary save-path" type="button">Valider</button><span class="path-status">defaut</span></div></div>
+                <div class="row"><div class="label">SDXL</div><div class="path-editor"><input class="path-input" data-path-key="sdxl" value="/Users/JOB/#AI/Images/Models"><button class="button secondary save-path" type="button">Valider</button><span class="path-status">defaut</span></div></div>
+                <div class="row"><div class="label">Sorties</div><div class="path-editor"><input class="path-input" data-path-key="outputs" value="/Users/JOB/#AI/Images/outputs"><button class="button secondary save-path" type="button">Valider</button><span class="path-status">defaut</span></div></div>
+                <div class="row"><div class="label">Scripts</div><div class="path-editor"><input class="path-input" data-path-key="scripts" value="/Users/JOB/#AI/scripts"><button class="button secondary save-path" type="button">Valider</button><span class="path-status">defaut</span></div></div>
+                <div class="row"><div class="label">Hermes</div><div class="path-editor"><input class="path-input" data-path-key="hermes" value="/Users/JOB/_Hermes/hermes-agent"><button class="button secondary save-path" type="button">Valider</button><span class="path-status">defaut</span></div></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-commandes" role="tabpanel" aria-labelledby="tab-btn-commandes">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Control room</p>
+              <h2>Commandes</h2>
+              <p class="hint">Commandes sûres à lancer dans le terminal pour diagnostiquer ou compléter la station.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card full">
+              <p class="kicker">Maintenance station</p>
+              <div class="list">
+                <div class="row"><div class="label">Tout lancer</div><code>"/Users/JOB/#AI/scripts/start_everything.sh"</code></div>
+                <div class="row"><div class="label">ComfyUI</div><code>"/Users/JOB/#AI/scripts/start_comfyui.sh" background</code></div>
+                <div class="row"><div class="label">Open WebUI</div><code>"/Users/JOB/#AI/scripts/start_openwebui.sh"</code></div>
+                <div class="row"><div class="label">Diagnostic</div><code>"/Users/JOB/#AI/scripts/diagnostic.sh"</code></div>
+              </div>
+            </article>
+            <article class="card full">
+              <p class="kicker">Agents dev</p>
+              <div class="list">
+                <div class="row"><div class="label">Hermes modèle</div><code>qwen3-coder:30b configuré</code></div>
+                <div class="row"><div class="label">Hermes test</div><code>/Users/JOB/.local/bin/hermes -z "Réponds : Hermes OK"</code></div>
+                <div class="row"><div class="label">Hermes direct</div><code>/Users/JOB/.local/bin/hermes -m qwen3-coder:30b</code></div>
+                <div class="row"><div class="label">Aider local</div><code>aider --model ollama/qwen2.5-coder:32b</code></div>
+                <div class="row"><div class="label">Agents extra</div><code>cline · goose session · openhands · opencode</code></div>
+                <div class="row"><div class="label">Modèles</div><code>ollama list</code></div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="bottom">
+      <span>AI-STATION · DEV IA LOCAL · DESIGN v4.5</span>
+      <span>Codex · Claude · Aider · Hermes · Continue · Cline · Goose · OpenHands · OpenCode · ComfyUI · Open WebUI · Ollama</span>
+    </footer>
+  </div>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const panels = Array.from(document.querySelectorAll(".tab-panel"));
+
+    function activateTab(name) {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === name;
+        tab.setAttribute("aria-selected", String(active));
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("active", panel.id === `tab-${name}`);
+      });
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+    });
+
+    document.querySelectorAll("[data-jump]").forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        activateTab(link.dataset.jump);
+      });
+    });
+
+    const scriptTabs = Array.from(document.querySelectorAll(".script-tab"));
+    const llmCli = document.getElementById("llmCli");
+    const llmOutputKind = document.getElementById("llmOutputKind");
+    const llmIntent = document.getElementById("llmIntent");
+    const llmModel = document.getElementById("llmModel");
+    const llmPath = document.getElementById("llmPath");
+    const llmPromptSource = document.getElementById("llmPromptSource");
+    const llmRequest = document.getElementById("llmRequest");
+    const llmScriptOutput = document.getElementById("llmScriptOutput");
+    const llmLaunchStatus = document.getElementById("llmLaunchStatus");
+    let llmMode = "chat";
+
+    const modeMap = {
+      chat: { label: "Chat", modules: "[BASE] [MODUL]", hint: "Réponse directe, pas de protocole DEV si demande simple." },
+      dev: { label: "Dev", modules: "[BASE] [MODUL] [PTHCOD] [GIT?] [SOURCE?] [DELIV?]", hint: "Code, repo, tests, Git, preuves." },
+      app: { label: "App", modules: "[BASE] [MODUL] [PTHCOD] [APP] [GIT?] [DELIV?]", hint: "App macOS, runtime, fenêtres, UX native." },
+      dash: { label: "Dashboard", modules: "[BASE] [MODUL] [PTHCOD] [DASHUX] [GIT?] [DELIV?]", hint: "HTML, UI, responsive, rendu vérifié." }
+    };
+
+    const intentMap = {
+      execute: "Exécute proprement la demande, vérifie le résultat, puis donne ACT / RES / NEXT.",
+      audit: "Audite la situation, liste ce qui est fait, non fait, manquant, oublié, puis propose les corrections.",
+      fix: "Trouve la cause du bug, applique le correctif minimal, vérifie, puis résume.",
+      build: "Implémente la feature demandée avec le minimum de changements, vérifie l'UX et les boutons.",
+      doc: "Mets à jour la documentation utile, garde un format court et actionnable.",
+      summary: "Prépare un résumé de reprise court : objectif, état, fichiers, décisions, prochaines actions."
+    };
+
+    function shellQuote(value) {
+      return `'${String(value).replace(/'/g, `'\\''`)}'`;
+    }
+
+    function buildLlmPrompt() {
+      const mode = modeMap[llmMode];
+      const source = llmPromptSource.value;
+      const target = llmPath.value.trim() || "/Users/JOB/#DEV";
+      const request = llmRequest.value.trim() || "Traite la demande.";
+
+      return `Charge CTxKNL avant de répondre.
+
+Source :
+${source}
+
+Mode : ${mode.label}
+Modules : ${mode.modules}
+Path : ${target}
+
+Règles :
+- ${mode.hint}
+- Objectif : ${intentMap[llmIntent.value] || intentMap.execute}
+- Compter chaque prompt utilisateur et afficher le footer compteur.
+- Ne pas push sans demande explicite.
+- Répondre court : ACT / RES / NEXT.
+
+Demande :
+${request}`;
+    }
+
+    function buildLlmScript() {
+      const prompt = buildLlmPrompt();
+      const cli = llmCli.value;
+      const model = llmModel.value;
+      const target = llmPath.value.trim() || "/Users/JOB/#DEV";
+      const quotedPrompt = shellQuote(prompt);
+      const quotedTarget = shellQuote(target);
+
+      const commands = {
+        ollama: `ollama run ${shellQuote(model)} "$PROMPT"`,
+        hermes: `hermes -m ${shellQuote(model)} -z "$PROMPT"`,
+        aider: `cd "$TARGET_PATH"\naider --model ${shellQuote(`ollama/${model}`)} --message "$PROMPT"`,
+        codex: `cd "$TARGET_PATH"\ncodex "$PROMPT"`,
+        opencode: `cd "$TARGET_PATH"\nopencode "$PROMPT"`,
+        claude: `cd "$TARGET_PATH"\nclaude "$PROMPT"`
+      };
+
+      return `#!/usr/bin/env bash
+set -euo pipefail
+
+TARGET_PATH=${quotedTarget}
+PROMPT=${quotedPrompt}
+
+${commands[cli] || commands.ollama}
+`;
+    }
+
+    function refreshLlmScript() {
+      if (!llmScriptOutput) return;
+      llmScriptOutput.textContent = llmOutputKind?.value === "prompt" ? buildLlmPrompt() : buildLlmScript();
+    }
+
+    scriptTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        llmMode = tab.dataset.scriptMode;
+        scriptTabs.forEach((item) => item.setAttribute("aria-selected", String(item === tab)));
+        refreshLlmScript();
+      });
+    });
+
+    [llmCli, llmOutputKind, llmIntent, llmModel, llmPath, llmPromptSource, llmRequest].forEach((element) => {
+      element?.addEventListener("input", refreshLlmScript);
+      element?.addEventListener("change", refreshLlmScript);
+    });
+
+    document.getElementById("copyLlmScript")?.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(buildLlmScript());
+    });
+
+    document.getElementById("copyLlmPrompt")?.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(buildLlmPrompt());
+    });
+
+    document.getElementById("runLlmScript")?.addEventListener("click", async () => {
+      if (!llmLaunchStatus) return;
+      llmLaunchStatus.textContent = "Lancement...";
+      try {
+        const response = await fetch("/llm-launch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cli: llmCli.value,
+            model: llmModel.value,
+            mode: llmMode,
+            promptSource: llmPromptSource.value,
+            targetPath: llmPath.value,
+            request: llmRequest.value
+          })
+        });
+        const result = await response.json();
+        if (!result.ok) throw new Error(result.error || "lancement impossible");
+        llmLaunchStatus.textContent = `Lancé : ${result.script}`;
+      } catch (error) {
+        llmLaunchStatus.textContent = `Erreur : ${error.message}`;
+      }
+    });
+
+    document.getElementById("quickGo")?.addEventListener("click", async () => {
+      const quickStatus = document.getElementById("quickStatus");
+      const mode = document.getElementById("quickMode").value;
+      const intent = document.getElementById("quickIntent").value;
+      const cli = document.getElementById("quickCli").value;
+      const model = document.getElementById("quickModel").value;
+      const targetPath = document.getElementById("quickPath").value;
+      const request = document.getElementById("quickRequest").value.trim();
+      quickStatus.textContent = "Lancement...";
+      try {
+        const response = await fetch("/llm-launch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cli,
+            model,
+            mode,
+            promptSource: "latest.md",
+            targetPath,
+            request: `${intentMap[intent] || intentMap.execute}\n\n${request}`
+          })
+        });
+        const result = await response.json();
+        if (!result.ok) throw new Error(result.error || "lancement impossible");
+        quickStatus.textContent = `Lancé : ${result.script}`;
+      } catch (error) {
+        quickStatus.textContent = `Erreur : ${error.message}`;
+      }
+    });
+
+    refreshLlmScript();
+
+    const cookiePrefix = "ai_station_path_";
+
+    function setCookie(name, value) {
+      document.cookie = `${name}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+      const prefix = `${name}=`;
+      return document.cookie
+        .split(";")
+        .map((part) => part.trim())
+        .find((part) => part.startsWith(prefix))
+        ?.slice(prefix.length);
+    }
+
+    const favoriteCookie = "ai_station_agent_favorites";
+    const agentGrid = document.querySelector(".agent-grid");
+    const homeFavorites = document.querySelector(".home-favorites");
+    const agentTools = agentGrid ? Array.from(agentGrid.querySelectorAll("[data-favorite-id]")) : [];
+    const originalAgentOrder = new Map(agentTools.map((tool, index) => [tool.dataset.favoriteId, index]));
+
+    function readFavorites() {
+      const saved = getCookie(favoriteCookie);
+      if (!saved) return new Set();
+      return new Set(decodeURIComponent(saved).split(",").filter(Boolean));
+    }
+
+    function writeFavorites(favorites) {
+      setCookie(favoriteCookie, Array.from(favorites).join(","));
+    }
+
+    function renderFavorites() {
+      if (!agentGrid) return;
+
+      const favorites = readFavorites();
+      agentTools.forEach((tool) => {
+        const active = favorites.has(tool.dataset.favoriteId);
+        tool.classList.toggle("is-favorite", active);
+        tool.querySelector(".fav-toggle").textContent = active ? "Fav+" : "Fav";
+      });
+
+      [...agentTools]
+        .sort((a, b) => {
+          const aFav = favorites.has(a.dataset.favoriteId) ? 0 : 1;
+          const bFav = favorites.has(b.dataset.favoriteId) ? 0 : 1;
+          if (aFav !== bFav) return aFav - bFav;
+          return originalAgentOrder.get(a.dataset.favoriteId) - originalAgentOrder.get(b.dataset.favoriteId);
+        })
+        .forEach((tool) => agentGrid.appendChild(tool));
+
+      if (homeFavorites) {
+        homeFavorites.innerHTML = [...agentTools]
+          .filter((tool) => favorites.has(tool.dataset.favoriteId))
+          .sort((a, b) => originalAgentOrder.get(a.dataset.favoriteId) - originalAgentOrder.get(b.dataset.favoriteId))
+          .map((tool) => {
+            const title = tool.querySelector(".tool-title").textContent.trim();
+            const launch = tool.querySelector(".launch-button");
+            return `<a class="favorite-launch" href="${launch.href}">${title}</a>`;
+          })
+          .join("");
+      }
+    }
+
+    agentTools.forEach((tool) => {
+      tool.querySelector(".fav-toggle").addEventListener("click", () => {
+        const favorites = readFavorites();
+        const id = tool.dataset.favoriteId;
+        if (favorites.has(id)) {
+          favorites.delete(id);
+        } else {
+          favorites.add(id);
+        }
+        writeFavorites(favorites);
+        renderFavorites();
+      });
+    });
+
+    renderFavorites();
+
+    function validTarget(value, kind) {
+      if (kind === "url-or-file") {
+        return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/") || value.startsWith("~/");
+      }
+
+      return value.startsWith("/") || value.startsWith("~/");
+    }
+
+    document.querySelectorAll(".path-input").forEach((input) => {
+      const key = `${cookiePrefix}${input.dataset.pathKey}`;
+      const saved = getCookie(key);
+      const status = input.closest(".path-editor").querySelector(".path-status");
+
+      if (saved) {
+        input.value = decodeURIComponent(saved);
+        status.textContent = "cookie";
+      }
+
+      input.closest(".path-editor").querySelector(".save-path").addEventListener("click", async () => {
+        const value = input.value.trim();
+        const kind = input.dataset.validateKind || "dir";
+        if (!validTarget(value, kind)) {
+          status.textContent = "invalide";
+          input.focus();
+          return;
+        }
+
+        status.textContent = "test";
+
+        try {
+          const response = await fetch(`/validate-path?kind=${encodeURIComponent(kind)}&path=${encodeURIComponent(value)}`);
+          const result = await response.json();
+
+          if (!result.ok) {
+            status.textContent = "absent";
+            input.focus();
+            return;
+          }
+
+          input.value = value;
+          setCookie(key, value);
+          status.textContent = "valide";
+        } catch {
+          status.textContent = "erreur";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
