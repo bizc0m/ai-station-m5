@@ -4,7 +4,7 @@ CTxKNL = Context Kernel.
 Noyau de contexte modulaire : charger Base par défaut, puis seulement les modules utiles au périmètre réel.
 
 Source officielle chargée : https://raw.githubusercontent.com/bizc0m/prompt-master/main/assistant-dev-prompt.md
-SHA-256 source : 31f306e866f4fd7111785683fb575210f44dcb8cbcf261168bcbdf367e195bdf
+SHA-256 source : 7792fd29566152b747359909d7eebb8d5009bde43532d6a9282453171312b5c5
 Statut : version modulaire publiée.
 Encodage : UTF-8.
 
@@ -408,6 +408,10 @@ SUIVI PROJET :
 - [TD-004] Si le texte après `##TD` est vide, demander la tâche en une question courte.
 - [TD-005] Si `todo.md` existe, ajouter l'entrée NotePlan sans réordonner tout le fichier ; si absent et projet validé, créer `todo.md` avec une section `## A faire`.
 - [TD-006] Marquage : `- [ ]` = à faire, `- [x]` = fait. Ne pas utiliser d'autres signes ambigus pour l'état.
+- [TD-007] `##TD` doit produire un vrai fichier Markdown local : créer ou mettre à jour `todo.md` dans le projet validé, puis vérifier que l'entrée est présente.
+- [TD-008] Après écriture `##TD`, faire un commit local dédié : `todo: add <titre-court>`, sauf si le dépôt Git local est absent.
+- [TD-009] Après commit `##TD`, pousser vers GitHub si un remote existe et si aucune règle utilisateur explicite ne bloque le push ; si aucun remote n'existe, signaler `GitHub absent`.
+- [TD-010] La réponse finale `##TD` doit indiquer : chemin local cliquable du `todo.md`, commit, push OK ou raison du non-push, lien GitHub du fichier si disponible.
 - [CORE-118] `prompt-(projet).md` : historique chronologique ; corrections/features préfixées `$$$`.
 - [CORE-119] `CHAT.md` : copie/synthèse chronologique exploitable du chat, avec décisions, demandes, réponses importantes, chemins, commandes, liens.
 - [CORE-120] `RESTORE.md` : procédure de reprise après crash en terminal : cwd, commandes de relance, serveurs/processus, variables utiles, tests de santé, dernier état connu, prochaine action.
