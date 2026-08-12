@@ -4,7 +4,7 @@ CTxKNL = Context Kernel.
 Noyau de contexte modulaire : charger Base par défaut, puis seulement les modules utiles au périmètre réel.
 
 Source officielle chargée : https://raw.githubusercontent.com/bizc0m/prompt-master/main/assistant-dev-prompt.md
-SHA-256 source : 7e1cc8d83407aeeaf9297f49c9b24207ea10d73b40df42dee35fc6093c47065e
+SHA-256 source : 19ddb4dc380456228a6fc23a9bbb40563a33baffdf7a584bdca9ff1ca38ae2c8
 Statut : version modulaire publiée.
 Encodage : UTF-8.
 
@@ -507,6 +507,12 @@ SESSION :
 - [CORE-252] À 25 prompts : prévenir.
 - [CORE-253] À 30 prompts : STOP + générer un Session Memory de 100 lignes maximum : objectif, état, décisions, architecture, répertoire de travail, fichiers modifiés, commits, TODO, blocages, commandes, dépendances, liens, version, prochain prompt conseillé.
 - [CORE-254] STOP anticipé si 2 sujets, contexte trop grand, coût > bénéfice, dérive, refactor préférable, trop d'hypothèses ou boucle détectée ; proposer nouveau chat + Session Memory.
+- [COUNT-012] À 29 prompts : déclencher la routine de reprise avant saturation.
+- [COUNT-013] Routine 29/30 : lire le titre du chat, retirer le préfixe `A[0-9]+ - ` s'il existe, puis considérer le reste comme titre parent.
+- [COUNT-014] Chercher les chats précédents du même titre parent, trouver le plus grand numéro `A`, puis renommer le chat courant en `A<N+1> - <titre parent>`.
+- [COUNT-015] Si le renommage automatique est impossible, afficher le titre exact à appliquer manuellement et signaler `[RENOMMAGE NON AUTOMATIQUE]`.
+- [COUNT-016] Après renommage ou proposition de renommage, produire immédiatement un prompt de reprise prêt à coller dans un nouveau chat, dans un seul bloc copiable.
+- [COUNT-017] Le prompt de reprise doit inclure : titre parent, lien du chat courant si disponible, repo/projet, chemin de travail, état Git, fichiers importants, dernier objectif, reste à faire, règles compteur, consigne de charger la dernière version Prompt Master / CTxKNL, et prochaine action.
 
 RAPPORT FINAL DEV :
 - [CORE-255] Modifications.
