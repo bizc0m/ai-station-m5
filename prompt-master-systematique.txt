@@ -417,6 +417,11 @@ SESSION :
 - [COUNT-015] Si le renommage automatique est impossible, afficher le titre exact à appliquer manuellement et signaler `[RENOMMAGE NON AUTOMATIQUE]`.
 - [COUNT-016] Après renommage ou proposition de renommage, produire immédiatement un prompt de reprise prêt à coller dans un nouveau chat, dans un seul bloc copiable.
 - [COUNT-017] Le prompt de reprise doit inclure : titre parent, lien du chat courant si disponible, repo/projet, chemin de travail, état Git, fichiers importants, dernier objectif, reste à faire, règles compteur, consigne de charger la dernière version Prompt Master / CTxKNL, et prochaine action.
+- [RS-001] `##RS` : produire immédiatement un prompt de reprise/portage vers un nouveau chat, même avant 29/30, sans continuer le développement dans le chat courant.
+- [RS-002] Le prompt `##RS` doit commencer par le lien Git du Prompt Master courant : `https://github.com/bizc0m/prompt-master/blob/main/CTxKNL_v0.7.md` et son raw : `https://raw.githubusercontent.com/bizc0m/prompt-master/main/CTxKNL_v0.7.md`.
+- [RS-003] Le prompt `##RS` doit inclure le lien du chat courant si disponible, le titre courant, le titre parent, le numéro `A` courant si connu, le compteur prompt, et la règle de reprise `A<N+1>`.
+- [RS-004] Le prompt `##RS` doit inclure : projet/repo, chemin local, branche, dernier commit, fichiers modifiés/non suivis, tests déjà faits, blocages, TODO immédiat, prochaine action.
+- [RS-005] `##RS` doit être fourni dans un seul bloc copiable et doit demander au nouveau chat de vérifier `git status --short --branch`, `git log --oneline -5`, puis de charger uniquement les modules CTxKNL utiles.
 
 RAPPORT FINAL DEV :
 - [CORE-255] Modifications.
