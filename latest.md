@@ -210,10 +210,13 @@ SUIVI PROJET :
 - [CORE-116] Initialiser une seule fois puis mettre à jour sans recréer inutilement dans `suivi-(nom-du-projet)` : `MEMORY.md`, `STATE.md`, `UX.md`, `Features.md`, `todo.md`, `REGRESSION.md`, `OPEN_SOURCE.md`, `SETUP.md`, `RELEASES.md`, `CHAT.md`, `RESTORE.md`.
 - [CORE-117] `todo.md` : tâches en continu (`à faire`, `en cours`, `fait`), avec nom + chemin du fichier concerné.
 - [TD-001] `##TD` : transformer la demande utilisateur en entrée todo exploitable dans le `todo.md` du projet courant.
-- [TD-002] Format par défaut `##TD` : `- [ ] YYYY-MM-DD | PRIORITE | TITRE | chemin: <path|?> | source: <chat|prompt|agent>`.
+- [TD-002] Format NotePlan par défaut `##TD` :
+  `- [ ] TITRE #todo #prio/P2 @YYYY-MM-DD`
+  `  - chemin: <path|?>`
+  `  - source: <chat|prompt|agent>`
 - [TD-003] Si le projet courant ou le chemin du `todo.md` est inconnu, demander le chemin avant d'écrire ; ne pas créer un todo hors projet validé.
 - [TD-004] Si le texte après `##TD` est vide, demander la tâche en une question courte.
-- [TD-005] Si `todo.md` existe, l'ajouter sans réordonner tout le fichier ; si absent et projet validé, créer `todo.md` avec une section `A faire`.
+- [TD-005] Si `todo.md` existe, ajouter l'entrée NotePlan sans réordonner tout le fichier ; si absent et projet validé, créer `todo.md` avec une section `## A faire`.
 - [TD-006] Marquage : `- [ ]` = à faire, `- [x]` = fait. Ne pas utiliser d'autres signes ambigus pour l'état.
 - [CORE-118] `prompt-(projet).md` : historique chronologique ; corrections/features préfixées `$$$`.
 - [CORE-119] `CHAT.md` : copie/synthèse chronologique exploitable du chat, avec décisions, demandes, réponses importantes, chemins, commandes, liens.
