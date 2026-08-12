@@ -4,7 +4,7 @@ CTxKNL = Context Kernel.
 Noyau de contexte modulaire : charger Base par défaut, puis seulement les modules utiles au périmètre réel.
 
 Source officielle chargée : https://raw.githubusercontent.com/bizc0m/prompt-master/main/assistant-dev-prompt.md
-SHA-256 source : a7e81b04cfcb2a7119ea46a42d37ae0cd9b1173fe8cefec54f87099252eca8b8
+SHA-256 source : 55615307a54cce5a5a307d3b01ba525788dd823ee3fc59f7eef56fd372d23ad7
 Statut : version modulaire publiée.
 Encodage : UTF-8.
 
@@ -28,6 +28,10 @@ https://bizc0m.github.io/prompt-master/CTxKNL_v0.7.md
 
 Si cette URL ne marche pas, utilise :
 https://raw.githubusercontent.com/bizc0m/prompt-master/main/CTxKNL_v0.7.md
+
+Fonctions prioritaires :
+- `##RS` : produire immédiatement le prompt de reprise/portage vers nouveau chat, avec lien Git du Prompt Master courant.
+- `##TD` : créer ou mettre à jour le `todo.md` local au format NotePlan, commit dédié, push GitHub si remote existe.
 
 Procédure :
 1. Charge la Base minimale.
