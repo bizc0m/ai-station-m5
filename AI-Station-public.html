@@ -21,7 +21,10 @@
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
     main { width: min(1160px, calc(100% - 24px)); margin: 24px auto; }
-    header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
+    header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 12px; }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 18px; }
+    nav a { min-height: 32px; display: inline-flex; align-items: center; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); text-decoration: none; font: 900 11px/1 var(--mono); text-transform: uppercase; }
+    nav a[aria-current="page"] { background: var(--red); border-color: var(--red); color: #fff; }
     h1 { margin: 0; font: 800 32px/1.05 var(--sans); letter-spacing: 0; }
     p { margin: 8px 0 0; color: var(--muted); line-height: 1.45; }
     a { color: var(--ok); }
@@ -50,6 +53,11 @@
       </div>
       <span class="badge">Public-safe · localStorage · export HTML</span>
     </header>
+    <nav aria-label="Pages AI Station">
+      <a href="AI-Station-online.html">Station online</a>
+      <a href="AI-Station-public.html" aria-current="page">Configurateur</a>
+      <a href="https://github.com/bizc0m/ai-station-m5">GitHub</a>
+    </nav>
 
     <div class="grid">
       <section>

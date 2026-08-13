@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <title>AI Station Online</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --paper: #f7f7f4;
+      --line: rgba(12, 12, 12, .16);
+      --ink: #101010;
+      --muted: #66615a;
+      --ok: #1f7a3f;
+      --warn: #9a6a11;
+      --red: #c8161d;
+      --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+    main { width: min(1180px, calc(100% - 24px)); margin: 24px auto; }
+    header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 12px; }
+    h1 { margin: 0; font: 900 34px/1.02 var(--sans); letter-spacing: 0; }
+    p { margin: 8px 0 0; color: var(--muted); line-height: 1.45; max-width: 760px; }
+    a { color: var(--ok); }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 18px; }
+    nav a, .button { min-height: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); text-decoration: none; font: 900 11px/1 var(--mono); text-transform: uppercase; }
+    nav a[aria-current="page"], .button.primary { background: var(--red); border-color: var(--red); color: #fff; }
+    .badge { border: 1px solid rgba(31, 122, 63, .3); border-radius: 999px; padding: 7px 10px; font: 800 11px/1 var(--mono); color: var(--ok); white-space: nowrap; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 14px; align-items: stretch; margin-bottom: 14px; }
+    .panel { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); padding: 14px; }
+    .launcher { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+    label { display: grid; gap: 5px; color: var(--muted); font: 900 10px/1 var(--mono); text-transform: uppercase; }
+    select, input { min-height: 34px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); padding: 0 9px; font: 800 12px/1 var(--mono); min-width: 0; }
+    .request { grid-column: 1 / -1; }
+    pre { grid-column: 1 / -1; margin: 0; min-height: 128px; overflow: auto; border-radius: 8px; background: #101216; color: #edf2ef; padding: 12px; font: 12px/1.45 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    h2 { margin: 0 0 10px; font: 900 15px/1.1 var(--mono); text-transform: uppercase; }
+    ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+    li { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 7px; color: var(--ink); font: 700 13px/1.25 var(--sans); }
+    li span { color: var(--muted); font: 800 11px/1.25 var(--mono); text-align: right; }
+    .state { color: var(--ok); }
+    .warn { color: var(--warn); }
+    footer { margin-top: 16px; color: var(--muted); font: 800 11px/1.4 var(--mono); }
+    @media (max-width: 900px) { header, .hero { grid-template-columns: 1fr; flex-direction: column; } .launcher, .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>AI Station Online</h1>
+        <p>Version publique sans chemin personnel. Elle montre les menus, les modèles, les apps et génère un script Bash copiable pour une station locale.</p>
+      </div>
+      <span class="badge">Sans données sensibles</span>
+    </header>
+
+    <nav aria-label="Pages AI Station">
+      <a href="AI-Station-online.html" aria-current="page">Station online</a>
+      <a href="AI-Station-public.html">Configurateur</a>
+      <a href="https://github.com/bizc0m/ai-station-m5">GitHub</a>
+    </nav>
+
+    <section class="hero">
+      <div class="panel">
+        <h2>Générateur CLI</h2>
+        <div class="launcher">
+          <label>Mode
+            <select id="mode">
+              <option>Chat</option>
+              <option>Dev</option>
+              <option>App</option>
+              <option>Dashboard</option>
+            </select>
+          </label>
+          <label>Action
+            <select id="intent">
+              <option>Exécuter</option>
+              <option>Auditer</option>
+              <option>Corriger</option>
+              <option>Documenter</option>
+            </select>
+          </label>
+          <label>CLI / App
+            <select id="cli">
+              <option>ollama</option>
+              <option>codex</option>
+              <option>claude</option>
+              <option>aider</option>
+              <option>opencode</option>
+              <option>cursor</option>
+              <option>zcode</option>
+            </select>
+          </label>
+          <label>Modèle
+            <select id="model">
+              <option>qwen3-coder-next:latest</option>
+              <option>qwen3-coder:30b</option>
+              <option>devstral-small-2:24b</option>
+              <option>qwen2.5-coder:32b</option>
+              <option>qwen3:32b</option>
+              <option>qwen3:8b</option>
+              <option>deepseek-r1:32b</option>
+              <option>gemma3:27b</option>
+            </select>
+          </label>
+          <label class="request">Demande
+            <input id="request" value="Décris la tâche puis exécute proprement.">
+          </label>
+          <pre id="script"></pre>
+        </div>
+        <div class="actions">
+          <button class="button primary" type="button" id="copy">Copier Bash</button>
+          <a class="button" href="AI-Station-public.html">Configurer ma station</a>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Principe</h2>
+        <ul>
+          <li>Page online <span>démo publique</span></li>
+          <li>Configurateur <span>localStorage</span></li>
+          <li>Export <span>HTML autonome</span></li>
+          <li>Station locale <span>launchers privés</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>Modèles</h2>
+        <ul>
+          <li>qwen3-coder-next <span>code lourd</span></li>
+          <li>qwen3-coder:30b <span>dev général</span></li>
+          <li>devstral-small-2 <span>agent code</span></li>
+          <li>deepseek-r1:32b <span>raisonnement</span></li>
+          <li>qwen3:8b <span>rapide</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Apps</h2>
+        <ul>
+          <li>Codex <span class="state">CLI</span></li>
+          <li>Claude <span class="state">CLI</span></li>
+          <li>Aider <span class="state">CLI</span></li>
+          <li>Cursor <span class="warn">desktop</span></li>
+          <li>ZCode <span class="warn">desktop</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="AI-Station-online.html">Station online</a><span>public</span></li>
+          <li><a href="AI-Station-public.html">Configurateur</a><span>export</span></li>
+          <li><a href="https://github.com/bizc0m/ai-station-m5">GitHub</a><span>source</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>La version locale complète garde les chemins privés hors de cette page publique.</footer>
+  </main>
+
+  <script>
+    const fields = ["mode", "intent", "cli", "model", "request"].reduce((acc, id) => ({ ...acc, [id]: document.getElementById(id) }), {});
+    const script = document.getElementById("script");
+    const desktopApps = new Set(["cursor", "zcode"]);
+
+    function quote(value) {
+      return `'${String(value).replaceAll("'", "'\\''")}'`;
+    }
+
+    function render() {
+      const prompt = `Mode: ${fields.mode.value}\nAction: ${fields.intent.value}\nDemande: ${fields.request.value}`;
+      fields.model.disabled = desktopApps.has(fields.cli.value);
+      const command = desktopApps.has(fields.cli.value)
+        ? `printf '%s\\n' "$PROMPT" > .ai-station-prompt.md\nopen -a "${fields.cli.value === "cursor" ? "Cursor" : "ZCode"}" "$PWD"`
+        : fields.cli.value === "ollama"
+          ? `ollama run ${quote(fields.model.value)} "$PROMPT"`
+          : `${fields.cli.value} "$PROMPT"`;
+      script.textContent = `#!/usr/bin/env bash\nset -euo pipefail\nPROMPT=${quote(prompt)}\n\n${command}\n`;
+    }
+
+    Object.values(fields).forEach((field) => field.addEventListener("input", render));
+    Object.values(fields).forEach((field) => field.addEventListener("change", render));
+    document.getElementById("copy").addEventListener("click", async () => navigator.clipboard.writeText(script.textContent));
+    render();
+  </script>
+</body>
+</html>
