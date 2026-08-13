@@ -1092,7 +1092,7 @@
         <span class="pill"><span class="dot"></span>Ollama 11434</span>
         <span class="pill"><span class="dot"></span>Station 8765</span>
       </div>
-      <div class="badge" aria-label="Version design">DESIGN v4.6</div>
+      <div class="badge" aria-label="Version design">DESIGN v4.7</div>
       <a class="top-action" href="/Agent-Queue.html">Queue</a>
       <a class="top-action" href="/Prompt-Master-Latest.html">Prompt</a>
       <a class="top-action" href="http://127.0.0.1:8188/">ComfyUI</a>
@@ -1121,16 +1121,24 @@
           <option value="codex">Codex</option>
           <option value="opencode">OpenCode</option>
           <option value="claude">Claude</option>
+          <option value="cursor">Cursor app</option>
+          <option value="zcode">ZCode app</option>
         </select></label>
       <label class="quick-field"><span>4 Modèle</span><select id="quickModel">
-          <option value="qwen3-coder:30b">qwen3-coder:30b</option>
-          <option value="devstral-small-2:24b">devstral-small-2:24b</option>
-          <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
-          <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
-          <option value="qwen3:32b">qwen3:32b</option>
-          <option value="qwen3:8b">qwen3:8b</option>
-          <option value="deepseek-r1:32b">deepseek-r1:32b</option>
-          <option value="gemma3:27b">gemma3:27b</option>
+          <option value="qwen3-coder-next:latest">qwen3-coder-next:latest · 51G</option>
+          <option value="qwen3-coder:latest">qwen3-coder:latest · 18G</option>
+          <option value="qwen3-coder:30b">qwen3-coder:30b · 18G</option>
+          <option value="devstral-small-2:24b">devstral-small-2:24b · 15G</option>
+          <option value="qwen2.5-coder:32b">qwen2.5-coder:32b · 19G</option>
+          <option value="qwen2.5-coder:14b">qwen2.5-coder:14b · 9G</option>
+          <option value="qwen3:32b">qwen3:32b · 20G</option>
+          <option value="qwen3:30b">qwen3:30b · 18G</option>
+          <option value="qwen3:8b">qwen3:8b · 5.2G</option>
+          <option value="deepseek-r1:32b">deepseek-r1:32b · 19G</option>
+          <option value="gemma3:27b">gemma3:27b · 17G</option>
+          <option value="llama3.2:latest">llama3.2:latest · 2G</option>
+          <option value="dolphin-mistral:latest">dolphin-mistral:latest · 4.1G</option>
+          <option value="qwen3-embedding:latest">qwen3-embedding:latest · 4.7G</option>
         </select></label>
       <label class="quick-field"><span>5 Chemin projet</span><input id="quickPath" type="text" value="/Users/JOB/#DEV"></label>
       <label class="quick-field"><span>6 Demande</span><input id="quickRequest" type="text" value="Explique puis exécute proprement."></label>
@@ -1413,6 +1421,8 @@
                     <option value="codex">Codex CLI</option>
                     <option value="opencode">OpenCode</option>
                     <option value="claude">Claude</option>
+                    <option value="cursor">Cursor app</option>
+                    <option value="zcode">ZCode app</option>
                   </select>
                 </div>
                 <div class="field">
@@ -1436,14 +1446,20 @@
                 <div class="field">
                   <label for="llmModel">Modèle</label>
                   <select id="llmModel">
-                    <option value="qwen3-coder:30b">qwen3-coder:30b</option>
-                    <option value="devstral-small-2:24b">devstral-small-2:24b</option>
-                    <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
-                    <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
-                    <option value="qwen3:32b">qwen3:32b</option>
-                    <option value="qwen3:8b">qwen3:8b</option>
-                    <option value="deepseek-r1:32b">deepseek-r1:32b</option>
-                    <option value="gemma3:27b">gemma3:27b</option>
+                    <option value="qwen3-coder-next:latest">qwen3-coder-next:latest · 51G</option>
+                    <option value="qwen3-coder:latest">qwen3-coder:latest · 18G</option>
+                    <option value="qwen3-coder:30b">qwen3-coder:30b · 18G</option>
+                    <option value="devstral-small-2:24b">devstral-small-2:24b · 15G</option>
+                    <option value="qwen2.5-coder:32b">qwen2.5-coder:32b · 19G</option>
+                    <option value="qwen2.5-coder:14b">qwen2.5-coder:14b · 9G</option>
+                    <option value="qwen3:32b">qwen3:32b · 20G</option>
+                    <option value="qwen3:30b">qwen3:30b · 18G</option>
+                    <option value="qwen3:8b">qwen3:8b · 5.2G</option>
+                    <option value="deepseek-r1:32b">deepseek-r1:32b · 19G</option>
+                    <option value="gemma3:27b">gemma3:27b · 17G</option>
+                    <option value="llama3.2:latest">llama3.2:latest · 2G</option>
+                    <option value="dolphin-mistral:latest">dolphin-mistral:latest · 4.1G</option>
+                    <option value="qwen3-embedding:latest">qwen3-embedding:latest · 4.7G</option>
                   </select>
                 </div>
                 <div class="field">
@@ -1536,7 +1552,7 @@
     </div>
 
     <footer class="bottom">
-      <span>AI-STATION · DEV IA LOCAL · DESIGN v4.6</span>
+      <span>AI-STATION · DEV IA LOCAL · DESIGN v4.7</span>
       <span>Codex · Claude · Aider · Hermes · Continue · Cline · Goose · OpenHands · OpenCode · ComfyUI · Open WebUI · Ollama</span>
     </footer>
   </div>
@@ -1594,6 +1610,7 @@
       doc: "Mets à jour la documentation utile, garde un format court et actionnable.",
       summary: "Prépare un résumé de reprise court : objectif, état, fichiers, décisions, prochaines actions."
     };
+    const desktopApps = new Set(["cursor", "zcode"]);
 
     function shellQuote(value) {
       return `'${String(value).replace(/'/g, `'\\''`)}'`;
@@ -1639,7 +1656,9 @@ ${request}`;
         aider: `cd "$TARGET_PATH"\naider --model ${shellQuote(`ollama/${model}`)} --message "$PROMPT"`,
         codex: `cd "$TARGET_PATH"\ncodex "$PROMPT"`,
         opencode: `cd "$TARGET_PATH"\nopencode "$PROMPT"`,
-        claude: `cd "$TARGET_PATH"\nclaude "$PROMPT"`
+        claude: `cd "$TARGET_PATH"\nclaude "$PROMPT"`,
+        cursor: `cd "$TARGET_PATH"\nprintf '%s\\n' "$PROMPT" > .ai-station-prompt.md\nopen -a "Cursor" "$TARGET_PATH"`,
+        zcode: `cd "$TARGET_PATH"\nprintf '%s\\n' "$PROMPT" > .ai-station-prompt.md\nopen -a "ZCode" "$TARGET_PATH"`
       };
 
       return `#!/usr/bin/env bash
@@ -1654,6 +1673,7 @@ ${commands[cli] || commands.ollama}
 
     function refreshLlmScript() {
       if (!llmScriptOutput) return;
+      if (llmModel) llmModel.disabled = desktopApps.has(llmCli.value);
       llmScriptOutput.textContent = llmOutputKind?.value === "prompt" ? buildLlmPrompt() : buildLlmScript();
     }
 
@@ -1714,6 +1734,7 @@ ${commands[cli] || commands.ollama}
       if (quickMode) llmMode = quickMode.value;
       if (quickCli && llmCli) llmCli.value = quickCli.value;
       if (quickModel && llmModel) llmModel.value = quickModel.value;
+      if (quickModel) quickModel.disabled = desktopApps.has(quickCli.value);
       if (quickPath && llmPath) llmPath.value = quickPath.value;
       if (llmPromptSource) llmPromptSource.value = "latest.md";
       if (llmOutputKind) llmOutputKind.value = "bash";

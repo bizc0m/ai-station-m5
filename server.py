@@ -43,12 +43,20 @@ ALLOWED_LLMS = {
     "codex",
     "opencode",
     "claude",
+    "cursor",
+    "zcode",
 }
 ALLOWED_MODELS = {
+    "qwen3-coder-next:latest",
+    "qwen3-coder:latest",
     "qwen3-coder:30b",
     "devstral-small-2:24b",
+    "llama3.2:latest",
+    "qwen3:30b",
+    "qwen3-embedding:latest",
     "qwen2.5-coder:32b",
     "qwen2.5-coder:14b",
+    "dolphin-mistral:latest",
     "qwen3:32b",
     "qwen3:8b",
     "deepseek-r1:32b",
@@ -226,6 +234,8 @@ Demande :
             "codex": "cd \"$TARGET_PATH\"\ncodex \"$PROMPT\"",
             "opencode": "cd \"$TARGET_PATH\"\nopencode \"$PROMPT\"",
             "claude": "cd \"$TARGET_PATH\"\nclaude \"$PROMPT\"",
+            "cursor": "cd \"$TARGET_PATH\"\nprintf '%s\\n' \"$PROMPT\" > .ai-station-prompt.md\nopen -a \"Cursor\" \"$TARGET_PATH\"",
+            "zcode": "cd \"$TARGET_PATH\"\nprintf '%s\\n' \"$PROMPT\" > .ai-station-prompt.md\nopen -a \"ZCode\" \"$TARGET_PATH\"",
         }
         return f"""#!/usr/bin/env bash
 set -euo pipefail

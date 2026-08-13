@@ -3,97 +3,198 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Prompt d'envoi - setup + demande marquee</title>
+  <title>Prompt d'envoi</title>
   <style>
     :root {
-      --paper: #fbfaf7;
-      --ink: #101010;
-      --muted: #69645d;
-      --line: #d9d2c6;
-      --panel: #fffdf8;
-      --accent: #1b6d50;
-      --accent-dark: #104a36;
-      --warn: #8a5a12;
+      --bg: #f4f2ec;
+      --surface: #fffef9;
+      --surface-2: #ebe7dd;
+      --ink: #171613;
+      --muted: #6b675e;
+      --line: #d4cec0;
+      --line-strong: #aaa294;
+      --accent: #165f49;
+      --accent-dark: #0f4334;
+      --danger: #8d3d25;
       --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
-      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      background: var(--paper);
+      min-height: 100dvh;
+      background: var(--bg);
       color: var(--ink);
-      font-family: var(--mono);
+      font-family: var(--sans);
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 2;
+
+    button,
+    a.button,
+    select,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .app-shell {
+      height: 100dvh;
+      min-height: 100dvh;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
-      align-items: center;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-      background: color-mix(in srgb, var(--paper) 92%, #fff);
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
     }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 254, 249, 0.94);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--surface);
+      border-radius: 8px;
+      font: 900 13px/1 var(--mono);
+      flex: 0 0 auto;
+    }
+
     h1 {
       margin: 0;
-      font: 800 16px/1.1 var(--sans);
+      font-size: 16px;
+      line-height: 1.1;
       letter-spacing: 0;
     }
-    .status {
-      margin-top: 4px;
+
+    .subtitle {
+      margin-top: 3px;
       color: var(--muted);
       font: 12px/1.3 var(--mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 74vw;
     }
-    .actions {
+
+    .top-actions {
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
       justify-content: flex-end;
+      align-items: center;
     }
-    button,
-    a.button {
-      min-height: 34px;
-      border: 1px solid var(--line);
+
+    .button,
+    button {
+      min-height: 36px;
+      border: 1px solid var(--line-strong);
       border-radius: 8px;
-      padding: 0 11px;
-      background: #fff;
+      padding: 0 12px;
+      background: var(--surface);
       color: var(--ink);
-      font: 800 11px/1 var(--mono);
+      font: 800 12px/1 var(--mono);
       text-decoration: none;
       cursor: pointer;
+      white-space: nowrap;
     }
-    button.primary {
+
+    button:hover,
+    .button:hover {
+      border-color: var(--ink);
+    }
+
+    button:active,
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    .primary {
       border-color: var(--accent);
       background: var(--accent);
       color: #fff;
     }
-    button.primary:hover { background: var(--accent-dark); }
-    main {
+
+    .primary:hover {
+      border-color: var(--accent-dark);
+      background: var(--accent-dark);
+    }
+
+    .workspace {
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
       display: grid;
-      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-      min-height: calc(100vh - 64px);
+      grid-template-columns: 330px minmax(420px, 1fr) minmax(320px, 0.82fr);
     }
-    aside {
+
+    .rail,
+    .output,
+    .source {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .rail {
       border-right: 1px solid var(--line);
-      background: var(--panel);
+      background: var(--surface);
+    }
+
+    .output {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      border-right: 1px solid var(--line);
+      background: #fbfaf5;
+    }
+
+    .source {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      background: var(--surface);
+    }
+
+    .panel {
       padding: 16px;
+      border-bottom: 1px solid var(--line);
     }
-    section + section { margin-top: 16px; }
-    h2 {
-      margin: 0 0 9px;
-      font: 800 13px/1.2 var(--sans);
-      letter-spacing: 0;
+
+    .panel-title,
+    .pane-title {
+      margin: 0 0 10px;
+      font: 900 12px/1 var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
+
+    .field + .field {
+      margin-top: 12px;
+    }
+
     label {
       display: block;
-      margin-bottom: 7px;
+      margin: 0 0 6px;
       color: var(--muted);
       font: 800 11px/1 var(--mono);
       text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
+
     select,
     input,
     textarea {
@@ -102,128 +203,316 @@
       border-radius: 8px;
       background: #fff;
       color: var(--ink);
-      font: 13px/1.4 var(--mono);
+      font: 13px/1.45 var(--mono);
+      outline: none;
     }
+
     select,
-    input { height: 36px; padding: 0 10px; }
+    input {
+      height: 38px;
+      padding: 0 10px;
+    }
+
     textarea {
-      min-height: 118px;
+      min-height: 156px;
       padding: 10px;
       resize: vertical;
     }
-    .field + .field { margin-top: 12px; }
-    .checks {
+
+    select:focus,
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(22, 95, 73, 0.14);
+    }
+
+    .toggles {
       display: grid;
       gap: 8px;
       margin-top: 12px;
     }
-    .check {
-      display: flex;
+
+    .toggle {
+      display: grid;
+      grid-template-columns: 18px 1fr;
       gap: 8px;
-      align-items: flex-start;
+      align-items: start;
       color: var(--ink);
       font: 12px/1.35 var(--mono);
       text-transform: none;
+      letter-spacing: 0;
     }
-    .check input {
-      width: 15px;
-      height: 15px;
-      margin-top: 1px;
+
+    .toggle input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--accent);
     }
+
+    .quick-setups {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .setup-chip {
+      min-height: 30px;
+      padding: 0 8px;
+      border-color: var(--line);
+      background: #f8f6ef;
+      font-size: 11px;
+    }
+
+    .setup-chip.active {
+      border-color: var(--accent);
+      background: rgba(22, 95, 73, 0.1);
+      color: var(--accent-dark);
+    }
+
+    .status-line {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .status-text {
+      color: var(--muted);
+      font: 12px/1.35 var(--mono);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status-text.ok { color: var(--accent); }
+    .status-text.warn { color: var(--danger); }
+
+    .meter {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font: 11px/1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--line-strong);
+    }
+
+    .dot.ok { background: var(--accent); }
+    .copy-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #f1eee6;
+    }
+
+    .copy-row strong {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+
+    .copy-row span {
+      display: block;
+      color: var(--muted);
+      font: 12px/1.3 var(--mono);
+    }
+
     pre {
       margin: 0;
-      padding: 18px;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
-      font-size: 13px;
-      line-height: 1.5;
+      font: 12.5px/1.55 var(--mono);
     }
-    .preview {
-      min-height: 220px;
-      max-height: 42vh;
+
+    .output pre,
+    .source pre {
+      height: 100%;
       overflow: auto;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
+      padding: 16px;
     }
-    .prompt-pane {
-      min-width: 0;
-      overflow: auto;
+
+    .output pre {
+      background:
+        linear-gradient(to bottom, rgba(22, 95, 73, 0.055), transparent 120px),
+        #fffdfa;
     }
-    .hint {
-      margin: 8px 0 0;
+
+    .source pre {
+      color: #302e29;
+      background: #fbfaf6;
+    }
+
+    .mini-help {
+      margin: 10px 0 0;
       color: var(--muted);
       font: 12px/1.4 var(--mono);
     }
-    .status.ok { color: var(--accent); }
-    .status.warn { color: var(--warn); }
 
-    @media (max-width: 860px) {
-      header,
-      main { display: block; }
-      aside { border-right: 0; border-bottom: 1px solid var(--line); }
-      .actions { justify-content: flex-start; margin-top: 10px; }
+    @media (max-width: 1180px) {
+      .workspace {
+        grid-template-columns: 320px minmax(0, 1fr);
+      }
+
+      .source {
+        display: none;
+      }
+
+      .output {
+        border-right: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        height: auto;
+        overflow: visible;
+      }
+
+      .topbar,
+      .workspace,
+      .copy-row,
+      .status-line {
+        display: block;
+      }
+
+      .workspace {
+        height: auto;
+        overflow: visible;
+      }
+
+      .top-actions {
+        justify-content: stretch;
+        margin-top: 12px;
+      }
+
+      .top-actions .button,
+      .top-actions button {
+        flex: 1;
+      }
+
+      .rail {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .output {
+        min-height: 70vh;
+      }
+
+      .copy-row button {
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .subtitle {
+        white-space: normal;
+        max-width: none;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Prompt d'envoi - setup + demande marquee</h1>
-      <div class="status" id="sourceStatus">Chargement de la derniere version...</div>
-    </div>
-    <div class="actions">
-      <a class="button" href="AI-Station.html">AI-Station</a>
-      <button type="button" id="copyOfficial">Copier officiel</button>
-      <button class="primary" type="button" id="copyInject">Copier prompt d'envoi</button>
-    </div>
-  </header>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">PM</div>
+        <div>
+          <h1>Prompt d'envoi</h1>
+          <div class="subtitle" id="sourceStatus">Chargement de la source locale...</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <a class="button" href="AI-Station.html">Station</a>
+        <button type="button" id="copyOfficial">Copier source</button>
+        <button class="primary" type="button" id="copySend">Copier prompt</button>
+      </div>
+    </header>
 
-  <main>
-    <aside>
-      <section>
-        <h2>Setup du prompt d'envoi</h2>
-        <div class="field">
-          <label for="setupMode">Setup</label>
-          <select id="setupMode">
-            <option value="auto">Auto - deduis le mode utile</option>
-            <option value="dev">Dev - repo/code/tests</option>
-            <option value="app">App - UX/runtime/packaging</option>
-            <option value="dash">Dashboard - data/vue/action</option>
-            <option value="strict">Strict - fiabilite maximale</option>
-            <option value="chat">Chat - reponse simple</option>
-          </select>
+    <main class="workspace">
+      <aside class="rail">
+        <section class="panel">
+          <h2 class="panel-title">1. Setup</h2>
+          <div class="field">
+            <label for="setupMode">Mode</label>
+            <select id="setupMode">
+              <option value="auto">Auto - deduire</option>
+              <option value="dev">Dev - code/tests</option>
+              <option value="app">App - UX/runtime</option>
+              <option value="dash">Dashboard - data/vue</option>
+              <option value="strict">Strict - preuves</option>
+              <option value="chat">Chat - direct</option>
+            </select>
+          </div>
+          <div class="quick-setups" aria-label="Setups rapides">
+            <button class="setup-chip active" type="button" data-mode="auto">Auto</button>
+            <button class="setup-chip" type="button" data-mode="dev">Dev</button>
+            <button class="setup-chip" type="button" data-mode="strict">Strict</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-title">2. Cible</h2>
+          <div class="field">
+            <label for="projectPath">Chemin ou URL</label>
+            <input id="projectPath" placeholder="/Users/JOB/#DEV/...">
+          </div>
+          <p class="mini-help">Optionnel. Utile pour forcer l'agent a travailler au bon endroit.</p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-title">3. Demande</h2>
+          <div class="field">
+            <label for="userRequest">Demande a traiter</label>
+            <textarea id="userRequest" placeholder="Colle ici la demande exacte a envoyer."></textarea>
+          </div>
+          <div class="toggles">
+            <label class="toggle">
+              <input type="checkbox" id="includeOfficial" checked>
+              <span>Inclure le Prompt Master charge</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="markRequest" checked>
+              <span>Marquer la demande avec DEMANDE A TRAITER</span>
+            </label>
+          </div>
+        </section>
+      </aside>
+
+      <section class="output" aria-label="Prompt pret a envoyer">
+        <div class="copy-row">
+          <div>
+            <strong>Prompt pret a envoyer</strong>
+            <span id="copyStatus">Modifie les champs a gauche, puis copie.</span>
+          </div>
+          <button class="primary" type="button" id="copySendInline">Copier prompt</button>
         </div>
-        <div class="field">
-          <label for="projectPath">Chemin / cible</label>
-          <input id="projectPath" placeholder="/Users/JOB/#DEV/... ou URL">
-        </div>
-        <div class="field">
-          <label for="userRequest">Demande a envoyer</label>
-          <textarea id="userRequest" placeholder="Ecris la demande ici. Elle sera marquee et preparee pour envoi vers app ou browser compatible."></textarea>
-        </div>
-        <label class="check">
-          <input type="checkbox" id="includeOfficial" checked>
-          Inclure le prompt officiel charge dans le bloc copie.
-        </label>
-        <label class="check">
-          <input type="checkbox" id="markRequest" checked>
-          Marquer explicitement la demande avec DEMANDE A TRAITER.
-        </label>
-        <p class="hint">Ce prompt d'envoi regroupe le setup, la cible, la demande marquee et le Prompt Master charge.</p>
+        <pre id="sendPreview">En attente du prompt officiel...</pre>
       </section>
 
-      <section>
-        <h2>Apercu du prompt d'envoi</h2>
-        <div class="preview"><pre id="injectPreview">En attente du prompt officiel...</pre></div>
-        <div class="status" id="copyStatus" aria-live="polite"></div>
+      <section class="source" aria-label="Prompt Master charge">
+        <div class="status-line">
+          <div class="status-text" id="sourceStatusPane">Source en cours de chargement</div>
+          <div class="meter"><span class="dot" id="sourceDot"></span><span id="sourceCount">0 car.</span></div>
+        </div>
+        <pre id="prompt">Chargement de la derniere version...</pre>
       </section>
-    </aside>
-
-    <div class="prompt-pane">
-      <pre id="prompt">Chargement de la derniere version...</pre>
-    </div>
-  </main>
+    </main>
+  </div>
 
   <script>
     const localSource = "latest.md";
@@ -231,13 +520,17 @@
     const rawSource = "https://raw.githubusercontent.com/bizc0m/prompt-master/main/latest.md";
     const promptEl = document.getElementById("prompt");
     const sourceStatus = document.getElementById("sourceStatus");
+    const sourceStatusPane = document.getElementById("sourceStatusPane");
+    const sourceDot = document.getElementById("sourceDot");
+    const sourceCount = document.getElementById("sourceCount");
     const copyStatus = document.getElementById("copyStatus");
-    const sendPreview = document.getElementById("injectPreview");
+    const sendPreview = document.getElementById("sendPreview");
     const setupMode = document.getElementById("setupMode");
     const projectPath = document.getElementById("projectPath");
     const userRequest = document.getElementById("userRequest");
     const includeOfficial = document.getElementById("includeOfficial");
     const markRequest = document.getElementById("markRequest");
+    const setupChips = Array.from(document.querySelectorAll("[data-mode]"));
     let officialPrompt = "";
     let officialSource = "";
 
@@ -260,44 +553,59 @@
       const request = userRequest.value.trim() || "[COLLER LA DEMANDE ICI]";
       const target = projectPath.value.trim() || "[AUCUN CHEMIN/CIBLE IMPOSE]";
       const setup = setupLabels[setupMode.value] || setupLabels.auto;
-      const requestBlock = markRequest.checked
-        ? `DEMANDE A TRAITER :\n${request}`
-        : request;
+      const requestBlock = markRequest.checked ? `DEMANDE A TRAITER :\n${request}` : request;
       const officialBlock = includeOfficial.checked
-        ? `\n\nPROMPT MASTER OFFICIEL CHARGE :\n${officialPrompt || "[PROMPT OFFICIEL PAS ENCORE CHARGE]"}`
+        ? `\n\nPROMPT MASTER CHARGE :\n${officialPrompt || "[PROMPT MASTER PAS ENCORE CHARGE]"}`
         : "";
 
-      return `SETUP :
+      return `PROMPT D'ENVOI
+
+SETUP
 ${setup}
 
-SOURCE PROMPT MASTER :
+SOURCE PROMPT MASTER
 ${officialSource || apiSource}
 
-CIBLE :
+CIBLE
 ${target}
 
-INSTRUCTIONS :
-1. Applique le setup ci-dessus.
+REGLES D'EXECUTION
+1. Applique le setup.
 2. Traite uniquement la demande marquee.
 3. N'elargis pas le scope sans necessite.
 4. Si le chemin ou l'acces manque pour Dev/App/Dash, demande uniquement cette info.
-5. Donne une sortie courte : ACTION / RESULTAT / NEXT.
+5. Reponds court : ACTION / RESULTAT / NEXT.
 
 ${requestBlock}${officialBlock}`;
     }
 
+    function refreshSetupChips() {
+      setupChips.forEach((chip) => {
+        chip.classList.toggle("active", chip.dataset.mode === setupMode.value);
+      });
+    }
+
     function refreshSendPreview() {
       sendPreview.textContent = buildSendPrompt();
+      refreshSetupChips();
+    }
+
+    function setStatus(message, state = "") {
+      sourceStatus.textContent = message;
+      sourceStatusPane.textContent = message;
+      sourceStatus.className = state ? `subtitle ${state}` : "subtitle";
+      sourceStatusPane.className = state ? `status-text ${state}` : "status-text";
+      sourceDot.className = state === "ok" ? "dot ok" : "dot";
     }
 
     async function copyText(text, buttonLabel) {
       try {
         await navigator.clipboard.writeText(text.trim());
         copyStatus.textContent = `${buttonLabel} copie.`;
-        copyStatus.className = "status ok";
+        copyStatus.className = "status-text ok";
       } catch (error) {
         copyStatus.textContent = `Copie impossible : ${error.message}`;
-        copyStatus.className = "status warn";
+        copyStatus.className = "status-text warn";
       }
     }
 
@@ -308,22 +616,23 @@ ${requestBlock}${officialBlock}`;
         officialPrompt = await localResponse.text();
         officialSource = localSource;
       } catch (localError) {
-      try {
-        const response = await fetch(apiSource, { cache: "no-store" });
-        if (!response.ok) throw new Error(`API HTTP ${response.status}`);
-        const payload = await response.json();
-        officialPrompt = decodeBase64Utf8(payload.content);
-        officialSource = apiSource;
-      } catch (apiError) {
-        const response = await fetch(`${rawSource}?t=${Date.now()}`, { cache: "no-store" });
-        if (!response.ok) throw new Error(`RAW HTTP ${response.status}`);
-        officialPrompt = await response.text();
-        officialSource = rawSource;
+        try {
+          const response = await fetch(apiSource, { cache: "no-store" });
+          if (!response.ok) throw new Error(`API HTTP ${response.status}`);
+          const payload = await response.json();
+          officialPrompt = decodeBase64Utf8(payload.content);
+          officialSource = apiSource;
+        } catch (apiError) {
+          const response = await fetch(`${rawSource}?t=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`RAW HTTP ${response.status}`);
+          officialPrompt = await response.text();
+          officialSource = rawSource;
+        }
       }
-      }
+
       promptEl.textContent = officialPrompt;
-      sourceStatus.textContent = `Source chargee : ${officialSource}`;
-      sourceStatus.className = "status ok";
+      sourceCount.textContent = `${officialPrompt.length.toLocaleString("fr-FR")} car.`;
+      setStatus(`Source chargee : ${officialSource}`, "ok");
       refreshSendPreview();
     }
 
@@ -332,19 +641,29 @@ ${requestBlock}${officialBlock}`;
       element.addEventListener("change", refreshSendPreview);
     });
 
-    document.getElementById("copyOfficial").addEventListener("click", () => {
-      copyText(officialPrompt || promptEl.textContent, "Prompt officiel");
+    setupChips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        setupMode.value = chip.dataset.mode;
+        refreshSendPreview();
+      });
     });
 
-    document.getElementById("copyInject").addEventListener("click", () => {
-      copyText(buildSendPrompt(), "Prompt d'envoi");
+    document.getElementById("copyOfficial").addEventListener("click", () => {
+      copyText(officialPrompt || promptEl.textContent, "Source");
+    });
+
+    document.getElementById("copySend").addEventListener("click", () => {
+      copyText(buildSendPrompt(), "Prompt");
+    });
+
+    document.getElementById("copySendInline").addEventListener("click", () => {
+      copyText(buildSendPrompt(), "Prompt");
     });
 
     refreshSendPreview();
     loadPrompt().catch((error) => {
       promptEl.textContent = `Erreur de chargement\n${apiSource}\n${rawSource}\n${error.message}`;
-      sourceStatus.textContent = `Erreur : ${error.message}`;
-      sourceStatus.className = "status warn";
+      setStatus(`Erreur : ${error.message}`, "warn");
       refreshSendPreview();
     });
   </script>
