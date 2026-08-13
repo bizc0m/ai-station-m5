@@ -4,7 +4,7 @@ CTxKNL = Context Kernel.
 Noyau de contexte modulaire : charger Base par défaut, puis seulement les modules utiles au périmètre réel.
 
 Source officielle chargée : https://raw.githubusercontent.com/bizc0m/prompt-master/main/assistant-dev-prompt.md
-SHA-256 source : a609770e24df353fd69aef9ff726c6eff98262e689b79a363a3c72c11669927b
+SHA-256 source : f10fb6d909d4cbcd97cc6cbca431b40d49c4edcbf80a82d10077b26e8e6619b2
 Statut : version modulaire publiée.
 Encodage : UTF-8.
 
@@ -524,7 +524,7 @@ SESSION :
 - [CORE-251] Cycle long : compter chaque prompt utilisateur actif jusqu'à 30 ; version `v0.05`, +0.05/prompt si le projet n'a pas de version propre.
 - [CORE-252] À 25 prompts : prévenir.
 - [CORE-253] À 30 prompts : STOP + générer un Session Memory de 100 lignes maximum : objectif, état, décisions, architecture, répertoire de travail, fichiers modifiés, commits, TODO, blocages, commandes, dépendances, liens, version, prochain prompt conseillé.
-- [CORE-254] STOP anticipé si 2 sujets, contexte trop grand, coût > bénéfice, dérive, refactor préférable, trop d'hypothèses ou boucle détectée ; proposer nouveau chat + Session Memory.
+- [CORE-254] STOP anticipé si 2 sujets, contexte trop grand, coût trop élevé, dérive, refactor préférable, trop d'hypothèses ou boucle détectée ; proposer nouveau chat + Session Memory.
 - [COUNT-012] À 29 prompts : déclencher la routine de reprise avant saturation.
 - [COUNT-013] Routine 29/30 : lire le titre du chat, retirer le préfixe `A[0-9]+ - ` s'il existe, puis considérer le reste comme titre parent.
 - [COUNT-014] Chercher les chats précédents du même titre parent, trouver le plus grand numéro `A`, puis renommer le chat courant en `A<N+1> - <titre parent>`.

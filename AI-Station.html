@@ -79,24 +79,51 @@
     }
 
     .quick-compose {
-      position: fixed;
-      inset: 0 0 auto;
-      z-index: 60;
+      position: sticky;
+      top: 42px;
+      z-index: 45;
       display: grid;
-      grid-template-columns: 64px 72px 90px 96px 128px minmax(130px, 210px) minmax(210px, 1fr) 48px;
-      gap: 4px;
-      align-items: center;
-      min-height: 36px;
-      padding: 4px 10px;
+      grid-template-columns: 180px repeat(4, minmax(96px, 130px)) minmax(180px, 250px) minmax(260px, 1fr) 82px 96px;
+      gap: 6px;
+      align-items: stretch;
+      margin-bottom: 8px;
+      padding: 8px;
       border-bottom: 2px solid var(--red);
-      background: #fff;
-      box-shadow: 0 2px 14px rgba(0,0,0,.08);
+      border-left: 2px solid var(--red);
+      border-radius: 10px;
+      background: rgba(255,255,255,.97);
+      box-shadow: 0 8px 24px rgba(0,0,0,.10);
     }
 
     .quick-label {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: var(--ink);
+      font: 900 13px/1.05 var(--mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .quick-label small {
+      margin-top: 3px;
       color: var(--red);
-      font: 900 11px/1 var(--mono);
-      letter-spacing: .12em;
+      font: 800 8px/1 var(--mono);
+      letter-spacing: .08em;
+    }
+
+    .quick-field {
+      display: grid;
+      grid-template-rows: 12px 32px;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .quick-field span {
+      color: var(--red);
+      font: 900 8px/1 var(--mono);
+      letter-spacing: .08em;
       text-transform: uppercase;
       white-space: nowrap;
     }
@@ -104,17 +131,24 @@
     .quick-compose select,
     .quick-compose input {
       min-width: 0;
-      min-height: 26px;
+      min-height: 32px;
       border: 1px solid var(--line);
       border-radius: 5px;
       background: #fff;
       color: var(--ink);
-      padding: 0 6px;
+      padding: 0 7px;
       font: 800 10px/1 var(--mono);
     }
 
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 82px 96px;
+      gap: 6px;
+      align-items: end;
+    }
+
     .quick-compose .go {
-      min-height: 26px;
+      min-height: 32px;
       border: 1px solid var(--ok);
       border-radius: 5px;
       background: var(--ok);
@@ -124,12 +158,40 @@
       letter-spacing: .1em;
     }
 
+    .quick-copy {
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+      font: 900 10px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
     .quick-compose .status {
-      display: none;
-      grid-column: 1 / -1;
+      display: block;
+      grid-column: 1 / 5;
       color: var(--muted);
       font: 700 10px/1 var(--mono);
       min-height: 10px;
+    }
+
+    .quick-preview {
+      grid-column: 5 / -1;
+      margin: 0;
+      min-height: 34px;
+      max-height: 54px;
+      overflow: auto;
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0f1115;
+      color: #e9f0ee;
+      font: 800 9px/1.35 var(--mono);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     .brand {
@@ -694,6 +756,34 @@
       letter-spacing: 0;
     }
 
+    .agent-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .agent-controls label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+      font: 800 8px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .agent-controls select {
+      min-height: 22px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font: 800 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
     .compact-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -720,13 +810,70 @@
       min-width: 0;
     }
 
+    .tool-head {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .tool-logo {
+      display: inline-flex;
+      width: 16px;
+      height: 16px;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: #fff;
+      color: var(--red);
+      font: 900 8px/1 var(--mono);
+      text-transform: uppercase;
+      cursor: default;
+    }
+
     .tool-title {
-      display: block;
+      display: inline-block;
+      min-width: 0;
       color: var(--ink);
       font: 800 11px/1.1 var(--sans);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      cursor: default;
+    }
+
+    .tool-state {
+      display: inline-flex;
+      align-items: center;
+      min-height: 15px;
+      padding: 0 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,.7);
+      font: 900 7px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .tool[data-state="stable"] .tool-state {
+      color: var(--ok);
+      border-color: rgba(31,122,63,.28);
+      background: rgba(31,122,63,.07);
+    }
+
+    .tool[data-state="beta"] .tool-state {
+      color: var(--warn);
+      border-color: rgba(154,106,17,.28);
+      background: rgba(154,106,17,.07);
+    }
+
+    .tool[data-state="alpha"] .tool-state {
+      color: var(--red);
+      border-color: rgba(200,22,29,.22);
+      background: var(--red-soft);
     }
 
     .tool-sub {
@@ -790,6 +937,38 @@
       background: rgba(31,122,63,.08);
     }
 
+    .screenshot-popover {
+      position: fixed;
+      z-index: 100;
+      width: min(320px, calc(100vw - 20px));
+      display: none;
+      pointer-events: none;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 14px 40px rgba(0,0,0,.18);
+      overflow: hidden;
+    }
+
+    .screenshot-popover.is-visible {
+      display: block;
+    }
+
+    .screenshot-popover img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: var(--paper-2);
+    }
+
+    .screenshot-popover span {
+      display: block;
+      padding: 7px 8px;
+      color: var(--ink);
+      font: 800 10px/1.2 var(--mono);
+    }
+
     .model-strip {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -845,14 +1024,17 @@
         margin: 0;
       }
       .quick-compose {
-        position: fixed;
-        grid-template-columns: 52px 72px 88px 90px minmax(104px, 1fr) 44px;
-        min-height: 36px;
-        padding: 4px 8px;
+        top: 42px;
+        grid-template-columns: 150px repeat(3, minmax(88px, 1fr)) 78px 92px;
+        padding: 7px;
         margin: 0;
       }
-      .quick-compose #quickMode,
-      .quick-compose #quickModel { display: none; }
+      .quick-field:has(#quickModel),
+      .quick-field:has(#quickPath),
+      .quick-field:has(#quickRequest),
+      .quick-preview,
+      .quick-compose .status { grid-column: 1 / -1; }
+      .quick-actions { grid-template-columns: 78px 92px; }
       .service-strip { justify-content: flex-start; }
       .top-action[href="http://127.0.0.1:8188/"] { display: none; }
       .layout { grid-template-columns: 1fr; }
@@ -869,12 +1051,15 @@
     }
 
     @media (max-width: 560px) {
-      .shell { width: min(100% - 8px, 1320px); padding-top: 108px; }
-      .quick-compose { grid-template-columns: 42px 1fr 42px; min-height: 58px; }
-      .quick-compose #quickIntent,
-      .quick-compose #quickCli,
-      .quick-compose #quickPath { display: none; }
-      .quick-compose #quickRequest { grid-column: 2; }
+      .shell { width: min(100% - 8px, 1320px); padding-top: 84px; }
+      .quick-compose { grid-template-columns: 1fr 1fr; top: 42px; }
+      .quick-label,
+      .quick-field:has(#quickModel),
+      .quick-field:has(#quickPath),
+      .quick-field:has(#quickRequest),
+      .quick-preview,
+      .quick-compose .status { grid-column: 1 / -1; }
+      .quick-actions { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
       h1 { font-size: 15px; }
       h2 { font-size: 22px; }
       .main,
@@ -907,50 +1092,54 @@
         <span class="pill"><span class="dot"></span>Ollama 11434</span>
         <span class="pill"><span class="dot"></span>Station 8765</span>
       </div>
-      <div class="badge" aria-label="Version design">DESIGN v4.5</div>
+      <div class="badge" aria-label="Version design">DESIGN v4.6</div>
       <a class="top-action" href="/Agent-Queue.html">Queue</a>
       <a class="top-action" href="/Prompt-Master-Latest.html">Prompt</a>
       <a class="top-action" href="http://127.0.0.1:8188/">ComfyUI</a>
     </header>
 
-    <div class="quick-compose" aria-label="Composeur Bash ultra compact">
-      <span class="quick-label">BASH GO</span>
-      <select id="quickMode" title="Mode">
-        <option value="chat">Chat</option>
-        <option value="dev">Dev</option>
-        <option value="app">App</option>
-        <option value="dash">Dashboard</option>
-      </select>
-      <select id="quickIntent" title="Objectif">
-        <option value="execute">Exécuter</option>
-        <option value="audit">Audit</option>
-        <option value="fix">Bugfix</option>
-        <option value="build">Feature</option>
-        <option value="doc">Doc</option>
-        <option value="summary">Résumé</option>
-      </select>
-      <select id="quickCli" title="CLI">
-        <option value="ollama">Ollama</option>
-        <option value="hermes">Hermes</option>
-        <option value="aider">Aider</option>
-        <option value="codex">Codex</option>
-        <option value="opencode">OpenCode</option>
-        <option value="claude">Claude</option>
-      </select>
-      <select id="quickModel" title="Modèle">
-        <option value="qwen3-coder:30b">qwen3-coder:30b</option>
-        <option value="devstral-small-2:24b">devstral-small-2:24b</option>
-        <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
-        <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
-        <option value="qwen3:32b">qwen3:32b</option>
-        <option value="qwen3:8b">qwen3:8b</option>
-        <option value="deepseek-r1:32b">deepseek-r1:32b</option>
-        <option value="gemma3:27b">gemma3:27b</option>
-      </select>
-      <input id="quickPath" type="text" value="/Users/JOB/#DEV" aria-label="Chemin projet">
-      <input id="quickRequest" type="text" value="Explique puis exécute proprement." aria-label="Requête">
-      <button class="go" type="button" id="quickGo">GO</button>
-      <div class="status" id="quickStatus">GO lance direct via AI-Station.</div>
+    <div class="quick-compose" aria-label="Générateur CLI et terminal">
+      <span class="quick-label">Lancer un agent<small>Prompt Master → Bash → Terminal</small></span>
+      <label class="quick-field"><span>1 Mode</span><select id="quickMode">
+          <option value="chat">Chat</option>
+          <option value="dev">Dev</option>
+          <option value="app">App</option>
+          <option value="dash">Dashboard</option>
+        </select></label>
+      <label class="quick-field"><span>2 Action</span><select id="quickIntent">
+          <option value="execute">Exécuter</option>
+          <option value="audit">Audit</option>
+          <option value="fix">Bugfix</option>
+          <option value="build">Feature</option>
+          <option value="doc">Doc</option>
+          <option value="summary">Résumé</option>
+        </select></label>
+      <label class="quick-field"><span>3 CLI</span><select id="quickCli">
+          <option value="ollama">Ollama</option>
+          <option value="hermes">Hermes</option>
+          <option value="aider">Aider</option>
+          <option value="codex">Codex</option>
+          <option value="opencode">OpenCode</option>
+          <option value="claude">Claude</option>
+        </select></label>
+      <label class="quick-field"><span>4 Modèle</span><select id="quickModel">
+          <option value="qwen3-coder:30b">qwen3-coder:30b</option>
+          <option value="devstral-small-2:24b">devstral-small-2:24b</option>
+          <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
+          <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
+          <option value="qwen3:32b">qwen3:32b</option>
+          <option value="qwen3:8b">qwen3:8b</option>
+          <option value="deepseek-r1:32b">deepseek-r1:32b</option>
+          <option value="gemma3:27b">gemma3:27b</option>
+        </select></label>
+      <label class="quick-field"><span>5 Chemin projet</span><input id="quickPath" type="text" value="/Users/JOB/#DEV"></label>
+      <label class="quick-field"><span>6 Demande</span><input id="quickRequest" type="text" value="Explique puis exécute proprement."></label>
+      <div class="quick-actions">
+        <button class="quick-copy" type="button" id="quickCopy">Copier</button>
+        <button class="go" type="button" id="quickGo">Terminal</button>
+      </div>
+      <div class="status" id="quickStatus">Choisis un CLI, écris la demande, puis copie le Bash ou lance le terminal.</div>
+      <pre class="quick-preview" id="quickPreview"></pre>
     </div>
 
     <div class="layout">
@@ -1004,7 +1193,7 @@
             </section>
 
             <section class="compact-section">
-              <div class="compact-head"><h3>Agents / IDE</h3><span class="state ok">16 launchers</span></div>
+              <div class="compact-head"><h3>Agents / IDE</h3><div class="agent-controls"><label>Tri <select id="agentSort"><option value="favorite">Favoris</option><option value="state">État</option><option value="name">Nom</option></select></label><span class="state ok">16 launchers</span></div></div>
               <div class="compact-grid agent-grid">
                 <div class="tool" data-favorite-id="agent-queue"><div><span class="tool-title">Agent Queue</span><a class="tool-sub" href="/Agent-Queue.html">Tâches agents persistantes</a><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F%23DEV%2F_Agents%2Ftask-queue">/Users/JOB/#DEV/_Agents/task-queue</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/agent-queue">Run</a></div>
                 <div class="tool" data-favorite-id="codex"><div><span class="tool-title">Codex</span><a class="tool-sub" href="/open-path?path=%2FUsers%2FJOB%2F.local%2Fbin%2Fcodex">/Users/JOB/.local/bin/codex</a></div><button class="fav-toggle" type="button">Fav</button><a class="button launch-button" href="/launch/codex">Run</a></div>
@@ -1347,7 +1536,7 @@
     </div>
 
     <footer class="bottom">
-      <span>AI-STATION · DEV IA LOCAL · DESIGN v4.5</span>
+      <span>AI-STATION · DEV IA LOCAL · DESIGN v4.6</span>
       <span>Codex · Claude · Aider · Hermes · Continue · Cline · Goose · OpenHands · OpenCode · ComfyUI · Open WebUI · Ollama</span>
     </footer>
   </div>
@@ -1513,14 +1702,54 @@ ${commands[cli] || commands.ollama}
       }
     });
 
+    const quickMode = document.getElementById("quickMode");
+    const quickIntent = document.getElementById("quickIntent");
+    const quickCli = document.getElementById("quickCli");
+    const quickModel = document.getElementById("quickModel");
+    const quickPath = document.getElementById("quickPath");
+    const quickRequest = document.getElementById("quickRequest");
+    const quickPreview = document.getElementById("quickPreview");
+
+    function syncQuickToLlm() {
+      if (quickMode) llmMode = quickMode.value;
+      if (quickCli && llmCli) llmCli.value = quickCli.value;
+      if (quickModel && llmModel) llmModel.value = quickModel.value;
+      if (quickPath && llmPath) llmPath.value = quickPath.value;
+      if (llmPromptSource) llmPromptSource.value = "latest.md";
+      if (llmOutputKind) llmOutputKind.value = "bash";
+      if (quickIntent && quickRequest && llmRequest) {
+        const request = quickRequest.value.trim() || "Traite la demande.";
+        llmRequest.value = `${intentMap[quickIntent.value] || intentMap.execute}\n\n${request}`;
+      }
+      scriptTabs.forEach((item) => item.setAttribute("aria-selected", String(item.dataset.scriptMode === llmMode)));
+    }
+
+    function refreshQuickPreview() {
+      syncQuickToLlm();
+      refreshLlmScript();
+      if (quickPreview) quickPreview.textContent = buildLlmScript();
+    }
+
+    [quickMode, quickIntent, quickCli, quickModel, quickPath, quickRequest].forEach((element) => {
+      element?.addEventListener("input", refreshQuickPreview);
+      element?.addEventListener("change", refreshQuickPreview);
+    });
+
+    document.getElementById("quickCopy")?.addEventListener("click", async () => {
+      refreshQuickPreview();
+      await navigator.clipboard.writeText(buildLlmScript());
+      const quickStatus = document.getElementById("quickStatus");
+      if (quickStatus) quickStatus.textContent = "Script copié.";
+    });
+
     document.getElementById("quickGo")?.addEventListener("click", async () => {
       const quickStatus = document.getElementById("quickStatus");
-      const mode = document.getElementById("quickMode").value;
-      const intent = document.getElementById("quickIntent").value;
-      const cli = document.getElementById("quickCli").value;
-      const model = document.getElementById("quickModel").value;
-      const targetPath = document.getElementById("quickPath").value;
-      const request = document.getElementById("quickRequest").value.trim();
+      refreshQuickPreview();
+      const mode = quickMode.value;
+      const cli = quickCli.value;
+      const model = quickModel.value;
+      const targetPath = quickPath.value;
+      const request = llmRequest.value;
       quickStatus.textContent = "Lancement...";
       try {
         const response = await fetch("/llm-launch", {
@@ -1532,7 +1761,7 @@ ${commands[cli] || commands.ollama}
             mode,
             promptSource: "latest.md",
             targetPath,
-            request: `${intentMap[intent] || intentMap.execute}\n\n${request}`
+            request
           })
         });
         const result = await response.json();
@@ -1544,6 +1773,7 @@ ${commands[cli] || commands.ollama}
     });
 
     refreshLlmScript();
+    refreshQuickPreview();
 
     const cookiePrefix = "ai_station_path_";
 
@@ -1563,8 +1793,76 @@ ${commands[cli] || commands.ollama}
     const favoriteCookie = "ai_station_agent_favorites";
     const agentGrid = document.querySelector(".agent-grid");
     const homeFavorites = document.querySelector(".home-favorites");
+    const agentSort = document.getElementById("agentSort");
     const agentTools = agentGrid ? Array.from(agentGrid.querySelectorAll("[data-favorite-id]")) : [];
     const originalAgentOrder = new Map(agentTools.map((tool, index) => [tool.dataset.favoriteId, index]));
+    const stateOrder = new Map([["alpha", 0], ["beta", 1], ["stable", 2]]);
+    const agentMeta = {
+      "agent-queue": { state: "beta", logo: "AQ" },
+      codex: { state: "alpha", logo: "CX" },
+      codeman: { state: "beta", logo: "CM" },
+      claude: { state: "stable", logo: "CL" },
+      caveman: { state: "alpha", logo: "CV" },
+      "aider-fast": { state: "stable", logo: "14" },
+      aider: { state: "stable", logo: "32" },
+      hermes: { state: "beta", logo: "HE" },
+      "ollama-menu": { state: "stable", logo: "OM" },
+      "prompt-master": { state: "beta", logo: "PM" },
+      cursor: { state: "stable", logo: "CU" },
+      zcode: { state: "beta", logo: "ZC" },
+      cline: { state: "alpha", logo: "CI" },
+      goose: { state: "beta", logo: "GO" },
+      openhands: { state: "alpha", logo: "OH" },
+      opencode: { state: "beta", logo: "OC" }
+    };
+
+    function enhanceAgentTools() {
+      agentTools.forEach((tool) => {
+        const meta = agentMeta[tool.dataset.favoriteId] || { state: "alpha", logo: "AI" };
+        const title = tool.querySelector(".tool-title");
+        if (!title || title.closest(".tool-head")) return;
+        tool.dataset.state = meta.state;
+        if (meta.screenshot) tool.dataset.screenshot = meta.screenshot;
+
+        const head = document.createElement("span");
+        head.className = "tool-head";
+
+        const logo = document.createElement("span");
+        logo.className = "tool-logo";
+        logo.textContent = meta.logo;
+        logo.setAttribute("aria-hidden", "true");
+
+        const state = document.createElement("span");
+        state.className = "tool-state";
+        state.textContent = meta.state;
+
+        title.replaceWith(head);
+        head.append(logo, title, state);
+      });
+    }
+
+    async function checkAgentScreenshots() {
+      await Promise.all(agentTools.map(async (tool) => {
+        if (tool.dataset.screenshot) return;
+        const id = tool.dataset.favoriteId;
+        const candidates = [
+          `/assets/screenshots/${id}.png`,
+          `/assets/screenshots/${id}.jpg`,
+          `/assets/screenshots/${id}.webp`
+        ];
+        for (const candidate of candidates) {
+          try {
+            const response = await fetch(candidate, { method: "HEAD" });
+            if (response.ok) {
+              tool.dataset.screenshot = candidate;
+              break;
+            }
+          } catch (_) {
+            break;
+          }
+        }
+      }));
+    }
 
     function readFavorites() {
       const saved = getCookie(favoriteCookie);
@@ -1591,6 +1889,14 @@ ${commands[cli] || commands.ollama}
           const aFav = favorites.has(a.dataset.favoriteId) ? 0 : 1;
           const bFav = favorites.has(b.dataset.favoriteId) ? 0 : 1;
           if (aFav !== bFav) return aFav - bFav;
+          if (agentSort?.value === "state") {
+            const stateDiff = stateOrder.get(a.dataset.state) - stateOrder.get(b.dataset.state);
+            if (stateDiff !== 0) return stateDiff;
+          }
+          if (agentSort?.value === "name") {
+            const nameDiff = a.querySelector(".tool-title").textContent.localeCompare(b.querySelector(".tool-title").textContent, "fr");
+            if (nameDiff !== 0) return nameDiff;
+          }
           return originalAgentOrder.get(a.dataset.favoriteId) - originalAgentOrder.get(b.dataset.favoriteId);
         })
         .forEach((tool) => agentGrid.appendChild(tool));
@@ -1608,6 +1914,11 @@ ${commands[cli] || commands.ollama}
       }
     }
 
+    enhanceAgentTools();
+    checkAgentScreenshots();
+
+    agentSort?.addEventListener("change", renderFavorites);
+
     agentTools.forEach((tool) => {
       tool.querySelector(".fav-toggle").addEventListener("click", () => {
         const favorites = readFavorites();
@@ -1619,6 +1930,48 @@ ${commands[cli] || commands.ollama}
         }
         writeFavorites(favorites);
         renderFavorites();
+      });
+    });
+
+    const screenshotPopover = document.createElement("div");
+    screenshotPopover.className = "screenshot-popover";
+    screenshotPopover.innerHTML = '<img alt=""><span></span>';
+    document.body.appendChild(screenshotPopover);
+    const screenshotImage = screenshotPopover.querySelector("img");
+    const screenshotTitle = screenshotPopover.querySelector("span");
+
+    function moveScreenshotPopover(event) {
+      const margin = 12;
+      const width = screenshotPopover.offsetWidth || 320;
+      const height = screenshotPopover.offsetHeight || 210;
+      const left = Math.min(window.innerWidth - width - margin, event.clientX + margin);
+      const top = Math.min(window.innerHeight - height - margin, event.clientY + margin);
+      screenshotPopover.style.left = `${Math.max(margin, left)}px`;
+      screenshotPopover.style.top = `${Math.max(margin, top)}px`;
+    }
+
+    function showScreenshot(event) {
+      const tool = event.currentTarget.closest(".tool");
+      const screenshot = tool?.dataset.screenshot;
+      if (!screenshot) return;
+      const title = tool.querySelector(".tool-title").textContent.trim();
+      screenshotImage.src = screenshot;
+      screenshotImage.alt = `Screenshot ${title}`;
+      screenshotTitle.textContent = title;
+      screenshotPopover.classList.add("is-visible");
+      moveScreenshotPopover(event);
+    }
+
+    function hideScreenshot() {
+      screenshotPopover.classList.remove("is-visible");
+      screenshotImage.removeAttribute("src");
+    }
+
+    agentTools.forEach((tool) => {
+      tool.querySelectorAll(".tool-title, .tool-logo").forEach((target) => {
+        target.addEventListener("mouseenter", showScreenshot);
+        target.addEventListener("mousemove", moveScreenshotPopover);
+        target.addEventListener("mouseleave", hideScreenshot);
       });
     });
 

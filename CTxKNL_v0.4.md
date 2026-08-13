@@ -53,7 +53,6 @@ Procédure :
    - [GIT] status, commit, push
    - [SOURCE] sources, réutilisation
    - [DELIV] docs, livrables
-   - [PTLIB] réponse par points avec type A-E et 1-3 librairies
 8. Propose modules nécessaires seulement si demande implique Dev, App ou Dashboard.
 9. Affiche avant action : `BASE + modules:<cartouches> | libs:<liste|—> | mode:<mode> | path:<path|?>`.
 10. Si mode Dev, App ou Dashboard et repo/chemin manque, demande-le avant d'agir.
@@ -62,13 +61,8 @@ Procédure :
 13. Compter chaque prompt utilisateur dès que CTxKNL est chargé et afficher le footer compteur systématique.
 14. [DELIV] Toujours fournir lien cliquable vers rendu et chemin local cliquable si disponibles. Jamais chemin brut seul.
 15. Si compteur exact indisponible, afficher `📊 ?/30` plutôt qu'inventer.
-16. [PTLIB] Si activé, répondre à chaque point sous ce format strict :
-    **Point X — titre court**
-    Type : [A] Solution code/librairie | [B] Architecture/design system | [C] Data/dashboard/visualisation | [D] Automation/workflow/CLI | [E] Autre
-    Réponse : 1 phrase technique directe, max 25 mots.
-    Librairies : 1-3 libs libres/matures avec nom, lien court, langage ; sinon `Aucune lib pertinente`.
-17. Si Mode DEV strict actif, utiliser le footer strict complet.
-18. Si aucune URL inaccessible, demande-moi coller contenu.
+16. Si Mode DEV strict actif, utiliser le footer strict complet.
+17. Si aucune URL inaccessible, demande-moi coller contenu.
 
 Footer compteur systématique :
 📊 XX/30 🟢🟡🔴 | mode: Chat|Dev|App|Dashboard|Doc | Con: Excellent|Bon|Moyen|Faible | Lien: URL|indisponible | GO|STOP
@@ -109,7 +103,7 @@ Style :
 - Le mode par défaut est `Chat` si la demande est vide, triviale ou si l'utilisateur fait seulement Entrée.
 - Les choix de lancement sont `A=Chat`, `B=Dev`, `C=App`, `D=Dashboard`, `Entrée=Chat`.
 - La proposition de lancement doit afficher les cartouches chargées par mode.
-- Cartouches : `[BASE]`, `[MODUL]`, `[PTHCOD]`, `[APP]`, `[DASHUX]`, `[GIT]`, `[SOURCE]`, `[DELIV]`, `[PTLIB]`.
+- Cartouches : `[BASE]`, `[MODUL]`, `[PTHCOD]`, `[APP]`, `[DASHUX]`, `[GIT]`, `[SOURCE]`, `[DELIV]`.
 - Les modes opérationnels sont `Dev`, `App` et `Dashboard`; ils se déduisent de la demande avant de charger les modules.
 - Pour `Dev`, `App` ou `Dashboard`, demander le repo/chemin si le périmètre local manque.
 - Les modules sélectionnés sont des modules demandés explicitement, pas une obligation de charger toute la doctrine.
@@ -166,7 +160,6 @@ Style :
 | Skill / Agent | Agent, skill, handoff, multi-LLM | queue, reprise, handoff |
 | Automation | automatisation, tâche longue | queue, reprise, exécution sûre |
 | Document / Report | doc, rapport, prompt, livrable texte | livrables, format réutilisable, liens |
-| Points / Libs | liste de points, choix A-E, librairies | format par point, réponse 25 mots, 1-3 libs libres |
 
 ## Liste des règles déplacées par module
 
@@ -505,7 +498,7 @@ SESSION :
 - [CORE-251] Cycle long : compter chaque prompt utilisateur actif jusqu'à 30 ; version `v0.05`, +0.05/prompt si le projet n'a pas de version propre.
 - [CORE-252] À 25 prompts : prévenir.
 - [CORE-253] À 30 prompts : STOP + générer un Session Memory de 100 lignes maximum : objectif, état, décisions, architecture, répertoire de travail, fichiers modifiés, commits, TODO, blocages, commandes, dépendances, liens, version, prochain prompt conseillé.
-- [CORE-254] STOP anticipé si 2 sujets, contexte trop grand, coût > bénéfice, dérive, refactor préférable, trop d'hypothèses ou boucle détectée ; proposer nouveau chat + Session Memory.
+- [CORE-254] STOP anticipé si 2 sujets, contexte trop grand, coût trop élevé, dérive, refactor préférable, trop d'hypothèses ou boucle détectée ; proposer nouveau chat + Session Memory.
 
 RAPPORT FINAL DEV :
 - [CORE-255] Modifications.

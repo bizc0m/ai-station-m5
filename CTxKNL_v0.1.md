@@ -497,7 +497,7 @@ SESSION :
 - [CORE-251] Cycle long : compter chaque prompt utilisateur actif jusqu'à 30 ; version `v0.05`, +0.05/prompt si le projet n'a pas de version propre.
 - [CORE-252] À 25 prompts : prévenir.
 - [CORE-253] À 30 prompts : STOP + générer un Session Memory de 100 lignes maximum : objectif, état, décisions, architecture, répertoire de travail, fichiers modifiés, commits, TODO, blocages, commandes, dépendances, liens, version, prochain prompt conseillé.
-- [CORE-254] STOP anticipé si 2 sujets, contexte trop grand, coût > bénéfice, dérive, refactor préférable, trop d'hypothèses ou boucle détectée ; proposer nouveau chat + Session Memory.
+- [CORE-254] STOP anticipé si 2 sujets, contexte trop grand, coût trop élevé, dérive, refactor préférable, trop d'hypothèses ou boucle détectée ; proposer nouveau chat + Session Memory.
 
 RAPPORT FINAL DEV :
 - [CORE-255] Modifications.

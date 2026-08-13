@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Prompt Master Latest</title>
+  <title>Prompt d'envoi - setup + demande marquee</title>
   <style>
     :root {
       --paper: #fbfaf7;
@@ -169,20 +169,20 @@
 <body>
   <header>
     <div>
-      <h1>Prompt Master Latest</h1>
+      <h1>Prompt d'envoi - setup + demande marquee</h1>
       <div class="status" id="sourceStatus">Chargement de la derniere version...</div>
     </div>
     <div class="actions">
       <a class="button" href="AI-Station.html">AI-Station</a>
       <button type="button" id="copyOfficial">Copier officiel</button>
-      <button class="primary" type="button" id="copyInject">Copier envoi</button>
+      <button class="primary" type="button" id="copyInject">Copier prompt d'envoi</button>
     </div>
   </header>
 
   <main>
     <aside>
       <section>
-        <h2>Setup envoi</h2>
+        <h2>Setup du prompt d'envoi</h2>
         <div class="field">
           <label for="setupMode">Setup</label>
           <select id="setupMode">
@@ -210,11 +210,11 @@
           <input type="checkbox" id="markRequest" checked>
           Marquer explicitement la demande avec DEMANDE A TRAITER.
         </label>
-        <p class="hint">Le bouton prepare un bloc a envoyer vers app, browser ou LLM compatible. Sinon copie-colle.</p>
+        <p class="hint">Ce prompt d'envoi regroupe le setup, la cible, la demande marquee et le Prompt Master charge.</p>
       </section>
 
       <section>
-        <h2>Apercu envoi</h2>
+        <h2>Apercu du prompt d'envoi</h2>
         <div class="preview"><pre id="injectPreview">En attente du prompt officiel...</pre></div>
         <div class="status" id="copyStatus" aria-live="polite"></div>
       </section>
