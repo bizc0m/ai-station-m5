@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <title>AI Station Public</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --paper: #f7f7f4;
+      --line: rgba(12, 12, 12, .16);
+      --ink: #101010;
+      --muted: #66615a;
+      --ok: #1f7a3f;
+      --red: #c8161d;
+      --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+    main { width: min(1160px, calc(100% - 24px)); margin: 24px auto; }
+    header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
+    h1 { margin: 0; font: 800 32px/1.05 var(--sans); letter-spacing: 0; }
+    p { margin: 8px 0 0; color: var(--muted); line-height: 1.45; }
+    a { color: var(--ok); }
+    .badge { border: 1px solid var(--line); border-radius: 999px; padding: 7px 10px; font: 800 11px/1 var(--mono); color: var(--ok); white-space: nowrap; }
+    .grid { display: grid; grid-template-columns: 430px minmax(0, 1fr); gap: 14px; align-items: start; }
+    section { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); padding: 14px; }
+    h2 { margin: 0 0 12px; font: 800 16px/1.2 var(--sans); }
+    form { display: grid; gap: 10px; }
+    label { display: grid; gap: 4px; color: var(--muted); font: 800 11px/1 var(--mono); text-transform: uppercase; }
+    input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); padding: 9px; font: 13px/1.35 var(--mono); }
+    textarea { min-height: 94px; resize: vertical; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    button, .button { border: 0; border-radius: 7px; min-height: 34px; padding: 0 12px; background: var(--red); color: #fff; font: 900 11px/1 var(--mono); text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    button.secondary { border: 1px solid var(--line); background: #fff; color: var(--ink); }
+    pre { margin: 0; min-height: 520px; max-height: 72vh; overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: #101216; color: #edf2ef; padding: 12px; font: 12px/1.45 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .note { margin-top: 12px; padding: 10px; border: 1px solid rgba(31, 122, 63, .25); border-radius: 8px; background: rgba(31, 122, 63, .07); color: var(--ink); font: 13px/1.45 var(--sans); }
+    @media (max-width: 900px) { header { flex-direction: column; } .grid { grid-template-columns: 1fr; } pre { min-height: 360px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>AI Station Public</h1>
+        <p>Page GitHub sans donnée sensible par défaut. Chacun configure ses URLs, modèles et apps localement, puis télécharge son HTML.</p>
+      </div>
+      <span class="badge">Public-safe · localStorage · export HTML</span>
+    </header>
+
+    <div class="grid">
+      <section>
+        <h2>Configuration</h2>
+        <form data-config-form>
+          <label>Nom station
+            <input name="title" autocomplete="off">
+          </label>
+          <label>Git public
+            <input name="repoUrl" autocomplete="off">
+          </label>
+          <label>URL locale station
+            <input name="localUrl" autocomplete="off">
+          </label>
+          <label>URL Prompt Master
+            <input name="promptUrl" autocomplete="off">
+          </label>
+          <label>URL Ollama
+            <input name="ollamaUrl" autocomplete="off">
+          </label>
+          <label>Modèles, un par ligne
+            <textarea name="models" spellcheck="false"></textarea>
+          </label>
+          <label>Apps / CLI, un par ligne
+            <textarea name="apps" spellcheck="false"></textarea>
+          </label>
+        </form>
+        <div class="actions">
+          <button type="button" data-save-config>Sauver config</button>
+          <button class="secondary" type="button" data-download-html>Télécharger HTML</button>
+          <button class="secondary" type="button" data-copy-config>Copier config</button>
+          <a class="button" href="https://github.com/bizc0m/ai-station-m5">GitHub</a>
+        </div>
+        <div class="note">Aucun chemin personnel n'est fourni par défaut. Si l'utilisateur ajoute ses propres chemins, ils restent dans son navigateur ou dans le HTML qu'il télécharge.</div>
+      </section>
+
+      <section>
+        <h2>HTML généré</h2>
+        <pre data-config-output></pre>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initAiStationConfigurator } from "./assets/ai-station-config-module.js";
+    initAiStationConfigurator(document);
+  </script>
+</body>
+</html>
