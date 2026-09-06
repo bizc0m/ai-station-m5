@@ -1,0 +1,3 @@
+launchers/
+*.log
+__pycache__/

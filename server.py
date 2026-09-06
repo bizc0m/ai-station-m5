@@ -9,6 +9,8 @@ import subprocess
 import tempfile
 import time
 import urllib.parse
+import threading
+import socket
 
 ROOT = Path(__file__).resolve().parent
 COMFY_OUTPUT = Path("/Users/JOB/#DEV/02-apps/ComfyUI-output")
@@ -83,6 +85,16 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path in {"/", "/index.html", "/AI-Station.html", "/Agent-Queue.html", "/Unified-Control.html", "/AI-Station.full.backup-20260901.html", "/AI-Station-online.html", "/AI-Station-public.html", "/V2/index.html", "/V2/AI-Station.html", "/V2/Agent-Queue.html"} or parsed.path.startswith("/launch/"):
+            self.send_response(303)
+            self.send_header("Location", "http://127.0.0.1:8871/")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        if parsed.path.startswith("/queue/"):
+            self.send_json({"ok": False, "error": "Agent Queue remplacé par LoopX", "url": "http://127.0.0.1:8870/chat/"}, status=410)
+            return
         if parsed.path == "/validate-path":
             query = urllib.parse.parse_qs(parsed.query)
             raw_path = query.get("path", [""])[0].strip()
@@ -132,6 +144,11 @@ class Handler(SimpleHTTPRequestHandler):
             if not script:
                 self.send_error(404, "Unknown launcher")
                 return
+            if name == "agent-queue":
+                self.send_response(303)
+                self.send_header("Location", "/Agent-Queue.html")
+                self.end_headers()
+                return
             target = ROOT / "launchers" / script
             subprocess.Popen(["open", str(target)])
             self.send_response(303)
@@ -142,11 +159,8 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path == "/queue/add":
-            self.handle_queue_add()
-            return
-        if parsed.path == "/llm-launch":
-            self.handle_llm_launch()
+        if parsed.path.startswith("/queue/") or parsed.path == "/llm-launch":
+            self.send_json({"ok": False, "error": "Ancien lanceur désactivé : utiliser LoopX", "url": "http://127.0.0.1:8870/chat/"}, status=410)
             return
         self.send_error(404, "Unknown POST route")
 
@@ -289,6 +303,9 @@ PROMPT={shlex.quote(prompt)}
             "--notes",
             request,
         ]
+        project = (form.getfirst("project") or "").strip()
+        if project:
+            cmd.extend(["--project", project])
         if agent:
             cmd.extend(["--agent", agent])
         cmd.extend(attachments)
@@ -332,5 +349,42 @@ PROMPT={shlex.quote(prompt)}
         return super().do_HEAD()
 
 
+
+def supervise_loopx():
+    """Keep the installed LoopX workspace available alongside the station."""
+    proc = None
+    while True:
+        try:
+            with socket.create_connection(("127.0.0.1", 8870), timeout=2):
+                pass
+        except OSError:
+            if proc is None or proc.poll() is not None:
+                root = Path("/Users/JOB/#DEV/_Agents/loopx")
+                with (root / "service.log").open("ab") as log:
+                    proc = subprocess.Popen([
+                        "/Users/JOB/.local/bin/loopx", "dashboard", "--no-open", "--port", "8870",
+                        "--codex-bin", "/Applications/ChatGPT.app/Contents/Resources/codex",
+                        "--claude-bin", "/Users/JOB/.local/bin/claude",
+                    ], cwd=str(root / "workspace"), stdin=subprocess.DEVNULL,
+                       stdout=log, stderr=log, start_new_session=True)
+        time.sleep(10)
+
+
+def supervise_global_dashboard():
+    proc = None
+    root = ROOT / "global-dashboard"
+    while True:
+        try:
+            with socket.create_connection(("127.0.0.1", 8871), timeout=2):
+                pass
+        except OSError:
+            if proc is None or proc.poll() is not None:
+                with (root / "service.log").open("ab") as log:
+                    proc = subprocess.Popen(["/opt/homebrew/bin/python3", str(root / "server.py")],
+                        cwd=str(root), stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
+        time.sleep(10)
+
 if __name__ == "__main__":
+    threading.Thread(target=supervise_global_dashboard, daemon=True).start()
+    threading.Thread(target=supervise_loopx, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", 8765), Handler).serve_forever()
