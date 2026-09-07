@@ -79,33 +79,33 @@ def notes(query=''):
         base = NOTEPLAN / folder
         if not base.is_dir():
             continue
-        candidates = []
         for directory, dirs, names in os.walk(base, followlinks=False):
             dirs[:] = [d for d in dirs if not d.startswith(('.', '@')) and not d.endswith('_attachments') and d not in {'node_modules', 'venv', 'Backups', 'Caches'}]
             if time.monotonic() - started > 8:
                 return {'items': results, 'truncated': True}
+            candidates = []
             for name in names:
                 if Path(name).suffix.lower() in {'.md', '.txt'}:
                     candidates.append(Path(directory) / name)
-        for path in candidates:
-            if time.monotonic() - started > 8:
-                return {'items': results, 'truncated': True}
-            if path.is_symlink() or not path.is_file() or path.suffix.lower() not in {'.md', '.txt'}:
-                continue
-            if not path.resolve().is_relative_to(NOTEPLAN.resolve()) or '@Archive' in path.parts or path.stat().st_size > 1_000_000:
-                continue
-            for number, line in enumerate(path.read_text(errors='replace').splitlines(), 1):
-                match = re.match(r'^\s*[-*]\s+\[ \]\s+(.+)', line)
-                if not match:
-                    continue
-                text = match.group(1)
-                rel = str(path.relative_to(NOTEPLAN))
-                if query and query.casefold() not in (text + rel).casefold():
-                    continue
-                token = hashlib.sha256((rel + ':' + str(number) + ':' + text).encode()).hexdigest()
-                results.append({'id': token, 'text': text, 'note': rel, 'line': number})
-                if len(results) == 200:
+            for path in candidates:
+                if time.monotonic() - started > 8:
                     return {'items': results, 'truncated': True}
+                if path.is_symlink() or not path.is_file() or path.suffix.lower() not in {'.md', '.txt'}:
+                    continue
+                if not path.resolve().is_relative_to(NOTEPLAN.resolve()) or '@Archive' in path.parts or path.stat().st_size > 1_000_000:
+                    continue
+                for number, line in enumerate(path.read_text(errors='replace').splitlines(), 1):
+                    match = re.match(r'^\s*[-*]\s+\[ \]\s+(.+)', line)
+                    if not match:
+                        continue
+                    text = match.group(1)
+                    rel = str(path.relative_to(NOTEPLAN))
+                    if query and query.casefold() not in (text + rel).casefold():
+                        continue
+                    token = hashlib.sha256((rel + ':' + str(number) + ':' + text).encode()).hexdigest()
+                    results.append({'id': token, 'text': text, 'note': rel, 'line': number})
+                    if len(results) == 200:
+                        return {'items': results, 'truncated': True}
     return {'items': results, 'truncated': False, 'available': NOTEPLAN.is_dir()}
 
 def preview(body):

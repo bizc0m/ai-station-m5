@@ -64,3 +64,9 @@ Le serveur expose uniquement ouverture, lecture et envoi de conversation via les
 ### Langue des réponses
 
 Le prompt natif LoopX demande le chinois par défaut sauf préférence explicite. Le dashboard transmet maintenant la préférence française à chaque message ; une demande explicite d'une autre langue reste possible. Le préfixe technique n'est pas affiché dans les bulles utilisateur. Test réel effectué sur la session existante : reformulation naturelle reçue en français. Les anciens messages sont conservés.
+
+## Chat compact, export et priorités
+
+Espacements des messages divisés par deux, police lisible conservée. Export Markdown téléchargé avec horodatages, ID de session/message, liens locaux de reprise et priorités. Matrice urgence × importance P1 à P4, classement manuel conservé dans le navigateur (non synchronisé entre Macs). NotePlan : lecture progressive limitée à 200 tâches ou 8 secondes, filtre, source et chargement dans un brouillon sans écrasement ni envoi automatique. Aucun changement dans le coffre NotePlan.
+
+Vérification réelle : export téléchargé et relu ; 200 tâches NotePlan chargées, classement P2 puis chargement du brouillon vérifiés. Six tests du pont de tâches passent. La priorité sert à organiser ; elle ne déclenche pas automatiquement une exécution.
