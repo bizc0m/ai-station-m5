@@ -48,3 +48,9 @@ Les commits et push des projets exécutés, la publication distante des fiches e
 L’API native LoopX renvoie parfois `Typed action preview could not be created` lors de la préparation et de la clôture. L’exécution de preuve a nécessité de créer sa prévisualisation avec le service canonique Python, puis a été lancée depuis le formulaire. Ce test prouve l’exécution et le retour/archivage, mais ne valide donc PAS encore un nouvel envoi autonome entièrement par HTTP. Le redémarrage de LoopX n’a pas corrigé l’erreur. La clôture du test n’est pas encore confirmée.
 
 Le diagnostic temporaire du serveur installé (trace d’exception et redémarrage) a été refusé par le contrôle automatique ; accord utilisateur explicite demandé. Tant que cette cause n’est pas corrigée, conserver les demandes en préparation et leurs identifiants, ne pas contourner le problème en recréant des tâches ni annoncer le parcours entièrement opérationnel.
+
+## Présentation Nyx — 2026-09-07
+
+Palette sombre issue de la référence Nyx fournie, barre compacte, treize onglets conservés, navigation latérale groupée et repliable. Les panneaux de synthèse se replient ; les préférences sont conservées localement. Le formulaire tâches utilise la même palette. Les pages intégrées de même origine reçoivent un thème visuel ; les applications externes conservent leur interface.
+
+Vérifications : syntaxe JavaScript, navigation des onglets, repli des menus/panneaux, rendu desktop et largeur mobile 390 px sans débordement du dashboard ni du formulaire. Aucun envoi de tâche ni démarrage d’agent déclenché pour tester ce design. Le blocage de prévisualisation LoopX décrit ci-dessus reste distinct de cette modification visuelle. Le fractionnement libre et le déplacement des panneaux du mockup ne sont pas implémentés.
