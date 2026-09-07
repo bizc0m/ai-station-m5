@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unified AI Control</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --paper: #fafaf8;
+      --paper-2: #f5f5f3;
+      --line: rgba(12,12,12,.14);
+      --line-strong: rgba(12,12,12,.28);
+      --ink: #0c0c0c;
+      --muted: #6f6a62;
+      --red: #c8161d;
+      --red-deep: #9a1117;
+      --ok: #1f7a3f;
+      --warn: #9a6a11;
+      --mono: "SF Mono", Menlo, Monaco, Consolas, monospace;
+      --sans: "Helvetica Neue", Helvetica, Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(transparent calc(100% - 1px), rgba(12,12,12,.035) 100%) 0 0 / 100% 34px,
+        linear-gradient(90deg, transparent calc(100% - 1px), rgba(12,12,12,.035) 100%) 0 0 / 34px 100%;
+    }
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(1240px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 22px 0;
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--red);
+    }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .sub { margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .top-actions, .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    a, button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      text-decoration: none;
+      padding: 9px 11px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    a:hover, button:hover { border-color: var(--red); color: var(--red-deep); }
+    .primary { background: var(--red); border-color: var(--red); color: #fff; }
+    .primary:hover { background: var(--red-deep); color: #fff; }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+      gap: 14px;
+      margin-top: 14px;
+      align-items: start;
+    }
+    .panel, .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(250,250,248,.94);
+    }
+    .panel { padding: 14px; }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    h2, h3 { margin: 0; }
+    h2 { font-size: 18px; }
+    h3 { font-size: 15px; }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .card { padding: 12px; min-height: 92px; }
+    .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font: 800 11px/1 var(--mono);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: inline-block; }
+    code, pre {
+      font-family: var(--mono);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+    }
+    code { display: block; padding: 8px; margin-top: 8px; overflow-wrap: anywhere; }
+    pre { margin: 0; padding: 12px; min-height: 120px; white-space: pre-wrap; overflow: auto; }
+    textarea {
+      width: 100%;
+      min-height: 116px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      resize: vertical;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      line-height: 1.45;
+    }
+    .chat-log {
+      min-height: 220px;
+      max-height: 44vh;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    .drop {
+      border: 1px dashed var(--line-strong);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--muted);
+      background: #fff;
+      margin: 8px 0;
+    }
+    body.drop-active { outline: 4px solid var(--red); outline-offset: -4px; }
+    body.drop-active .drop { border-color: var(--red); color: var(--red); }
+    .files { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .file { border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; background: #fff; color: var(--red); font-size: 13px; }
+    .upload input { display: none; }
+    .rows { display: grid; gap: 8px; }
+    .row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    @media (max-width: 860px) {
+      header, .grid, .cards { grid-template-columns: 1fr; }
+      .top-actions { justify-content: flex-start; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+<style>header,.topbar{display:none!important}body{background:#f5f4ef!important}</style><style>:root{--red:#275d45;--accent:#275d45;--ink:#202820;--paper:#fff;--bg:#f5f4ef}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}h1,h2,h3,.tool-title{font-family:inherit!important;letter-spacing:normal!important}.eyebrow,.kicker{color:#275d45!important}.card,.panel,article{border-radius:10px!important;background:#fff!important;box-shadow:none!important}.script-tab.active,.button.green,.button:not(.secondary){background:#275d45!important;color:white!important;border-color:#275d45!important}.script-panel,.script-controls{border-color:#dce1d8!important}aside,footer{display:none!important}select,input,textarea{border-radius:6px!important}body{overflow-wrap:anywhere}</style></head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <h1>Unified AI Control</h1>
+        <div class="sub">Une seule page · M5 hub · M2 worker · AgentLab · Osaurus</div>
+      </div>
+      <div class="top-actions">
+        <a class="primary" href="/#m5">M5</a>
+        <a href="http://100.90.189.76:1338/#m2">M2</a>
+        <a href="http://100.90.189.76:1338/agentlab-control.html">AgentLab</a>
+        <a href="http://100.90.189.76:1338/logs">Logs M2</a>
+      </div>
+    </header>
+
+    <section id="m5" class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <div>
+          <h2>Fonctions M5</h2>
+          <div class="hint">Commandes M5 visibles en premier. Routage dur vers 100.123.134.62:8765.</div>
+        </div>
+        <span class="label"><span class="dot"></span>M5</span>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <span class="label">Agents Dev</span>
+          <h3>CLI / IDE</h3>
+          <div class="actions" style="justify-content:flex-start;margin-top:10px">
+            <a href="/launch/codex">Codex</a>
+            <a href="/launch/claude">Claude</a>
+            <a href="/launch/aider-fast">Aider</a>
+            <a href="/launch/opencode">OpenCode</a>
+          </div>
+        </div>
+        <div class="card">
+          <span class="label">Images</span>
+          <h3>ComfyUI</h3>
+          <div class="actions" style="justify-content:flex-start;margin-top:10px">
+            <a href="/launch/comfyui">Démarrer</a>
+            <a href="/open/comfy-output">Sorties</a>
+          </div>
+        </div>
+        <div class="card">
+          <span class="label">Prompt</span>
+          <h3>Prompt Master</h3>
+          <div class="actions" style="justify-content:flex-start;margin-top:10px">
+            <a href="/Prompt-Master-Latest.html">Latest</a>
+            <a href="/CTxKNL_v0.7.md">CTxKNL</a>
+            <a href="/AI-Station.full.backup-20260901.html">AI-STATION complète</a>
+          </div>
+        </div>
+        <div class="card">
+          <span class="label">Queue</span>
+          <h3>Tâches agents</h3>
+          <div class="actions" style="justify-content:flex-start;margin-top:10px">
+            <a href="/Agent-Queue.html">Queue</a>
+            <a href="/launch/agent-queue">Run</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="m2" class="grid">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Chat de base</h2>
+            <div class="hint">Envoie au M2 Osaurus · modèle foundation.</div>
+          </div>
+          <span class="label"><span class="dot"></span>M2</span>
+        </div>
+        <div id="chatLog" class="chat-log">M2 prêt. Dépose un fichier ou écris un message.</div>
+        <div id="drop" class="drop">Drag/drop sur toute la page. iPhone: bouton fichier.</div>
+        <div class="actions" style="justify-content:flex-start">
+          <label class="upload"><a>Ajouter fichiers</a><input id="fileInput" type="file" multiple></label>
+        </div>
+        <div id="files" class="files"></div>
+        <textarea id="prompt" placeholder="Message au M2. Enter envoie. Shift+Enter nouvelle ligne."></textarea>
+        <div class="actions" style="margin-top:8px">
+          <button class="primary" id="send" type="button">Envoyer</button>
+          <button id="clear" type="button">Effacer</button>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Routage dur</h2>
+            <div class="hint">Adresses figées dans les deux sens.</div>
+          </div>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <span class="label"><span class="dot"></span>M5</span>
+            <h3>AI-STATION</h3>
+            <code>/</code>
+            <div class="actions" style="justify-content:flex-start;margin-top:10px">
+              <a class="primary" href="/#m5">Ouvrir</a>
+              <a href="/AI-Station.html">Station</a>
+            </div>
+          </div>
+          <div class="card">
+            <span class="label"><span class="dot"></span>M2</span>
+            <h3>Osaurus</h3>
+            <code>http://100.90.189.76:1338/</code>
+            <div class="actions" style="justify-content:flex-start;margin-top:10px">
+              <a class="primary" href="http://100.90.189.76:1338/#m2">Ouvrir</a>
+              <a href="http://100.90.189.76:1338/status">Status</a>
+            </div>
+          </div>
+          <div class="card">
+            <span class="label"><span class="dot"></span>M2</span>
+            <h3>AgentLab</h3>
+            <code>http://100.90.189.76:1338/agentlab-control.html</code>
+            <div class="actions" style="justify-content:flex-start;margin-top:10px">
+              <a class="primary" href="http://100.90.189.76:1338/agentlab-control.html">Ouvrir</a>
+              <a href="http://100.90.189.76:1338/agentlab-control.html">Status</a>
+            </div>
+          </div>
+          <div class="card">
+            <span class="label"><span class="dot"></span>API</span>
+            <h3>OpenAI</h3>
+            <code>http://100.90.189.76:1338/v1</code>
+            <div class="actions" style="justify-content:flex-start;margin-top:10px">
+              <a class="primary" href="http://100.90.189.76:1338/models">Models</a>
+              <a href="http://100.90.189.76:1338/logs">Logs</a>
+            </div>
+          </div>
+        </div>
+        <div class="actions" style="justify-content:flex-start; margin-top:12px">
+          <a href="http://100.90.189.76:1338/status">Status M2</a>
+          <a href="http://100.90.189.76:1338/models">Models</a>
+          <a href="http://100.90.189.76:1338/agentlab-control.html">AgentLab cockpit</a>
+          <a href="/AI-Station.html">AI-STATION complète</a>
+        </div>
+        <div class="rows" style="margin-top:12px">
+          <div class="row"><span class="label">M5</span><code>100.123.134.62</code></div>
+          <div class="row"><span class="label">M2</span><code>100.90.189.76</code></div>
+          <div class="row"><span class="label">AgentLab</span><code>100.90.189.76:1338/agentlab-control.html</code></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <div>
+          <h2>Lancer agent M5</h2>
+          <div class="hint">Génère et lance un script local via endpoint M5 `/llm-launch`.</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <label class="label" for="llmCli">CLI</label>
+          <select id="llmCli">
+            <option value="codex">Codex</option>
+            <option value="claude">Claude</option>
+            <option value="aider">Aider</option>
+            <option value="opencode">OpenCode</option>
+            <option value="ollama">Ollama</option>
+          </select>
+        </div>
+        <div class="card">
+          <label class="label" for="llmModel">Modèle</label>
+          <select id="llmModel">
+            <option value="qwen3-coder:30b">qwen3-coder:30b</option>
+            <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
+            <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
+            <option value="qwen3:8b">qwen3:8b</option>
+          </select>
+        </div>
+        <div class="card">
+          <label class="label" for="llmMode">Mode</label>
+          <select id="llmMode">
+            <option value="dev">Dev</option>
+            <option value="chat">Chat</option>
+            <option value="app">App</option>
+            <option value="dash">Dashboard</option>
+          </select>
+        </div>
+        <div class="card">
+          <label class="label" for="llmPath">Chemin</label>
+          <input id="llmPath" value="/Users/JOB/#DEV">
+        </div>
+      </div>
+      <textarea id="llmRequest" style="margin-top:10px" placeholder="Demande agent M5">Explique puis exécute proprement.</textarea>
+      <div class="actions" style="margin-top:8px">
+        <button class="primary" id="runM5Agent" type="button">Lancer M5</button>
+        <button id="copyM5Payload" type="button">Copier payload</button>
+        <span class="hint" id="m5Status">Prêt.</span>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <div>
+          <h2>Dossiers / commandes</h2>
+          <div class="hint">Chemins M5 essentiels.</div>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="label">Dashboard</span><code>/Users/JOB/#DEV/01-projets/Tools/ai-station-m5</code></div>
+        <div class="row"><span class="label">ComfyUI</span><code>/Users/JOB/#DEV/02-apps/ComfyUI</code></div>
+        <div class="row"><span class="label">Outputs</span><code>/Users/JOB/#DEV/02-apps/ComfyUI-output</code></div>
+        <div class="row"><span class="label">AgentLab M2</span><code>/Users/JOB/AgentLab</code></div>
+        <div class="row"><span class="label">Diagnostic M2</span><code>curl -fsS http://100.90.189.76:1338/health</code></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const M2_CHAT_URL = "http://100.90.189.76:1338/v1/chat/completions";
+    const chatLog = document.getElementById("chatLog");
+    const promptBox = document.getElementById("prompt");
+    const send = document.getElementById("send");
+    const clear = document.getElementById("clear");
+    const fileInput = document.getElementById("fileInput");
+    const filesBox = document.getElementById("files");
+    const m5Status = document.getElementById("m5Status");
+    let attachments = [];
+
+    const isM2Host = location.hostname === "100.90.189.76";
+    if (isM2Host) {
+      document.querySelector(".sub").textContent = "M2 worker actif · Osaurus · AgentLab · API privée";
+      document.getElementById("m5").after(document.getElementById("m2"));
+      document.getElementById("m5").before(document.getElementById("m2"));
+    }
+    function add(role, text) {
+      chatLog.textContent += "\\n\\n" + role + ": " + text;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+    function renderFiles() {
+      filesBox.innerHTML = "";
+      for (const file of attachments) {
+        const div = document.createElement("div");
+        div.className = "file";
+        div.textContent = file.name + " · " + Math.ceil(file.size / 1024) + " Ko";
+        filesBox.appendChild(div);
+      }
+    }
+    function readFile(file) {
+      return new Promise((resolve, reject) => {
+        if (file.size > 2 * 1024 * 1024) return reject(new Error(file.name + " dépasse 2 Mo"));
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("lecture impossible: " + file.name));
+        reader.onload = () => resolve({
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          size: file.size,
+          data: String(reader.result || "")
+        });
+        if ((file.type || "").startsWith("text/") || /\\.(md|txt|json|csv|log|xml|html|css|js|ts|py|sh)$/i.test(file.name)) {
+          reader.readAsText(file);
+        } else {
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+    async function addFiles(list) {
+      try {
+        const loaded = await Promise.all(Array.from(list).map(readFile));
+        attachments.push(...loaded);
+        renderFiles();
+      } catch (error) {
+        add("M2", "FICHIER REFUSÉ: " + error.message);
+      }
+    }
+    function setDrop(active) { document.body.classList.toggle("drop-active", active); }
+    document.addEventListener("dragover", (event) => { event.preventDefault(); setDrop(true); });
+    document.addEventListener("drop", async (event) => { event.preventDefault(); setDrop(false); await addFiles(event.dataTransfer.files); });
+    document.addEventListener("dragleave", (event) => {
+      if (event.clientX <= 0 || event.clientY <= 0 || event.clientX >= window.innerWidth || event.clientY >= window.innerHeight) setDrop(false);
+    });
+    fileInput.addEventListener("change", async () => {
+      await addFiles(fileInput.files);
+      fileInput.value = "";
+    });
+    async function submit() {
+      const text = promptBox.value.trim();
+      if (!text && attachments.length === 0) return;
+      const files = attachments;
+      attachments = [];
+      renderFiles();
+      promptBox.value = "";
+      const fileText = files.map(file => (
+        "\\n\\n[FICHIER " + file.name + "]\\n" +
+        "type: " + file.type + "\\n" +
+        "taille: " + file.size + " octets\\n" +
+        file.data
+      )).join("");
+      const content = text + fileText;
+      add("Toi", text + (files.length ? "\\n[" + files.length + " fichier(s)]" : ""));
+      send.disabled = true;
+      try {
+        const response = await fetch(M2_CHAT_URL, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            model: "foundation",
+            messages: [{role: "user", content}],
+            max_tokens: 512,
+            temperature: 0
+          })
+        });
+        const data = await response.json();
+        add("M2", data.choices?.[0]?.message?.content || JSON.stringify(data));
+      } catch (error) {
+        add("M2", "ERREUR: " + error.message);
+      } finally {
+        send.disabled = false;
+        promptBox.focus();
+      }
+    }
+    promptBox.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        submit();
+      }
+    });
+    send.addEventListener("click", submit);
+    clear.addEventListener("click", () => { chatLog.textContent = "M2 prêt."; });
+    function m5Payload() {
+      return {
+        cli: document.getElementById("llmCli").value,
+        model: document.getElementById("llmModel").value,
+        mode: document.getElementById("llmMode").value,
+        promptSource: "latest.md",
+        targetPath: document.getElementById("llmPath").value,
+        request: document.getElementById("llmRequest").value
+      };
+    }
+    document.getElementById("runM5Agent").addEventListener("click", async () => {
+      m5Status.textContent = "Lancement...";
+      try {
+        const response = await fetch("/llm-launch", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(m5Payload())
+        });
+        const data = await response.json();
+        m5Status.textContent = data.ok ? "Lancé: " + data.script : "Erreur: " + data.error;
+      } catch (error) {
+        m5Status.textContent = "Erreur: " + error.message;
+      }
+    });
+    document.getElementById("copyM5Payload").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(JSON.stringify(m5Payload(), null, 2));
+      m5Status.textContent = "Payload copié.";
+    });
+  </script>
+<script>document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;const u=new URL(a.href,location.href);const routes={'/AI-Station.html':'catalog','/Agent-Queue.html':'work','/Prompt-Master-Latest.html':'prompt','/Unified-Control.html':'control'};if(routes[u.pathname]){e.preventDefault();e.stopImmediatePropagation();parent.postMessage({stationTab:routes[u.pathname]},location.origin);}},true);</script><script>document.addEventListener('click',async e=>{const a=e.target.closest('a');if(!a)return;const u=new URL(a.href,location.href);if(u.origin!==location.origin){a.target='_blank';a.rel='noopener';return;}
+const tabs={'/Agent-Queue.html':'work','/Prompt-Master-Latest.html':'prompt','/Unified-Control.html':'control','/index.html':'overview','/V2/index.html':'prompt'};
+if(tabs[u.pathname]){e.preventDefault();parent.postMessage({stationTab:tabs[u.pathname]},location.origin);return;}
+if(u.pathname.startsWith('/launch/')||u.pathname==='/open-path'||u.pathname==='/open/comfy-output'){
+e.preventDefault();let output=document.getElementById('action-feedback');if(!output){output=document.createElement('p');output.id='action-feedback';output.style='position:fixed;bottom:10px;left:12px;right:12px;padding:12px;background:#fff;border:1px solid #888;z-index:999';document.body.append(output);}
+try{const res=await fetch('/api/legacy-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:u.pathname,query:u.search})});const d=await res.json();if(!res.ok)throw Error(d.error);output.textContent=d.message;}catch(err){output.textContent=err.message;}}
+});
+</script></body>
+</html>

@@ -5,6 +5,8 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import json
+from unification_view import render as render_unification
+from legacy_actions import LaunchMixin, LAUNCHERS
 import os
 import socket
 import subprocess
@@ -92,7 +94,10 @@ def command_for(key):
             return '#!/bin/zsh\ncd /Users/JOB/\\#DEV || exit 1\nexec ' + shlex.join([binary, *args]) + '\n'
     raise ValueError('Agent inconnu')
 
-class Handler(BaseHTTPRequestHandler):
+class Handler(LaunchMixin, BaseHTTPRequestHandler):
+    def send_json(self, payload, status=200):
+        return self.respond(payload, status)
+
     def respond(self, body, status=200, content_type='application/json; charset=utf-8'):
         payload = body if isinstance(body, bytes) else json.dumps(body, ensure_ascii=False).encode()
         self.send_response(status)
@@ -111,12 +116,24 @@ class Handler(BaseHTTPRequestHandler):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
         path = urllib.parse.urlparse(self.path).path
+        if path == '/unification':
+            doc = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get('doc', [''])[0]
+            body, status = render_unification(doc)
+            return self.respond(body, status, 'text/html; charset=utf-8')
         if path == '/api/state':
             return self.respond(snapshot())
+        if path == '/validate-path':
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            raw = q.get('path', [''])[0]; target = Path(raw).expanduser()
+            is_url = urllib.parse.urlparse(raw).scheme in {'https', 'http'}
+            ok = (is_url or target.exists()) if q.get('kind') == ['url-or-file'] else target.is_dir()
+            return self.respond({'ok': ok, 'path': raw, 'reason': 'ok' if ok else 'Chemin introuvable'})
+        if path in {'/station.html', '/control.html'}:
+            return self.respond((ROOT / path[1:]).read_bytes(), content_type='text/html; charset=utf-8')
         if path in {'/', '/index.html'}:
             return self.respond((ROOT / 'index.html').read_bytes(), content_type='text/html; charset=utf-8')
         # Only the existing prompt documents are exposed, never a filesystem tree.
-        allowed = {'/Prompt-Master-Latest.html', '/latest.md', '/CTxKNL_v0.7.md'}
+        allowed = {'/Prompt-Master-Latest.html', '/latest.md', '/CTxKNL_v0.7.md', '/CTxKNL-launcher-prompt.txt', '/Prompt-Master.html', '/prompt.md'}
         if path in allowed:
             target = STATION / path[1:]
             if target.is_file():
@@ -129,6 +146,36 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
+        if self.path == '/llm-launch':
+            try:
+                size = int(self.headers.get('Content-Length', '0'))
+                if not 0 < size <= 64000:
+                    raise ValueError('Requête trop volumineuse ou vide')
+            except ValueError as error:
+                return self.respond({'error': str(error)}, 400)
+            return self.handle_llm_launch()
+        if self.path == '/api/legacy-action':
+            try:
+                size = int(self.headers.get('Content-Length', '0'))
+                if not 0 < size < 8000: raise ValueError('Requête invalide')
+                data = json.loads(self.rfile.read(size))
+                path = data.get('path', '')
+                if path.startswith('/launch/'):
+                    name = path.split('/')[-1]
+                    if name == 'agent-queue' or name not in LAUNCHERS: raise ValueError('Lanceur inconnu')
+                    target = STATION / 'launchers' / LAUNCHERS[name]
+                elif path == '/open/comfy-output':
+                    target = Path('/Users/JOB/#DEV/02-apps/ComfyUI-output')
+                elif path == '/open-path':
+                    raw = urllib.parse.parse_qs(data.get('query','').lstrip('?')).get('path',[''])[0]
+                    if not raw.startswith(('/', '~/')): raise ValueError('Chemin absolu requis')
+                    target = Path(raw).expanduser()
+                else: raise ValueError('Action inconnue')
+                if not target.exists(): raise ValueError('Introuvable : ' + str(target))
+                subprocess.run(['/usr/bin/open', str(target)], check=True, timeout=10)
+                return self.respond({'ok': True, 'message': 'Ouverture demandée : ' + target.name})
+            except (ValueError, AttributeError, OSError, subprocess.SubprocessError) as error:
+                return self.respond({'error': str(error)},400)
         if self.path != '/api/launch':
             return self.respond({'error': 'Introuvable'}, 404)
         try:
