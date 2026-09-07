@@ -2,3 +2,4 @@ launchers/
 *.log
 __pycache__/
 tmp/
+task-data/

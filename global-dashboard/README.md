@@ -28,3 +28,23 @@ Le dashboard indique les services inaccessibles. Aucun lancement automatique de 
 Syntaxe Python et JavaScript vérifiée, API locale testée, onglets et rendu desktop/mobile observés. LoopX et Ollama ont répondu ; ComfyUI et M2 étaient inaccessibles lors de la vérification. Tous les lanceurs externes n’ont pas été retestés de bout en bout.
 
 Les journaux, scripts de lancement générés, sauvegardes et données privées des tâches sont exclus de cette publication.
+
+## V1.1 — Tâches et résultats (2026-09-07)
+
+L’onglet **Tâches & résultats** appelle les actions natives LoopX `todo.create` avec `start_execution=true`. Il ne simule pas une exécution par ouverture de Terminal. Codex doit être rattaché au Goal choisi via `agent.bind` ; ce rattachement a été appliqué à `station-tasks`.
+
+Parcours : lecture seule des tâches NotePlan ou saisie → aperçu du projet et de la demande → création/exécution → suivi durable de la session et du tour → réponse dans l’interface → fiche dans le clone Unification et index local régénéré. Le bouton de validation demande une preuve puis utilise la clôture native LoopX. Aucune validation métier n’est déduite de la seule réponse du modèle.
+
+Les demandes et reçus privés sont dans `task-data/`, ignoré par Git. Le suivi reprend au démarrage ; il ne renvoie pas une action d’exécution après une réponse réseau incertaine. Un identifiant persistant évite le double envoi. Les anciennes tâches ne sont jamais relancées. La source NotePlan n’est ni modifiée ni cochée. Lecture limitée à 200 tâches/8 secondes, avec signalement des résultats partiels ; archives, dossiers cachés et pièces jointes exclus.
+
+Configuration : `STATION_LOOPX_REGISTRY` sélectionne le registre, `STATION_NOTEPLAN_ROOT` le dossier contenant `Notes` et `Calendar`. Seuls les projets actifs du registre sont proposés, avec leur dossier affiché. Le Goal actuel vise le workspace LoopX ; il ne donne pas automatiquement accès en écriture à tous les projets ou à l’autre Mac. Les lanceurs des autres agents restent distincts.
+
+Vérifications : `python3 global-dashboard/test_task_bridge.py` couvre non-duplication, envoi incertain, corrélation du tour, distinction réponse/validation, lecture NotePlan et rejet des chemins invalides. Test réel du formulaire : tâche dédiée, fichier `dashboard-execution-proof.txt` créé par Codex, relu indépendamment et conforme à `STATION_EXECUTION_OK`, réponse récupérée, fiche/index générés, import NotePlan dans le formulaire sans envoi, état conservé après redémarrage.
+
+Les commits et push des projets exécutés, la publication distante des fiches et le déploiement sur M2 ne sont pas automatiques. Une tâche peut encore rencontrer une permission manquante ou une erreur d’agent ; le dashboard doit alors afficher ce blocage.
+
+### Blocage découvert pendant le test réel
+
+L’API native LoopX renvoie parfois `Typed action preview could not be created` lors de la préparation et de la clôture. L’exécution de preuve a nécessité de créer sa prévisualisation avec le service canonique Python, puis a été lancée depuis le formulaire. Ce test prouve l’exécution et le retour/archivage, mais ne valide donc PAS encore un nouvel envoi autonome entièrement par HTTP. Le redémarrage de LoopX n’a pas corrigé l’erreur. La clôture du test n’est pas encore confirmée.
+
+Le diagnostic temporaire du serveur installé (trace d’exception et redémarrage) a été refusé par le contrôle automatique ; accord utilisateur explicite demandé. Tant que cette cause n’est pas corrigée, conserver les demandes en préparation et leurs identifiants, ne pas contourner le problème en recréant des tâches ni annoncer le parcours entièrement opérationnel.

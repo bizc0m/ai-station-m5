@@ -5,6 +5,7 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import json
+import task_bridge
 from unification_view import render as render_unification
 from legacy_actions import LaunchMixin, LAUNCHERS
 import os
@@ -116,6 +117,20 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
         path = urllib.parse.urlparse(self.path).path
+        if path == '/execution':
+            return self.respond((ROOT / 'execution.html').read_bytes(), content_type='text/html; charset=utf-8')
+        if path in {'/api/executions', '/api/execution-goals', '/api/noteplan-tasks'}:
+            try:
+                if path == '/api/executions':
+                    data = {'jobs': task_bridge.jobs()}
+                elif path == '/api/execution-goals':
+                    data = {'goals': task_bridge.goals()}
+                else:
+                    query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get('q', [''])[0]
+                    data = task_bridge.notes(query[:200])
+                return self.respond(data)
+            except (ValueError, OSError) as error:
+                return self.respond({'error': str(error)}, 503)
         if path == '/unification':
             doc = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get('doc', [''])[0]
             body, status = render_unification(doc)
@@ -146,6 +161,20 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
     def do_POST(self):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
+        if self.path in {'/api/executions/preview', '/api/executions/apply', '/api/executions/validate'}:
+            try:
+                size = int(self.headers.get('Content-Length', '0'))
+                if not 0 < size < 32000 or 'application/json' not in self.headers.get('Content-Type', ''):
+                    raise ValueError('Requête JSON invalide')
+                data = json.loads(self.rfile.read(size))
+                if not isinstance(data, dict): raise ValueError('Objet JSON requis')
+                if self.path.endswith('/validate'):
+                    result = task_bridge.validate(data.get('id'), data.get('note'))
+                else:
+                    result = task_bridge.preview(data) if self.path.endswith('/preview') else task_bridge.apply(data.get('id'))
+                return self.respond(result)
+            except Exception as error:
+                return self.respond({'error': str(error)}, 400)
         if self.path == '/llm-launch':
             try:
                 size = int(self.headers.get('Content-Length', '0'))
@@ -205,4 +234,5 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
             self.respond({'ok': False, 'error': str(error)}, 400)
 
 if __name__ == '__main__':
+    task_bridge.start()
     ThreadingHTTPServer(('127.0.0.1', PORT), Handler).serve_forever()
