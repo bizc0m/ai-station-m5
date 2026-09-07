@@ -5,6 +5,7 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import json
+import re
 import task_bridge
 from unification_view import render as render_unification
 from legacy_actions import LaunchMixin, LAUNCHERS
@@ -117,6 +118,13 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
         path = urllib.parse.urlparse(self.path).path
+        if path == '/conversation':
+            return self.respond((ROOT / 'conversation.html').read_bytes(), content_type='text/html; charset=utf-8')
+        if re.fullmatch(r'/api/conversation/[a-f0-9]{32}', path):
+            try:
+                return self.respond(task_bridge.remote('/api/chat/sessions/' + path.rsplit('/', 1)[1]))
+            except Exception as error:
+                return self.respond({'error': str(error)}, 502)
         if path == '/execution':
             return self.respond((ROOT / 'execution.html').read_bytes(), content_type='text/html; charset=utf-8')
         if path in {'/api/executions', '/api/execution-goals', '/api/noteplan-tasks'}:
@@ -161,6 +169,24 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
     def do_POST(self):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
+        if self.path in {'/api/conversation/open', '/api/conversation/send'}:
+            try:
+                size = int(self.headers.get('Content-Length', '0'))
+                if not 0 < size < 32000 or 'application/json' not in self.headers.get('Content-Type', ''):
+                    raise ValueError('Requête JSON invalide')
+                data = json.loads(self.rfile.read(size))
+                if not isinstance(data, dict): raise ValueError('Objet JSON requis')
+                if self.path.endswith('/open'):
+                    result = task_bridge.remote('/api/chat/sessions', {'goal_id': 'station-tasks', 'agent_id': 'codex', 'mode': 'resume_latest', 'context_kind': 'goal'})
+                else:
+                    sid, text, tid = data.get('session_id'), data.get('message'), data.get('client_turn_id')
+                    if not isinstance(sid, str) or not re.fullmatch(r'[a-f0-9]{32}', sid): raise ValueError('Session invalide')
+                    if not isinstance(text, str) or not text.strip() or len(text) > 6000: raise ValueError('Message invalide')
+                    if not isinstance(tid, str) or not re.fullmatch(r'[a-f0-9-]{36}', tid): raise ValueError('Identifiant invalide')
+                    result = task_bridge.remote('/api/chat/sessions/' + sid + '/turns', {'message': text, 'client_turn_id': tid})
+                return self.respond(result)
+            except Exception as error:
+                return self.respond({'error': str(error)}, 400)
         if self.path in {'/api/executions/preview', '/api/executions/apply', '/api/executions/validate'}:
             try:
                 size = int(self.headers.get('Content-Length', '0'))

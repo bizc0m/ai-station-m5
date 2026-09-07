@@ -54,3 +54,9 @@ Le diagnostic temporaire du serveur installé (trace d’exception et redémarra
 Palette sombre issue de la référence Nyx fournie, barre compacte, treize onglets conservés, navigation latérale groupée et repliable. Les panneaux de synthèse se replient ; les préférences sont conservées localement. Le formulaire tâches utilise la même palette. Les pages intégrées de même origine reçoivent un thème visuel ; les applications externes conservent leur interface.
 
 Vérifications : syntaxe JavaScript, navigation des onglets, repli des menus/panneaux, rendu desktop et largeur mobile 390 px sans débordement du dashboard ni du formulaire. Aucun envoi de tâche ni démarrage d’agent déclenché pour tester ce design. Le blocage de prévisualisation LoopX décrit ci-dessus reste distinct de cette modification visuelle. Le fractionnement libre et le déplacement des panneaux du mockup ne sont pas implémentés.
+
+## Chat compact — 2026-09-07
+
+Chat placé en premier et ouvert par défaut sans fragment URL. Navigation latérale fermée par défaut, texte de conversation 15 px (saisie 16 px sur mobile), messages et saisie fixe en bas. Les treize sections précédentes restent disponibles. La session est conservée dans le navigateur après ouverture et les messages restent stockés par LoopX.
+
+Le serveur expose uniquement ouverture, lecture et envoi de conversation via les API natives LoopX. Le chat utilise Codex en contexte goal station-tasks, distinct du lancement de tâches. Test réel dans le navigateur : demande sans outils, réponse CHAT_OK reçue. Largeur mobile vérifiée à 390 px sans débordement. Le problème de prévisualisation des tâches est inchangé.
