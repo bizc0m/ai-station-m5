@@ -60,3 +60,7 @@ Vérifications : syntaxe JavaScript, navigation des onglets, repli des menus/pan
 Chat placé en premier et ouvert par défaut sans fragment URL. Navigation latérale fermée par défaut, texte de conversation 15 px (saisie 16 px sur mobile), messages et saisie fixe en bas. Les treize sections précédentes restent disponibles. La session est conservée dans le navigateur après ouverture et les messages restent stockés par LoopX.
 
 Le serveur expose uniquement ouverture, lecture et envoi de conversation via les API natives LoopX. Le chat utilise Codex en contexte goal station-tasks, distinct du lancement de tâches. Test réel dans le navigateur : demande sans outils, réponse CHAT_OK reçue. Largeur mobile vérifiée à 390 px sans débordement. Le problème de prévisualisation des tâches est inchangé.
+
+### Langue des réponses
+
+Le prompt natif LoopX demande le chinois par défaut sauf préférence explicite. Le dashboard transmet maintenant la préférence française à chaque message ; une demande explicite d'une autre langue reste possible. Le préfixe technique n'est pas affiché dans les bulles utilisateur. Test réel effectué sur la session existante : reformulation naturelle reçue en français. Les anciens messages sont conservés.

@@ -183,7 +183,7 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
                     if not isinstance(sid, str) or not re.fullmatch(r'[a-f0-9]{32}', sid): raise ValueError('Session invalide')
                     if not isinstance(text, str) or not text.strip() or len(text) > 6000: raise ValueError('Message invalide')
                     if not isinstance(tid, str) or not re.fullmatch(r'[a-f0-9-]{36}', tid): raise ValueError('Identifiant invalide')
-                    result = task_bridge.remote('/api/chat/sessions/' + sid + '/turns', {'message': text, 'client_turn_id': tid})
+                    result = task_bridge.remote('/api/chat/sessions/' + sid + '/turns', {'message': '[Préférence de langue : réponds en français, sauf si mon message demande explicitement une autre langue.]\n\n' + text, 'client_turn_id': tid})
                 return self.respond(result)
             except Exception as error:
                 return self.respond({'error': str(error)}, 400)
