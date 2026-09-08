@@ -188,7 +188,7 @@
 /* Opaque dark surfaces replace the inherited translucent light panels. */
 .main,.side,.bottom,.row,.panel-head{background:#0f0f15!important;color:#f2f2f5!important;border-color:#2c2c3a!important}.main{border:0!important;border-radius:0!important;padding:0!important}.row{background:#16161e!important;padding:6px 10px!important;grid-template-columns:120px minmax(0,1fr)!important}.label{color:#c8c8d4!important}.panel-head{padding:10px 12px!important;margin-bottom:8px!important}.panel-head h2{font-size:20px!important;line-height:1.25!important;margin:4px 0!important}.panel-head .hint{color:#b8b8be!important;font-size:13px!important}.card{padding:12px!important}.card h3{font-size:17px!important;margin:0 0 6px!important}.card p{font-size:13px!important;line-height:1.5!important;margin:6px 0!important}.list{gap:4px!important}.row code{font-size:12px!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important}.grid{gap:8px!important}.actions{gap:6px!important;margin:8px 0!important}.button{padding:7px 10px!important;font-size:11px!important}.eyebrow{margin:0!important}.panel-head:after,.panel-head h2:after{display:none!important}@media(max-width:600px){.row{grid-template-columns:1fr!important;gap:3px!important}.card h3{font-size:16px!important}}
 </style></head>
-<body>
+<body><iframe id="m2-unified-chat" src="/conversation?destination=m2" title="Chat M2 et tâches" style="display:block;width:100%;height:78vh;min-height:460px;border:0"></iframe><details style="margin:8px"><summary style="cursor:pointer;padding:8px">Routage et outils M2 avancés</summary>
   <main class="shell">
     <header>
       <div>
@@ -544,5 +544,5 @@ if(u.pathname.startsWith('/launch/')||u.pathname==='/open-path'||u.pathname==='/
 e.preventDefault();let output=document.getElementById('action-feedback');if(!output){output=document.createElement('p');output.id='action-feedback';output.style='position:fixed;bottom:10px;left:12px;right:12px;padding:12px;background:#fff;border:1px solid #888;z-index:999';document.body.append(output);}
 try{const res=await fetch('/api/legacy-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:u.pathname,query:u.search})});const d=await res.json();if(!res.ok)throw Error(d.error);output.textContent=d.message;}catch(err){output.textContent=err.message;}}
 });
-</script></body>
+</script></details></body>
 </html>
