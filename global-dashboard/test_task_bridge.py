@@ -22,6 +22,16 @@ class TaskBridgeTests(TestCase):
             self.assertEqual(bridge.preview(body)['id'], bridge.preview(body)['id'])
             self.assertEqual(remote.call_count, 1)
 
+    def test_prefix_is_sent_once_and_retry_is_idempotent(self):
+        body = {'id':'prefix', 'text':'Corriger le chat', 'goal_id':'station'}
+        with mock.patch.object(bridge,'goals',return_value=[{'id':'station','project':'fixture'}]), mock.patch.object(bridge,'remote',return_value={'proposal':{'proposal_id':'p'}}) as remote:
+            job = bridge.preview(body)
+            self.assertEqual(job['text'], '##STAI5 — Corriger le chat')
+            self.assertEqual(remote.call_args.args[1]['normalized_parameters']['text'], job['text'])
+            bridge.preview(body)
+            bridge.preview(dict(body, text=job['text']))
+            self.assertEqual(remote.call_count, 1)
+
     def test_uncertain_apply_is_not_replayed(self):
         bridge.save({'id':'abc','status':'preview','proposal_id':'proposal-abc'})
         with mock.patch.object(bridge, 'remote', side_effect=TimeoutError('timeout')) as remote:

@@ -113,18 +113,19 @@ def preview(body):
     text = str(body.get('text', '')).strip()
     if not text or len(text) > 6000:
         raise ValueError('Saisis une tâche de 1 à 6000 caractères')
+    tagged = text if text.startswith('##STAI5') else '##STAI5 — ' + text
     goal = next((g for g in goals() if g['id'] == body.get('goal_id')), None)
     if not goal:
         raise ValueError('Projet LoopX inconnu')
     with LOCK:
         if (DATA / (key + '.json')).exists():
             existing = load(key)
-            if existing['text'] != text or existing['goal_id'] != goal['id']:
+            if existing['text'] not in (text, tagged) or existing['goal_id'] != goal['id']:
                 raise ValueError('Cet identifiant appartient à une autre demande')
             if existing['status'] != 'preparing':
                 return existing
             return prepare(existing)
-        job = {'id': key, 'goal_id': goal['id'], 'project': goal['project'], 'text': text,
+        job = {'id': key, 'goal_id': goal['id'], 'project': goal['project'], 'text': tagged,
                'source': str(body.get('source', 'Saisie directe'))[:500], 'status': 'preparing',
                'created_at': now(), 'result': '', 'error': '', 'archive': ''}
         save(job)
