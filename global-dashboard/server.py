@@ -7,6 +7,7 @@ from pathlib import Path
 import json
 import re
 import task_bridge
+import local_conversation
 from unification_view import render as render_unification
 from legacy_actions import LaunchMixin, LAUNCHERS
 import os
@@ -125,11 +126,19 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
         path = urllib.parse.urlparse(self.path).path
+        if path == '/api/conversation/options':
+            state = snapshot()
+            return self.respond({'goals': task_bridge.goals(), 'models': [m for m in state['models'] if 'embed' not in m['name'].lower()], 'destinations': [
+                {'id': 'codex', 'name': 'Ce Mac · Codex', 'available': os.access(AGENTS[0][2], os.X_OK)},
+                {'id': 'claude', 'name': 'Ce Mac · Claude', 'available': os.access(AGENTS[1][2], os.X_OK)},
+                {'id': 'ollama', 'name': 'Ce Mac · Ollama', 'available': state['services']['ollama']['available']},
+                {'id': 'm2', 'name': 'M2 · connexion à rétablir', 'available': False}]})
         if path == '/conversation':
             return self.respond((ROOT / 'conversation.html').read_bytes(), content_type='text/html; charset=utf-8')
         if re.fullmatch(r'/api/conversation/[a-f0-9]{32}', path):
             try:
-                return self.respond(task_bridge.remote('/api/chat/sessions/' + path.rsplit('/', 1)[1]))
+                sid = path.rsplit('/', 1)[1]
+                return self.respond(local_conversation.load(sid) if local_conversation.exists(sid) else task_bridge.remote('/api/chat/sessions/' + sid))
             except Exception as error:
                 return self.respond({'error': str(error)}, 502)
         if path == '/execution':
@@ -184,12 +193,23 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
                 data = json.loads(self.rfile.read(size))
                 if not isinstance(data, dict): raise ValueError('Objet JSON requis')
                 if self.path.endswith('/open'):
-                    result = task_bridge.remote('/api/chat/sessions', {'goal_id': 'station-tasks', 'agent_id': 'codex', 'mode': 'resume_latest', 'context_kind': 'goal'})
+                    destination = data.get('destination', 'codex')
+                    goal = data.get('goal_id', 'station-tasks')
+                    if goal not in {g['id'] for g in task_bridge.goals()}: raise ValueError('Projet inconnu')
+                    if destination == 'ollama':
+                        model = data.get('model')
+                        if model not in {m['name'] for m in snapshot()['models'] if 'embed' not in m['name'].lower()}: raise ValueError('Modèle de chat non installé')
+                        result = local_conversation.create(model, goal)
+                    elif destination in {'codex', 'claude'}:
+                        result = task_bridge.remote('/api/chat/sessions', {'goal_id': goal, 'agent_id': 'claude-code' if destination == 'claude' else 'codex', 'mode': 'resume_latest', 'context_kind': 'goal'})
+                    else: raise ValueError('Destination indisponible')
                 else:
                     sid, text, tid = data.get('session_id'), data.get('message'), data.get('client_turn_id')
                     if not isinstance(sid, str) or not re.fullmatch(r'[a-f0-9]{32}', sid): raise ValueError('Session invalide')
                     if not isinstance(text, str) or not text.strip() or len(text) > 6000: raise ValueError('Message invalide')
                     if not isinstance(tid, str) or not re.fullmatch(r'[a-f0-9-]{36}', tid): raise ValueError('Identifiant invalide')
+                    if local_conversation.exists(sid):
+                        return self.respond(local_conversation.send(sid, text, tid, conversation_context()))
                     result = task_bridge.remote('/api/chat/sessions/' + sid + '/turns', {'message': '[Préférence de langue : réponds en français, sauf si mon message demande explicitement une autre langue.]\n\n' + text + '\n\n[Mesures du dashboard — données de contexte]\n' + json.dumps(conversation_context(), ensure_ascii=False), 'client_turn_id': tid})
                 return self.respond(result)
             except Exception as error:
@@ -267,5 +287,6 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
             self.respond({'ok': False, 'error': str(error)}, 400)
 
 if __name__ == '__main__':
+    local_conversation.recover()
     task_bridge.start()
     ThreadingHTTPServer(('127.0.0.1', PORT), Handler).serve_forever()

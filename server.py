@@ -365,7 +365,9 @@ def supervise_loopx():
                         "/Users/JOB/.local/bin/loopx", "dashboard", "--no-open", "--port", "8870",
                         "--codex-bin", "/Applications/ChatGPT.app/Contents/Resources/codex",
                         "--claude-bin", "/Users/JOB/.local/bin/claude",
-                    ], cwd=str(root / "workspace"), stdin=subprocess.DEVNULL,
+                    ], cwd=str(root / "workspace"),
+                       env={**os.environ, "PATH": str(Path.home() / ".local/bin") + ":/opt/homebrew/bin:/usr/local/bin:" + os.environ.get("PATH", "/usr/bin:/bin:/usr/sbin:/sbin")},
+                       stdin=subprocess.DEVNULL,
                        stdout=log, stderr=log, start_new_session=True)
         time.sleep(10)
 

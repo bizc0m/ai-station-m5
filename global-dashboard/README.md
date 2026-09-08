@@ -1,4 +1,4 @@
-# Dashboard global — V1.0.1 · build 1
+# Dashboard global — V1.0.2 · build 2
 
 Interface locale macOS : état des services, tâches LoopX, modèles Ollama, lanceurs des agents installés et onglet Prompt Master.
 
@@ -76,3 +76,17 @@ Vérification réelle : export téléchargé et relu ; 200 tâches NotePlan char
 Voir [AUDIT-1.0.1.md](AUDIT-1.0.1.md) pour les preuves et limites actuelles. Les cartes intégrées ont désormais un fond sombre explicite et les onglets passent sur plusieurs lignes. Les métadonnées du chat sont repliables. Chaque envoi reçoit les mesures récentes du dashboard (machine, services, modèles, date), sans exposer ce contexte technique dans les bulles ou l’export. Ces mesures ne constituent pas une preuve d’exécution d’un agent.
 
 La convention SemVer existante est conservée : 1.0.0 → 1.0.1. Aucun build précédent n’était déclaré ; build 1 initialise ce suivi dans `release.json`. Aucun installateur n’est fourni.
+
+## 1.0.2 — build 2 — 2026-09-08
+
+Le démarrage macOS fournit désormais le PATH des exécutables locaux à LoopX. Son moteur TypeScript exige Node 22.6 minimum ; le service ne voyait auparavant que `/usr/bin:/bin:/usr/sbin:/sbin`. C’était la cause du statut HTTP 500 et des prévisualisations impossibles lorsque le moteur n’était pas déjà démarré ailleurs. Le paquet LoopX installé n’a pas été modifié.
+
+Preuve réelle : une nouvelle tâche a été préparée et exécutée entièrement depuis le formulaire HTTP. Codex a créé `dashboard-execution-proof-1.0.2.txt`, relu indépendamment : contenu exact `STATION_1_0_2_EXECUTED` suivi d’un retour à la ligne. Réponse affichée, fiche Unification générée, clôture native confirmée après validation. Cette preuve remplace le blocage historique de prévisualisation décrit plus haut.
+
+Chat : destination Codex, Claude ou Ollama ; projet issu du registre réel ; modèles de conversation Ollama issus de son inventaire. Le modèle cloud reste celui configuré dans Codex/Claude, clairement indiqué dans le sélecteur. M2 demeure désactivé tant que la connexion n’est pas rétablie. Aucune promesse d’outils n’est faite pour le chat Ollama.
+
+Les sessions locales sont conservées dans `task-data/conversations/`, exclues de Git. Les réponses sont asynchrones ; chaque identifiant d’envoi n’est accepté qu’une fois. Un redémarrage signale une interruption sans renvoyer automatiquement le message. Historique, export, liens et priorités restent disponibles pour ces sessions. Llama 3.2 sélectionné dans l’interface a répondu correctement à 17 + 25 ; sa conversation a été reprise après rechargement.
+
+Dix tests passent : pont de tâches, isolation des modèles, déduplication, interruption et rejet des chemins invalides. Aucun accès en écriture au coffre NotePlan.
+
+Vérifications complémentaires : Claude (`claude-code`) a répondu depuis le sélecteur. NotePlan a chargé 200 tâches après une première lecture ayant atteint sa limite de temps ; une tâche a été chargée dans le brouillon, puis retirée sans envoi ni modification de la note. Le chat reste sans débordement horizontal à 390 px.
