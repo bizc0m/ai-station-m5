@@ -18,9 +18,10 @@ def load(sid):
     with LOCK:
         return json.loads(path(sid).read_text())
 
-def create(model, goal):
+def create(model, goal, destination="ollama"):
+    if destination not in {"ollama", "m2"}: raise ValueError("Destination invalide")
     sid = uuid.uuid4().hex
-    data = {'session': {'session_id': sid, 'agent_id': 'ollama', 'model': model, 'goal_id': goal, 'destination': 'ollama', 'active_turn_id': None}, 'messages': [], 'turn_ids': []}
+    data = {'session': {'session_id': sid, 'agent_id': destination, 'model': model, 'goal_id': goal, 'destination': destination, 'active_turn_id': None}, 'messages': [], 'turn_ids': []}
     with LOCK: atomic(path(sid), data)
     return data
 
@@ -44,9 +45,13 @@ def complete(sid, context):
     prompt = [{'role': 'system', 'content': 'Réponds en français. Tu es un chat sans outils : ne prétends jamais avoir exécuté une tâche. Mesures horodatées du dashboard : ' + json.dumps(context, ensure_ascii=False)}]
     prompt += [{'role': 'assistant' if m['role'] == 'agent' else 'user', 'content': m['text']} for m in data['messages'] if m['role'] in {'user', 'agent'}]
     try:
-        request = urllib.request.Request('http://127.0.0.1:11434/api/chat', data=json.dumps({'model': data['session']['model'], 'messages': prompt, 'stream': False, 'keep_alive': '5m'}).encode(), headers={'Content-Type': 'application/json'})
+        remote = data['session'].get('destination') == 'm2'
+        endpoint = 'http://100.90.189.76:1338/v1/chat/completions' if remote else 'http://127.0.0.1:11434/api/chat'
+        payload = {'model': data['session']['model'], 'messages': prompt, 'stream': False}
+        payload.update({'max_tokens': 1024} if remote else {'keep_alive': '5m'})
+        request = urllib.request.Request(endpoint, data=json.dumps(payload).encode(), headers={'Content-Type': 'application/json'})
         with urllib.request.urlopen(request, timeout=180) as response: result = json.load(response)
-        answer = result.get('message', {}).get('content')
+        answer = result.get('choices', [{}])[0].get('message', {}).get('content') if remote else result.get('message', {}).get('content')
         if not answer: raise ValueError('Le modèle n’a pas renvoyé de texte')
         append(data, 'agent', answer)
     except Exception as error:

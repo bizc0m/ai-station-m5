@@ -97,6 +97,14 @@ def command_for(key):
             return '#!/bin/zsh\ncd /Users/JOB/\\#DEV || exit 1\nexec ' + shlex.join([binary, *args]) + '\n'
     raise ValueError('Agent inconnu')
 
+def m2_models():
+    try:
+        with urllib.request.urlopen('http://100.90.189.76:1338/v1/models', timeout=3) as response:
+            data = json.load(response)
+        return [{'name': m['id']} for m in data.get('data', []) if isinstance(m.get('id'), str) and not any(x in m['id'].lower() for x in ('embed', 'minilm'))]
+    except (OSError, ValueError):
+        return []
+
 def conversation_context():
     state = snapshot()
     return {'measured_at': state['checked_at'], 'host': state['host'],
@@ -128,11 +136,12 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         if path == '/api/conversation/options':
             state = snapshot()
-            return self.respond({'goals': task_bridge.goals(), 'models': [m for m in state['models'] if 'embed' not in m['name'].lower()], 'destinations': [
+            remote_models = m2_models()
+            return self.respond({'m2_models': remote_models, 'goals': task_bridge.goals(), 'models': [m for m in state['models'] if 'embed' not in m['name'].lower()], 'destinations': [
                 {'id': 'codex', 'name': 'Ce Mac · Codex', 'available': os.access(AGENTS[0][2], os.X_OK)},
                 {'id': 'claude', 'name': 'Ce Mac · Claude', 'available': os.access(AGENTS[1][2], os.X_OK)},
                 {'id': 'ollama', 'name': 'Ce Mac · Ollama', 'available': state['services']['ollama']['available']},
-                {'id': 'm2', 'name': 'M2 · connexion à rétablir', 'available': False}]})
+                {'id': 'm2', 'name': 'M2 · Osaurus', 'available': bool(remote_models) and state['services']['m2']['available']}]})
         if path == '/conversation':
             return self.respond((ROOT / 'conversation.html').read_bytes(), content_type='text/html; charset=utf-8')
         if re.fullmatch(r'/api/conversation/[a-f0-9]{32}', path):
@@ -196,10 +205,10 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
                     destination = data.get('destination', 'codex')
                     goal = data.get('goal_id', 'station-tasks')
                     if goal not in {g['id'] for g in task_bridge.goals()}: raise ValueError('Projet inconnu')
-                    if destination == 'ollama':
+                    if destination in {'ollama', 'm2'}:
                         model = data.get('model')
-                        if model not in {m['name'] for m in snapshot()['models'] if 'embed' not in m['name'].lower()}: raise ValueError('Modèle de chat non installé')
-                        result = local_conversation.create(model, goal)
+                        if model not in {m['name'] for m in (m2_models() if destination == 'm2' else snapshot()['models']) if 'embed' not in m['name'].lower()}: raise ValueError('Modèle de chat non installé')
+                        result = local_conversation.create(model, goal, destination)
                     elif destination in {'codex', 'claude'}:
                         result = task_bridge.remote('/api/chat/sessions', {'goal_id': goal, 'agent_id': 'claude-code' if destination == 'claude' else 'codex', 'mode': 'resume_latest', 'context_kind': 'goal'})
                     else: raise ValueError('Destination indisponible')

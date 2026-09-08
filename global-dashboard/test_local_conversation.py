@@ -29,6 +29,17 @@ class LocalConversationTest(unittest.TestCase):
         a=chat.create('model-a','a');b=chat.create('model-b','b')
         self.assertNotEqual(a['session']['session_id'],b['session']['session_id'])
         self.assertEqual(chat.load(a['session']['session_id'])['session']['model'],'model-a')
+    def test_m2_response_uses_remote_endpoint_and_keeps_destination(self):
+        import io, json
+        sid=chat.create('foundation','a','m2')['session']['session_id']
+        with patch.object(chat.threading,'Thread'):chat.send(sid,'19 + 23','test-turn',{})
+        with patch.object(chat.urllib.request,'urlopen',return_value=io.BytesIO(json.dumps({'choices':[{'message':{'content':'42'}}]}).encode())) as request:
+            chat.complete(sid,{})
+        self.assertEqual(request.call_args.args[0].full_url,'http://100.90.189.76:1338/v1/chat/completions')
+        self.assertEqual(chat.load(sid)['session']['destination'],'m2')
+        self.assertEqual(chat.load(sid)['messages'][-1]['text'],'42')
+        self.assertIsNone(chat.load(sid)['session']['active_turn_id'])
+
     def test_path_traversal_rejected(self):
         with self.assertRaises(ValueError):chat.load('../notes')
 

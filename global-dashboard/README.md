@@ -1,4 +1,4 @@
-# Dashboard global — V1.0.2 · build 2
+# Dashboard global — V1.0.3 · build 3
 
 Interface locale macOS : état des services, tâches LoopX, modèles Ollama, lanceurs des agents installés et onglet Prompt Master.
 
@@ -90,3 +90,13 @@ Les sessions locales sont conservées dans `task-data/conversations/`, exclues d
 Dix tests passent : pont de tâches, isolation des modèles, déduplication, interruption et rejet des chemins invalides. Aucun accès en écriture au coffre NotePlan.
 
 Vérifications complémentaires : Claude (`claude-code`) a répondu depuis le sélecteur. NotePlan a chargé 200 tâches après une première lecture ayant atteint sa limite de temps ; une tâche a été chargée dans le brouillon, puis retirée sans envoi ni modification de la note. Le chat reste sans débordement horizontal à 390 px.
+
+## 1.0.3 — Connexion du chat M2
+
+Le sélecteur M2 dépend désormais des réponses réelles `/health` et `/v1/models`, au lieu de rester désactivé en dur. Les modèles de conversation Osaurus sont proposés, sans le modèle d’embedding. L’envoi passe par le serveur M5 vers `/v1/chat/completions` du M2 ; les sessions conservent leur destination et leur modèle. L’historique peut ainsi être repris sans basculer silencieusement sur M5.
+
+Vérification actuelle : connexion SSH fraîche au M2 (`Mac.lan`, arm64), santé de l’Apple M2 Pro HTTP 200, modèles listés, sélection M2 dans le navigateur et réponse réelle de `foundation`. Ce test valide le chat distant, pas l’exécution d’outils : l’onglet Tâches & résultats reste exécuté sur M5, explicitement indiqué dans le chat.
+
+Onze tests passent, dont routage M2, conservation de destination et décodage de la réponse. Le correctif d’export en cours reste séparé de cette publication.
+
+Test Nanbeige : modèle `nanbeige4.2-3b-jang_6m` chargé sur M2, aucun défaut MLX signalé, réponse « 42 » à 19 + 23 reçue dans le chat du dashboard.
