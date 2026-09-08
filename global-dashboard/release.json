@@ -1,0 +1,9 @@
+{
+  "project": "ai-station-m5",
+  "version": "1.0.1",
+  "build": 1,
+  "status": "partial",
+  "previous_declared_version": "1.0.0",
+  "previous_build": null,
+  "build_note": "First explicit build number; no prior build was recorded."
+}

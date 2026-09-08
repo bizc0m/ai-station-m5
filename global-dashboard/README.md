@@ -1,4 +1,4 @@
-# Dashboard global — V1.0.0
+# Dashboard global — V1.0.1 · build 1
 
 Interface locale macOS : état des services, tâches LoopX, modèles Ollama, lanceurs des agents installés et onglet Prompt Master.
 
@@ -23,7 +23,7 @@ Cette V1 reprend les chemins du Mac JOB, définis dans les deux serveurs. Adapte
 
 Le dashboard indique les services inaccessibles. Aucun lancement automatique de toutes les tâches n’est activé. Le code retour d’ouverture de Terminal ne prouve pas qu’une tâche a été exécutée.
 
-## Vérifications de cette version
+## Vérifications historiques (avant 1.0.1)
 
 Syntaxe Python et JavaScript vérifiée, API locale testée, onglets et rendu desktop/mobile observés. LoopX et Ollama ont répondu ; ComfyUI et M2 étaient inaccessibles lors de la vérification. Tous les lanceurs externes n’ont pas été retestés de bout en bout.
 
@@ -70,3 +70,9 @@ Le prompt natif LoopX demande le chinois par défaut sauf préférence explicite
 Espacements des messages divisés par deux, police lisible conservée. Export Markdown téléchargé avec horodatages, ID de session/message, liens locaux de reprise et priorités. Matrice urgence × importance P1 à P4, classement manuel conservé dans le navigateur (non synchronisé entre Macs). NotePlan : lecture progressive limitée à 200 tâches ou 8 secondes, filtre, source et chargement dans un brouillon sans écrasement ni envoi automatique. Aucun changement dans le coffre NotePlan.
 
 Vérification réelle : export téléchargé et relu ; 200 tâches NotePlan chargées, classement P2 puis chargement du brouillon vérifiés. Six tests du pont de tâches passent. La priorité sert à organiser ; elle ne déclenche pas automatiquement une exécution.
+
+## Audit 1.0.1 — build 1 — 2026-09-08
+
+Voir [AUDIT-1.0.1.md](AUDIT-1.0.1.md) pour les preuves et limites actuelles. Les cartes intégrées ont désormais un fond sombre explicite et les onglets passent sur plusieurs lignes. Les métadonnées du chat sont repliables. Chaque envoi reçoit les mesures récentes du dashboard (machine, services, modèles, date), sans exposer ce contexte technique dans les bulles ou l’export. Ces mesures ne constituent pas une preuve d’exécution d’un agent.
+
+La convention SemVer existante est conservée : 1.0.0 → 1.0.1. Aucun build précédent n’était déclaré ; build 1 initialise ce suivi dans `release.json`. Aucun installateur n’est fourni.
