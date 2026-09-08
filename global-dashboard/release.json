@@ -1,7 +1,7 @@
 {
   "project": "ai-station-m5",
-  "version": "1.0.5",
-  "build": 5,
+  "version": "1.0.6",
+  "build": 6,
   "status": "local-tested",
   "previous_declared_version": "1.0.0",
   "previous_build": null,

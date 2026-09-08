@@ -8,6 +8,7 @@ import json
 import re
 import task_bridge
 import local_conversation
+from conversation_history import history as conversation_history
 from unification_view import render as render_unification
 from legacy_actions import LaunchMixin, LAUNCHERS
 import os
@@ -134,6 +135,8 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
         path = urllib.parse.urlparse(self.path).path
+        if path == '/api/conversation/history':
+            return self.respond(conversation_history())
         if path == '/api/conversation/options':
             state = snapshot()
             remote_models = m2_models()
