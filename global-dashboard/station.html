@@ -1292,44 +1292,37 @@ button:not([data-nav]):not([role=tab]),.button{background:#1b2635!important;bord
             <div>
               <p class="eyebrow">Image lab</p>
               <h2>Prompt → image</h2>
-              <p class="hint">ComfyUI pour génération, édition, upscale et workflows SDXL/Z-Image.</p>
+              <p class="hint">Génération d'images avec Claude + Unsplash API ou ComfyUI local.</p>
             </div>
           </div>
           <div class="grid">
-            <article class="card wide">
-              <span class="state warn">À démarrer</span>
-              <h3>ComfyUI</h3>
-              <p>Workflow conseillé : <code>Text to Image (Z-Image-Turbo)</code>. Alternative : SDXL base/refiner.</p>
-              <div class="actions"><a class="button" href="/launch/comfyui">Démarrer ComfyUI</a><a class="button secondary" href="http://127.0.0.1:8188/">Ouvrir ComfyUI</a><a class="button secondary" href="/open/comfy-output">Voir sorties</a></div>
-            </article>
-            <article class="card wide">
-              <p class="kicker">Modèles image</p>
-              <div class="list">
-                <div class="row"><div class="label">Z-Image</div><code>z_image_turbo_bf16.safetensors</code></div>
-                <div class="row"><div class="label">Encoder</div><code>qwen_3_4b.safetensors</code></div>
-                <div class="row"><div class="label">SDXL</div><code>sd_xl_base_1.0.safetensors + sd_xl_refiner_1.0.safetensors</code></div>
-                <div class="row"><div class="label">Upscale</div><code>4x-UltraSharp.pth</code></div>
-              </div>
-            </article>
-            <article class="card wide">
-              <h3>BDSM 18+ consensuel</h3>
-              <p>Image adulte stylisée uniquement : adultes 18+, consentement clair, pas de personne réelle sans accord.</p>
-              <div class="actions"><a class="button" href="/launch/comfyui">Démarrer ComfyUI</a><a class="button secondary" href="http://127.0.0.1:8188/">Ouvrir ComfyUI</a><a class="button secondary" href="/open/comfy-output">Voir sorties</a></div>
-            </article>
-            <article class="card wide">
-              <p class="kicker">Pack prompts BDSM</p>
-              <div class="list">
-                <div class="row"><div class="label">Fichier</div><code>/Users/JOB/#DEV/01-projets/Tools/ai-station-m5/BDSM-18-consensuel-prompt-pack.md</code></div>
-                <div class="row"><div class="label">Négatif</div><code>minor, teen, child, underage, coercion, non-consensual, forced, injury, abuse, violence, real person, celebrity, deepfake</code></div>
-              </div>
-            </article>
             <article class="card full">
-              <p class="kicker">Limites</p>
-              <div class="list">
-                <div class="row"><div class="label">OK</div><p>Adultes 18+, consentement clair, esthétique BDSM stylisée, mode latex/cuir, bondage artistique non violent.</p></div>
-                <div class="row"><div class="label">Non</div><p>Mineurs ou apparence mineure, contrainte réelle, blessure, violence sexuelle, deepfake/personne réelle sans accord.</p></div>
+              <h3>Générer une image</h3>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div>
+                  <label style="display:block;margin-bottom:5px;font-weight:600;">Prompt</label>
+                  <textarea id="imagePrompt" style="width:100%;min-height:80px;padding:8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;background:#fff;color:var(--ink);" placeholder="Décris l'image que tu veux générer..."></textarea>
+                </div>
+                <div style="display:flex;gap:10px;">
+                  <div style="flex:1;">
+                    <label style="display:block;margin-bottom:5px;font-weight:600;">Source</label>
+                    <select id="imageSource" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;background:#fff;color:var(--ink);">
+                      <option value="claude">Claude (génération)</option>
+                      <option value="unsplash">Unsplash</option>
+                      <option value="pexels">Pexels</option>
+                    </select>
+                  </div>
+                  <div style="flex:1;">
+                    <label style="display:block;margin-bottom:5px;font-weight:600;">Nombre</label>
+                    <input id="imageCount" type="number" min="1" max="9" value="3" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;background:#fff;color:var(--ink);" />
+                  </div>
+                </div>
+                <button id="generateImages" class="button primary" style="padding:10px;cursor:pointer;">Générer</button>
+                <div id="imageStatus" style="display:none;padding:10px;background:#fff4d6;border:1px solid #e6b84b;border-radius:6px;color:#76520a;"></div>
+                <div id="imageError" style="display:none;padding:10px;background:#ffe9eb;border:1px solid #e88991;border-radius:6px;color:#9e1c2a;"></div>
               </div>
             </article>
+            <div id="imagesGrid"></div>
           </div>
         </section>
 
@@ -2088,6 +2081,72 @@ if(u.pathname.startsWith('/launch/')||u.pathname==='/open-path'||u.pathname==='/
 e.preventDefault();let output=document.getElementById('action-feedback');if(!output){output=document.createElement('p');output.id='action-feedback';output.style='position:fixed;bottom:10px;left:12px;right:12px;padding:12px;background:#fff;border:1px solid #888;z-index:999';document.body.append(output);}
 try{const res=await fetch('/api/legacy-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:u.pathname,query:u.search})});const d=await res.json();if(!res.ok)throw Error(d.error);output.textContent=d.message;}catch(err){output.textContent=err.message;}}
 });
+</script>
+<script>
+(()=>{
+  const promptInput = document.getElementById('imagePrompt');
+  const sourceSelect = document.getElementById('imageSource');
+  const countInput = document.getElementById('imageCount');
+  const generateBtn = document.getElementById('generateImages');
+  const statusDiv = document.getElementById('imageStatus');
+  const errorDiv = document.getElementById('imageError');
+  const imagesGrid = document.getElementById('imagesGrid');
+
+  generateBtn.addEventListener('click', async () => {
+    const prompt = promptInput.value.trim();
+    if (!prompt) {
+      errorDiv.textContent = 'Veuillez entrer un prompt';
+      errorDiv.style.display = 'block';
+      statusDiv.style.display = 'none';
+      return;
+    }
+
+    generateBtn.disabled = true;
+    statusDiv.textContent = 'Génération en cours...';
+    statusDiv.style.display = 'block';
+    errorDiv.style.display = 'none';
+    imagesGrid.innerHTML = '';
+
+    try {
+      const res = await fetch('/api/generate-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          source: sourceSelect.value,
+          count: parseInt(countInput.value)
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw Error(data.error || 'Erreur génération');
+
+      imagesGrid.innerHTML = data.images.map((img, i) => `
+        <article style="border:1px solid #ccc;border-radius:6px;overflow:hidden;background:#fff;">
+          <img src="${img.url}" alt="Image ${i+1}" style="width:100%;height:200px;object-fit:cover;display:block;" />
+          <div style="padding:8px;">
+            <p style="margin:0;font-size:12px;color:#6f6a62;">${img.title}</p>
+            ${img.photographer ? `<p style="margin:3px 0 0;font-size:11px;color:#aaa;">by ${img.photographer}</p>` : ''}
+            <a href="${img.url}" target="_blank" rel="noopener" class="button" style="margin-top:6px;display:inline-block;font-size:11px;">Voir ↗</a>
+          </div>
+        </article>
+      `).join('');
+
+      statusDiv.textContent = `${data.images.length} image(s) générée(s)`;
+    } catch (e) {
+      errorDiv.textContent = e.message;
+      errorDiv.style.display = 'block';
+      statusDiv.style.display = 'none';
+    } finally {
+      generateBtn.disabled = false;
+    }
+  });
+
+  promptInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) generateBtn.click();
+  });
+})();
 </script></body>
 </html>
 <script>

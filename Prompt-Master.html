@@ -539,8 +539,25 @@ GO | STOP
   <script>
     const copyBtn = document.getElementById("copy");
     const promptEl = document.getElementById("prompt");
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand("copy");
+        textarea.remove();
+        return ok;
+      }
+    }
     copyBtn.addEventListener("click", async () => {
-      await navigator.clipboard.writeText(promptEl.textContent);
+      await copyText(promptEl.textContent);
       copyBtn.textContent = "Copie";
       setTimeout(() => { copyBtn.textContent = "Copier"; }, 1200);
     });

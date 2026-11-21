@@ -175,7 +175,7 @@
     <div class="actions">
       <a class="button" href="AI-Station.html">AI-Station</a>
       <button type="button" id="copyOfficial">Copier officiel</button>
-      <button class="primary" type="button" id="copyInject">Copier envoi</button>
+      <button class="primary" type="button" id="copySend">Copier envoi</button>
     </div>
   </header>
 
@@ -215,7 +215,7 @@
 
       <section>
         <h2>Apercu envoi</h2>
-        <div class="preview"><pre id="injectPreview">En attente du prompt officiel...</pre></div>
+        <div class="preview"><pre id="sendPreview">En attente du prompt officiel...</pre></div>
         <div class="status" id="copyStatus" aria-live="polite"></div>
       </section>
     </aside>
@@ -232,7 +232,7 @@
     const promptEl = document.getElementById("prompt");
     const sourceStatus = document.getElementById("sourceStatus");
     const copyStatus = document.getElementById("copyStatus");
-    const sendPreview = document.getElementById("injectPreview");
+    const sendPreview = document.getElementById("sendPreview");
     const setupMode = document.getElementById("setupMode");
     const projectPath = document.getElementById("projectPath");
     const userRequest = document.getElementById("userRequest");
@@ -291,13 +291,23 @@ ${requestBlock}${officialBlock}`;
     }
 
     async function copyText(text, buttonLabel) {
+      const value = text.trim();
       try {
-        await navigator.clipboard.writeText(text.trim());
+        await navigator.clipboard.writeText(value);
         copyStatus.textContent = `${buttonLabel} copie.`;
         copyStatus.className = "status ok";
       } catch (error) {
-        copyStatus.textContent = `Copie impossible : ${error.message}`;
-        copyStatus.className = "status warn";
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand("copy");
+        textarea.remove();
+        copyStatus.textContent = ok ? `${buttonLabel} copie.` : `Copie impossible : ${error.message}`;
+        copyStatus.className = ok ? "status ok" : "status warn";
       }
     }
 
@@ -336,7 +346,7 @@ ${requestBlock}${officialBlock}`;
       copyText(officialPrompt || promptEl.textContent, "Prompt officiel");
     });
 
-    document.getElementById("copyInject").addEventListener("click", () => {
+    document.getElementById("copySend").addEventListener("click", () => {
       copyText(buildSendPrompt(), "Prompt d'envoi");
     });
 

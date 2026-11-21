@@ -3,546 +3,217 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Unified AI Control</title>
+  <title>STATION IA · M2/M5</title>
   <style>
     :root {
-      color-scheme: light;
-      --bg: #ffffff;
-      --paper: #fafaf8;
-      --paper-2: #f5f5f3;
-      --line: rgba(12,12,12,.14);
-      --line-strong: rgba(12,12,12,.28);
-      --ink: #0c0c0c;
-      --muted: #6f6a62;
-      --red: #c8161d;
-      --red-deep: #9a1117;
-      --ok: #1f7a3f;
-      --warn: #9a6a11;
-      --mono: "SF Mono", Menlo, Monaco, Consolas, monospace;
-      --sans: "Helvetica Neue", Helvetica, Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+      color-scheme: dark;
+      --bg: #08090b; --panel: #111318; --soft: #181b22; --line: #2c313b;
+      --text: #f4f5f7; --muted: #9ca3af; --ok: #29b765; --warn: #d89621;
+      --bad: #e5484d; --blue: #4da3ff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: var(--sans);
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(transparent calc(100% - 1px), rgba(12,12,12,.035) 100%) 0 0 / 100% 34px,
-        linear-gradient(90deg, transparent calc(100% - 1px), rgba(12,12,12,.035) 100%) 0 0 / 34px 100%;
-    }
-    .shell {
-      position: relative;
-      z-index: 1;
-      width: min(1240px, calc(100% - 24px));
-      margin: 0 auto;
-      padding: 22px 0;
-    }
-    header {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: start;
-      padding-bottom: 16px;
-      border-bottom: 2px solid var(--red);
-    }
-    h1 {
-      margin: 0;
-      font-size: 28px;
-      line-height: 1;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-    .sub { margin-top: 6px; color: var(--muted); font-size: 13px; }
-    .top-actions, .actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    a, button {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--ink);
-      text-decoration: none;
-      padding: 9px 11px;
-      font: inherit;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    a:hover, button:hover { border-color: var(--red); color: var(--red-deep); }
-    .primary { background: var(--red); border-color: var(--red); color: #fff; }
-    .primary:hover { background: var(--red-deep); color: #fff; }
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
-      gap: 14px;
-      margin-top: 14px;
-      align-items: start;
-    }
-    .panel, .card {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(250,250,248,.94);
-    }
-    .panel { padding: 14px; }
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: start;
-      margin-bottom: 12px;
-    }
-    h2, h3 { margin: 0; }
-    h2 { font-size: 18px; }
-    h3 { font-size: 15px; }
-    .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-    .card { padding: 12px; min-height: 92px; }
-    .label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--muted);
-      font: 800 11px/1 var(--mono);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: inline-block; }
-    code, pre {
-      font-family: var(--mono);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--ink);
-    }
-    code { display: block; padding: 8px; margin-top: 8px; overflow-wrap: anywhere; }
-    pre { margin: 0; padding: 12px; min-height: 120px; white-space: pre-wrap; overflow: auto; }
-    textarea {
-      width: 100%;
-      min-height: 116px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 12px;
-      resize: vertical;
-      background: #fff;
-      color: var(--ink);
-      font: inherit;
-      line-height: 1.45;
-    }
-    .chat-log {
-      min-height: 220px;
-      max-height: 44vh;
-      overflow: auto;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 12px;
-      white-space: pre-wrap;
-      line-height: 1.45;
-    }
-    .drop {
-      border: 1px dashed var(--line-strong);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--muted);
-      background: #fff;
-      margin: 8px 0;
-    }
-    body.drop-active { outline: 4px solid var(--red); outline-offset: -4px; }
-    body.drop-active .drop { border-color: var(--red); color: var(--red); }
-    .files { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-    .file { border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; background: #fff; color: var(--red); font-size: 13px; }
-    .upload input { display: none; }
-    .rows { display: grid; gap: 8px; }
-    .row {
-      display: grid;
-      grid-template-columns: 120px minmax(0, 1fr);
-      gap: 10px;
-      align-items: center;
-      border-bottom: 1px solid var(--line);
-      padding-bottom: 8px;
-    }
-    .ok { color: var(--ok); }
-    .warn { color: var(--warn); }
-    @media (max-width: 860px) {
-      header, .grid, .cards { grid-template-columns: 1fr; }
-      .top-actions { justify-content: flex-start; }
+    body { margin: 0; min-height: 100dvh; background: var(--bg); color: var(--text); }
+    header { position: sticky; top: 0; z-index: 2; background: #08090bf4; border-bottom: 1px solid var(--line); padding: 10px 12px; backdrop-filter: blur(10px); }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    h1 { margin: 0; font-size: 17px; line-height: 1.15; }
+    .state { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 0 3px #d8962122; display: inline-block; }
+    .dot.ok { background: var(--ok); box-shadow: 0 0 0 3px #29b76522; }
+    .dot.bad { background: var(--bad); box-shadow: 0 0 0 3px #e5484d22; }
+    .stamp { margin-top: 4px; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+    main { max-width: 1440px; margin: 0 auto; padding: 10px; display: grid; gap: 10px; }
+    .tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; position: sticky; top: 61px; z-index: 1; background: #08090bf4; padding-bottom: 2px; }
+    button, a, select, textarea { font: inherit; }
+    button, a { min-height: 38px; border: 1px solid var(--line); border-radius: 7px; background: var(--soft); color: var(--text); padding: 8px 10px; text-decoration: none; cursor: pointer; }
+    .tab { color: var(--muted); }
+    .tab.active, .primary { background: #123456; border-color: #2f74bd; color: var(--text); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .box { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .box-head { min-height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px; border-bottom: 1px solid var(--line); }
+    .box-head strong { font-size: 13px; }
+    iframe { display: block; width: 100%; height: calc(100dvh - 153px); min-height: 520px; border: 0; background: #050608; }
+    .console { padding: 12px; display: grid; gap: 10px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 7px; background: #0c0f14; color: var(--text); padding: 10px; }
+    textarea { min-height: 180px; resize: vertical; line-height: 1.45; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .log { min-height: 180px; max-height: 42dvh; overflow: auto; border: 1px solid var(--line); border-radius: 7px; background: #080a0e; padding: 10px; display: grid; gap: 8px; }
+    .msg { padding: 9px 10px; border-radius: 7px; background: var(--soft); font-size: 13px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .msg.me { border-left: 3px solid var(--blue); }
+    .msg.sys { border-left: 3px solid var(--ok); color: var(--muted); }
+    .msg.err { border-left: 3px solid var(--bad); color: #ffc7c7; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 7px; }
+    .card h2 { margin: 0; font-size: 15px; }
+    .meta { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .badge { display: inline-flex; width: max-content; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; font-size: 12px; color: var(--muted); }
+    @media (max-width: 720px) {
+      header { padding: 9px 10px; }
+      main { padding: 8px; }
+      .tabs { top: 58px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .top { align-items: start; }
+      .state { white-space: normal; justify-content: flex-end; text-align: right; }
+      iframe { height: calc(100dvh - 197px); min-height: 440px; }
       .row { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      button, a { width: 100%; }
     }
   </style>
-<style>header,.topbar{display:none!important}body{background:#f5f4ef!important}</style><style>:root{--red:#275d45;--accent:#275d45;--ink:#202820;--paper:#fff;--bg:#f5f4ef}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}h1,h2,h3,.tool-title{font-family:inherit!important;letter-spacing:normal!important}.eyebrow,.kicker{color:#275d45!important}.card,.panel,article{border-radius:10px!important;background:#fff!important;box-shadow:none!important}.script-tab.active,.button.green,.button:not(.secondary){background:#275d45!important;color:white!important;border-color:#275d45!important}.script-panel,.script-controls{border-color:#dce1d8!important}aside,footer{display:none!important}select,input,textarea{border-radius:6px!important}body{overflow-wrap:anywhere}</style><style>
-/* Opaque dark surfaces replace the inherited translucent light panels. */
-.main,.side,.bottom,.row,.panel-head{background:#0f0f15!important;color:#f2f2f5!important;border-color:#2c2c3a!important}.main{border:0!important;border-radius:0!important;padding:0!important}.row{background:#16161e!important;padding:6px 10px!important;grid-template-columns:120px minmax(0,1fr)!important}.label{color:#c8c8d4!important}.panel-head{padding:10px 12px!important;margin-bottom:8px!important}.panel-head h2{font-size:20px!important;line-height:1.25!important;margin:4px 0!important}.panel-head .hint{color:#b8b8be!important;font-size:13px!important}.card{padding:12px!important}.card h3{font-size:17px!important;margin:0 0 6px!important}.card p{font-size:13px!important;line-height:1.5!important;margin:6px 0!important}.list{gap:4px!important}.row code{font-size:12px!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important}.grid{gap:8px!important}.actions{gap:6px!important;margin:8px 0!important}.button{padding:7px 10px!important;font-size:11px!important}.eyebrow{margin:0!important}.panel-head:after,.panel-head h2:after{display:none!important}@media(max-width:600px){.row{grid-template-columns:1fr!important;gap:3px!important}.card h3{font-size:16px!important}}
-</style></head>
-<body><iframe id="m2-unified-chat" src="/conversation?destination=m2" title="Chat M2 et tâches" style="display:block;width:100%;height:78vh;min-height:460px;border:0"></iframe><details style="margin:8px"><summary style="cursor:pointer;padding:8px">Routage et outils M2 avancés</summary>
-  <main class="shell">
-    <header>
-      <div>
-        <h1>Unified AI Control</h1>
-        <div class="sub">Une seule page · M5 hub · M2 worker · AgentLab · Osaurus</div>
-      </div>
-      <div class="top-actions">
-        <a class="primary" href="/#m5">M5</a>
-        <a href="http://100.90.189.76:1338/#m2">M2</a>
-        <a href="http://100.90.189.76:1338/agentlab-control.html">AgentLab</a>
-        <a href="http://100.90.189.76:1338/logs">Logs M2</a>
-      </div>
-    </header>
-
-    <section id="m5" class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <div>
-          <h2>Fonctions M5</h2>
-          <div class="hint">Commandes M5 visibles en premier. Routage dur vers 100.123.134.62:8765.</div>
+</head>
+<body>
+  <header>
+    <div class="top">
+      <h1>STATION IA · M2/M5</h1>
+      <span class="state"><span class="dot" id="chat-dot"></span><span id="chat-state">test...</span></span>
+    </div>
+    <div class="stamp" id="stamp">chargement...</div>
+  </header>
+  <main>
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab active" data-tab="chat" onclick="showTab('chat')">Chat</button>
+      <button class="tab" data-tab="send" onclick="showTab('send')">Ordre</button>
+      <button class="tab" data-tab="services" onclick="showTab('services')">Services</button>
+      <button class="tab" data-tab="nodes" onclick="showTab('nodes')">M2/M5</button>
+    </nav>
+    <section class="panel active" id="tab-chat">
+      <div class="box">
+        <div class="box-head">
+          <strong>Chat principal</strong>
+          <a href="/conversation?destination=m2" target="_top">ouvrir plein écran</a>
         </div>
-        <span class="label"><span class="dot"></span>M5</span>
-      </div>
-      <div class="cards">
-        <div class="card">
-          <span class="label">Agents Dev</span>
-          <h3>CLI / IDE</h3>
-          <div class="actions" style="justify-content:flex-start;margin-top:10px">
-            <a href="/launch/codex">Codex</a>
-            <a href="/launch/claude">Claude</a>
-            <a href="/launch/aider-fast">Aider</a>
-            <a href="/launch/opencode">OpenCode</a>
-          </div>
-        </div>
-        <div class="card">
-          <span class="label">Images</span>
-          <h3>ComfyUI</h3>
-          <div class="actions" style="justify-content:flex-start;margin-top:10px">
-            <a href="/launch/comfyui">Démarrer</a>
-            <a href="/open/comfy-output">Sorties</a>
-          </div>
-        </div>
-        <div class="card">
-          <span class="label">Prompt</span>
-          <h3>Prompt Master</h3>
-          <div class="actions" style="justify-content:flex-start;margin-top:10px">
-            <a href="/Prompt-Master-Latest.html">Latest</a>
-            <a href="/CTxKNL_v0.7.md">CTxKNL</a>
-            <a href="/AI-Station.full.backup-20260901.html">AI-STATION complète</a>
-          </div>
-        </div>
-        <div class="card">
-          <span class="label">Queue</span>
-          <h3>Tâches agents</h3>
-          <div class="actions" style="justify-content:flex-start;margin-top:10px">
-            <a href="/Agent-Queue.html">Queue</a>
-            <a href="/launch/agent-queue">Run</a>
-          </div>
-        </div>
+        <iframe src="/conversation?destination=m2" title="Chat STATION IA"></iframe>
       </div>
     </section>
-
-    <section id="m2" class="grid">
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Chat de base</h2>
-            <div class="hint">Envoie au M2 Osaurus · modèle foundation.</div>
-          </div>
-          <span class="label"><span class="dot"></span>M2</span>
-        </div>
-        <div id="chatLog" class="chat-log">M2 prêt. Dépose un fichier ou écris un message.</div>
-        <div id="drop" class="drop">Drag/drop sur toute la page. iPhone: bouton fichier.</div>
-        <div class="actions" style="justify-content:flex-start">
-          <label class="upload"><a>Ajouter fichiers</a><input id="fileInput" type="file" multiple></label>
-        </div>
-        <div id="files" class="files"></div>
-        <textarea id="prompt" placeholder="Message au M2. Enter envoie. Shift+Enter nouvelle ligne."></textarea>
-        <div class="actions" style="margin-top:8px">
-          <button class="primary" id="send" type="button">Envoyer</button>
-          <button id="clear" type="button">Effacer</button>
-        </div>
-      </div>
-
-      <aside class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Routage dur</h2>
-            <div class="hint">Adresses figées dans les deux sens.</div>
-          </div>
-        </div>
-        <div class="cards">
-          <div class="card">
-            <span class="label"><span class="dot"></span>M5</span>
-            <h3>AI-STATION</h3>
-            <code>/</code>
-            <div class="actions" style="justify-content:flex-start;margin-top:10px">
-              <a class="primary" href="/#m5">Ouvrir</a>
-              <a href="/AI-Station.html">Station</a>
-            </div>
-          </div>
-          <div class="card">
-            <span class="label"><span class="dot"></span>M2</span>
-            <h3>Osaurus</h3>
-            <code>http://100.90.189.76:1338/</code>
-            <div class="actions" style="justify-content:flex-start;margin-top:10px">
-              <a class="primary" href="http://100.90.189.76:1338/#m2">Ouvrir</a>
-              <a href="http://100.90.189.76:1338/status">Status</a>
-            </div>
-          </div>
-          <div class="card">
-            <span class="label"><span class="dot"></span>M2</span>
-            <h3>AgentLab</h3>
-            <code>http://100.90.189.76:1338/agentlab-control.html</code>
-            <div class="actions" style="justify-content:flex-start;margin-top:10px">
-              <a class="primary" href="http://100.90.189.76:1338/agentlab-control.html">Ouvrir</a>
-              <a href="http://100.90.189.76:1338/agentlab-control.html">Status</a>
-            </div>
-          </div>
-          <div class="card">
-            <span class="label"><span class="dot"></span>API</span>
-            <h3>OpenAI</h3>
-            <code>http://100.90.189.76:1338/v1</code>
-            <div class="actions" style="justify-content:flex-start;margin-top:10px">
-              <a class="primary" href="http://100.90.189.76:1338/models">Models</a>
-              <a href="http://100.90.189.76:1338/logs">Logs</a>
-            </div>
-          </div>
-        </div>
-        <div class="actions" style="justify-content:flex-start; margin-top:12px">
-          <a href="http://100.90.189.76:1338/status">Status M2</a>
-          <a href="http://100.90.189.76:1338/models">Models</a>
-          <a href="http://100.90.189.76:1338/agentlab-control.html">AgentLab cockpit</a>
-          <a href="/AI-Station.html">AI-STATION complète</a>
-        </div>
-        <div class="rows" style="margin-top:12px">
-          <div class="row"><span class="label">M5</span><code>100.123.134.62</code></div>
-          <div class="row"><span class="label">M2</span><code>100.90.189.76</code></div>
-          <div class="row"><span class="label">AgentLab</span><code>100.90.189.76:1338/agentlab-control.html</code></div>
-        </div>
-      </aside>
-    </section>
-
-    <section class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <div>
-          <h2>Lancer agent M5</h2>
-          <div class="hint">Génère et lance un script local via endpoint M5 `/llm-launch`.</div>
-        </div>
-      </div>
-      <div class="cards">
-        <div class="card">
-          <label class="label" for="llmCli">CLI</label>
-          <select id="llmCli">
-            <option value="codex">Codex</option>
-            <option value="claude">Claude</option>
-            <option value="aider">Aider</option>
-            <option value="opencode">OpenCode</option>
-            <option value="ollama">Ollama</option>
-          </select>
-        </div>
-        <div class="card">
-          <label class="label" for="llmModel">Modèle</label>
-          <select id="llmModel">
-            <option value="qwen3-coder:30b">qwen3-coder:30b</option>
-            <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
-            <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
-            <option value="qwen3:8b">qwen3:8b</option>
-          </select>
-        </div>
-        <div class="card">
-          <label class="label" for="llmMode">Mode</label>
-          <select id="llmMode">
-            <option value="dev">Dev</option>
-            <option value="chat">Chat</option>
-            <option value="app">App</option>
-            <option value="dash">Dashboard</option>
-          </select>
-        </div>
-        <div class="card">
-          <label class="label" for="llmPath">Chemin</label>
-          <input id="llmPath" value="/Users/JOB/#DEV">
-        </div>
-      </div>
-      <textarea id="llmRequest" style="margin-top:10px" placeholder="Demande agent M5">Explique puis exécute proprement.</textarea>
-      <div class="actions" style="margin-top:8px">
-        <button class="primary" id="runM5Agent" type="button">Lancer M5</button>
-        <button id="copyM5Payload" type="button">Copier payload</button>
-        <span class="hint" id="m5Status">Prêt.</span>
+    <section class="panel" id="tab-send">
+      <div class="box console">
+        <div class="row"><select id="destination"></select><select id="model"></select></div>
+        <select id="goal"></select>
+        <textarea id="prompt" placeholder="Ordre ou prompt..."></textarea>
+        <div class="actions"><button class="primary" onclick="sendPrompt()">Envoyer</button><button onclick="newSession()">Nouvelle session</button></div>
+        <div class="log" id="chatlog"><div class="msg sys">Envoi direct prêt.</div></div>
       </div>
     </section>
-
-    <section class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <div>
-          <h2>Dossiers / commandes</h2>
-          <div class="hint">Chemins M5 essentiels.</div>
-        </div>
-      </div>
-      <div class="rows">
-        <div class="row"><span class="label">Dashboard</span><code>/Users/JOB/#DEV/01-projets/Tools/ai-station-m5</code></div>
-        <div class="row"><span class="label">ComfyUI</span><code>/Users/JOB/#DEV/02-apps/ComfyUI</code></div>
-        <div class="row"><span class="label">Outputs</span><code>/Users/JOB/#DEV/02-apps/ComfyUI-output</code></div>
-        <div class="row"><span class="label">AgentLab M2</span><code>/Users/JOB/AgentLab</code></div>
-        <div class="row"><span class="label">Diagnostic M2</span><code>curl -fsS http://100.90.189.76:1338/health</code></div>
-      </div>
-    </section>
+    <section class="panel" id="tab-services"><div class="cards" id="services"></div></section>
+    <section class="panel" id="tab-nodes"><div class="cards" id="nodes"></div></section>
   </main>
-
   <script>
-    const M2_CHAT_URL = "http://100.90.189.76:1338/v1/chat/completions";
-    const chatLog = document.getElementById("chatLog");
-    const promptBox = document.getElementById("prompt");
-    const send = document.getElementById("send");
-    const clear = document.getElementById("clear");
-    const fileInput = document.getElementById("fileInput");
-    const filesBox = document.getElementById("files");
-    const m5Status = document.getElementById("m5Status");
-    let attachments = [];
-
-    const isM2Host = location.hostname === "100.90.189.76";
-    if (isM2Host) {
-      document.querySelector(".sub").textContent = "M2 worker actif · Osaurus · AgentLab · API privée";
-      document.getElementById("m5").after(document.getElementById("m2"));
-      document.getElementById("m5").before(document.getElementById("m2"));
+    let sessionId = localStorage.getItem('station.control.sessionId') || '';
+    function showTab(name) {
+      document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === name));
+      document.querySelectorAll('.panel').forEach(el => el.classList.toggle('active', el.id === 'tab-' + name));
+      localStorage.setItem('station.control.tab', name);
     }
-    function add(role, text) {
-      chatLog.textContent += "\\n\\n" + role + ": " + text;
-      chatLog.scrollTop = chatLog.scrollHeight;
+    function addMsg(kind, text) {
+      const el = document.createElement('div');
+      el.className = 'msg ' + kind;
+      el.textContent = text;
+      document.getElementById('chatlog').appendChild(el);
+      el.scrollIntoView({ block: 'end' });
     }
-    function renderFiles() {
-      filesBox.innerHTML = "";
-      for (const file of attachments) {
-        const div = document.createElement("div");
-        div.className = "file";
-        div.textContent = file.name + " · " + Math.ceil(file.size / 1024) + " Ko";
-        filesBox.appendChild(div);
+    function setDot(kind, text) {
+      chatDot.className = 'dot' + (kind ? ' ' + kind : '');
+      chatState.textContent = text;
+    }
+    async function loadOptions() {
+      try {
+        const res = await fetch('/api/conversation/options', { cache: 'no-store' });
+        const data = await res.json();
+        document.getElementById('destination').replaceChildren(...(data.destinations || []).map(item => option(item.id, item.name + (item.available ? '' : ' · indispo'), !item.available)));
+        document.getElementById('model').replaceChildren(...[...(data.models || []), ...(data.m2_models || [])].map(item => option(item.name, item.name, false)));
+        document.getElementById('goal').replaceChildren(...(data.goals || [{id:'station-tasks', title:'Tâches de la station'}]).map(item => option(item.id, item.title || item.id, false)));
+      } catch (error) {
+        addMsg('err', 'Options indisponibles: ' + error);
       }
     }
-    function readFile(file) {
-      return new Promise((resolve, reject) => {
-        if (file.size > 2 * 1024 * 1024) return reject(new Error(file.name + " dépasse 2 Mo"));
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error("lecture impossible: " + file.name));
-        reader.onload = () => resolve({
-          name: file.name,
-          type: file.type || "application/octet-stream",
-          size: file.size,
-          data: String(reader.result || "")
-        });
-        if ((file.type || "").startsWith("text/") || /\\.(md|txt|json|csv|log|xml|html|css|js|ts|py|sh)$/i.test(file.name)) {
-          reader.readAsText(file);
-        } else {
-          reader.readAsDataURL(file);
-        }
+    function option(value, text, disabled) {
+      const opt = document.createElement('option');
+      opt.value = value; opt.textContent = text; opt.disabled = disabled;
+      return opt;
+    }
+    function newSession() {
+      sessionId = '';
+      localStorage.removeItem('station.control.sessionId');
+      addMsg('sys', 'Nouvelle session prête.');
+    }
+    async function ensureSession() {
+      if (sessionId) return sessionId;
+      const res = await fetch('/api/conversation/open', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          destination: document.getElementById('destination').value || 'm2',
+          model: document.getElementById('model').value,
+          goal_id: document.getElementById('goal').value || 'station-tasks'
+        })
       });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'session non créée');
+      sessionId = data.session_id || data.id || data.sid || (data.session && data.session.session_id);
+      if (!sessionId) throw new Error('session_id absent');
+      localStorage.setItem('station.control.sessionId', sessionId);
+      addMsg('sys', 'Session ouverte: ' + sessionId);
+      return sessionId;
     }
-    async function addFiles(list) {
-      try {
-        const loaded = await Promise.all(Array.from(list).map(readFile));
-        attachments.push(...loaded);
-        renderFiles();
-      } catch (error) {
-        add("M2", "FICHIER REFUSÉ: " + error.message);
-      }
-    }
-    function setDrop(active) { document.body.classList.toggle("drop-active", active); }
-    document.addEventListener("dragover", (event) => { event.preventDefault(); setDrop(true); });
-    document.addEventListener("drop", async (event) => { event.preventDefault(); setDrop(false); await addFiles(event.dataTransfer.files); });
-    document.addEventListener("dragleave", (event) => {
-      if (event.clientX <= 0 || event.clientY <= 0 || event.clientX >= window.innerWidth || event.clientY >= window.innerHeight) setDrop(false);
-    });
-    fileInput.addEventListener("change", async () => {
-      await addFiles(fileInput.files);
-      fileInput.value = "";
-    });
-    async function submit() {
+    async function sendPrompt() {
+      const promptBox = document.getElementById('prompt');
       const text = promptBox.value.trim();
-      if (!text && attachments.length === 0) return;
-      const files = attachments;
-      attachments = [];
-      renderFiles();
-      promptBox.value = "";
-      const fileText = files.map(file => (
-        "\\n\\n[FICHIER " + file.name + "]\\n" +
-        "type: " + file.type + "\\n" +
-        "taille: " + file.size + " octets\\n" +
-        file.data
-      )).join("");
-      const content = text + fileText;
-      add("Toi", text + (files.length ? "\\n[" + files.length + " fichier(s)]" : ""));
-      send.disabled = true;
+      if (!text) return;
+      promptBox.value = '';
+      addMsg('me', text);
       try {
-        const response = await fetch(M2_CHAT_URL, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-            model: "foundation",
-            messages: [{role: "user", content}],
-            max_tokens: 512,
-            temperature: 0
-          })
+        const sid = await ensureSession();
+        const res = await fetch('/api/conversation/send', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ session_id: sid, message: text, client_turn_id: crypto.randomUUID() })
         });
-        const data = await response.json();
-        add("M2", data.choices?.[0]?.message?.content || JSON.stringify(data));
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || 'envoi refusé');
+        addMsg('sys', data.reply || data.message || data.text || JSON.stringify(data, null, 2));
       } catch (error) {
-        add("M2", "ERREUR: " + error.message);
-      } finally {
-        send.disabled = false;
-        promptBox.focus();
+        addMsg('err', String(error));
       }
     }
-    promptBox.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        submit();
-      }
-    });
-    send.addEventListener("click", submit);
-    clear.addEventListener("click", () => { chatLog.textContent = "M2 prêt."; });
-    function m5Payload() {
-      return {
-        cli: document.getElementById("llmCli").value,
-        model: document.getElementById("llmModel").value,
-        mode: document.getElementById("llmMode").value,
-        promptSource: "latest.md",
-        targetPath: document.getElementById("llmPath").value,
-        request: document.getElementById("llmRequest").value
-      };
-    }
-    document.getElementById("runM5Agent").addEventListener("click", async () => {
-      m5Status.textContent = "Lancement...";
+    async function refresh() {
       try {
-        const response = await fetch("/llm-launch", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(m5Payload())
-        });
-        const data = await response.json();
-        m5Status.textContent = data.ok ? "Lancé: " + data.script : "Erreur: " + data.error;
+        const res = await fetch('/api/state', { cache: 'no-store' });
+        const data = await res.json();
+        const serviceMap = data.services || {};
+        const loopx = serviceMap.loopx;
+        if (loopx && loopx.available) setDot('ok', 'Chat OK');
+        else if (data.checked_at) setDot('', 'LoopX partiel');
+        else setDot('bad', 'Chat KO');
+        document.getElementById('stamp').textContent = (data.host || 'STATION IA') + ' · ' + (data.checked_at || new Date().toLocaleString());
+        document.getElementById('services').replaceChildren(...Object.entries(serviceMap).map(([id, svc]) => card(svc.name, svc.detail || '', svc.available, svc.url)));
+        const groups = { M2: [], M5: [] };
+        Object.values(serviceMap).forEach(svc => groups[String(svc.name || '').includes('M2') ? 'M2' : 'M5'].push(svc));
+        document.getElementById('nodes').replaceChildren(...Object.entries(groups).map(([name, list]) => {
+          const ok = list.filter(item => item.available);
+          return card(name, ok.map(item => item.name).join('\\n') || 'Aucun service OK', ok.length > 0, '');
+        }));
       } catch (error) {
-        m5Status.textContent = "Erreur: " + error.message;
+        setDot('bad', 'Chat KO');
+        document.getElementById('stamp').textContent = 'API STATION IA inaccessible';
       }
-    });
-    document.getElementById("copyM5Payload").addEventListener("click", async () => {
-      await navigator.clipboard.writeText(JSON.stringify(m5Payload(), null, 2));
-      m5Status.textContent = "Payload copié.";
-    });
+    }
+    function card(title, detail, ok, url) {
+      const el = document.createElement('article');
+      el.className = 'card';
+      const link = url ? '<a href="'+url+'" target="_blank">ouvrir</a>' : '';
+      el.innerHTML = '<span class="badge"><span class="dot '+(ok?'ok':'bad')+'"></span>'+(ok?'OK':'OFF')+'</span><h2>'+escapeHtml(title)+'</h2><div class="meta">'+escapeHtml(detail).replaceAll('\\n','<br>')+'</div>'+link;
+      return el;
+    }
+    function escapeHtml(text) {
+      return String(text || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    const chatDot = document.getElementById('chat-dot');
+    const chatState = document.getElementById('chat-state');
+    showTab(localStorage.getItem('station.control.tab') || 'chat');
+    loadOptions();
+    refresh();
+    setInterval(refresh, 15000);
   </script>
-<script>document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;const u=new URL(a.href,location.href);const routes={'/AI-Station.html':'catalog','/Agent-Queue.html':'work','/Prompt-Master-Latest.html':'prompt','/Unified-Control.html':'control'};if(routes[u.pathname]){e.preventDefault();e.stopImmediatePropagation();parent.postMessage({stationTab:routes[u.pathname]},location.origin);}},true);</script><script>document.addEventListener('click',async e=>{const a=e.target.closest('a');if(!a)return;const u=new URL(a.href,location.href);if(u.origin!==location.origin){a.target='_blank';a.rel='noopener';return;}
-const tabs={'/Agent-Queue.html':'work','/Prompt-Master-Latest.html':'prompt','/Unified-Control.html':'control','/index.html':'overview','/V2/index.html':'prompt'};
-if(tabs[u.pathname]){e.preventDefault();parent.postMessage({stationTab:tabs[u.pathname]},location.origin);return;}
-if(u.pathname.startsWith('/launch/')||u.pathname==='/open-path'||u.pathname==='/open/comfy-output'){
-e.preventDefault();let output=document.getElementById('action-feedback');if(!output){output=document.createElement('p');output.id='action-feedback';output.style='position:fixed;bottom:10px;left:12px;right:12px;padding:12px;background:#fff;border:1px solid #888;z-index:999';document.body.append(output);}
-try{const res=await fetch('/api/legacy-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:u.pathname,query:u.search})});const d=await res.json();if(!res.ok)throw Error(d.error);output.textContent=d.message;}catch(err){output.textContent=err.message;}}
-});
-</script></details></body>
+</body>
 </html>

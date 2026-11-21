@@ -73,40 +73,58 @@ def jobs():
 
 def notes(query=''):
     """Read unchecked task lines only; never writes to the NotePlan vault."""
+    bases = [NOTEPLAN / folder for folder in ('Notes', 'Calendar') if (NOTEPLAN / folder).is_dir()]
+    if not bases:
+        return {'items': [], 'truncated': False, 'available': False}
+    command = [
+        os.environ.get('STATION_RG', '/opt/homebrew/bin/rg'),
+        '--json', '--line-buffered', '--no-messages', '--max-filesize', '1M',
+        '--glob', '*.[mM][dD]', '--glob', '*.[tT][xX][tT]',
+        '--glob', '!**/@Archive/**', '--glob', '!**/*_attachments/**',
+        '--glob', '!**/node_modules/**', '--glob', '!**/venv/**',
+        '--glob', '!**/Backups/**', '--glob', '!**/Caches/**',
+        r'^\s*[-*]\s+\[ \]\s+(.+)',
+    ]
+    truncated = False
+    outputs = []
+    for base in bases:
+        try:
+            completed = subprocess.run([*command, str(base)], capture_output=True, text=True, timeout=4, check=False)
+            outputs.append(completed.stdout)
+            if completed.returncode not in {0, 1}:
+                raise OSError(completed.stderr.strip() or 'Lecture NotePlan impossible')
+        except subprocess.TimeoutExpired as error:
+            output = error.stdout or ''
+            outputs.append(output.decode(errors='replace') if isinstance(output, bytes) else output)
+            truncated = True
     results = []
-    started = time.monotonic()
-    for folder in ('Notes', 'Calendar'):
-        base = NOTEPLAN / folder
-        if not base.is_dir():
+    for raw in '\n'.join(outputs).splitlines():
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError:
             continue
-        for directory, dirs, names in os.walk(base, followlinks=False):
-            dirs[:] = [d for d in dirs if not d.startswith(('.', '@')) and not d.endswith('_attachments') and d not in {'node_modules', 'venv', 'Backups', 'Caches'}]
-            if time.monotonic() - started > 8:
-                return {'items': results, 'truncated': True}
-            candidates = []
-            for name in names:
-                if Path(name).suffix.lower() in {'.md', '.txt'}:
-                    candidates.append(Path(directory) / name)
-            for path in candidates:
-                if time.monotonic() - started > 8:
-                    return {'items': results, 'truncated': True}
-                if path.is_symlink() or not path.is_file() or path.suffix.lower() not in {'.md', '.txt'}:
-                    continue
-                if not path.resolve().is_relative_to(NOTEPLAN.resolve()) or '@Archive' in path.parts or path.stat().st_size > 1_000_000:
-                    continue
-                for number, line in enumerate(path.read_text(errors='replace').splitlines(), 1):
-                    match = re.match(r'^\s*[-*]\s+\[ \]\s+(.+)', line)
-                    if not match:
-                        continue
-                    text = match.group(1)
-                    rel = str(path.relative_to(NOTEPLAN))
-                    if query and query.casefold() not in (text + rel).casefold():
-                        continue
-                    token = hashlib.sha256((rel + ':' + str(number) + ':' + text).encode()).hexdigest()
-                    results.append({'id': token, 'text': text, 'note': rel, 'line': number})
-                    if len(results) == 200:
-                        return {'items': results, 'truncated': True}
-    return {'items': results, 'truncated': False, 'available': NOTEPLAN.is_dir()}
+        if event.get('type') != 'match':
+            continue
+        data = event['data']
+        path = Path(data['path']['text'])
+        try:
+            rel = str(path.relative_to(NOTEPLAN))
+        except ValueError:
+            continue
+        line = data['lines']['text'].rstrip('\r\n')
+        match = re.match(r'^\s*[-*]\s+\[ \]\s+(.+)', line)
+        if not match:
+            continue
+        text = match.group(1)
+        if query and query.casefold() not in (text + rel).casefold():
+            continue
+        number = data['line_number']
+        token = hashlib.sha256((rel + ':' + str(number) + ':' + text).encode()).hexdigest()
+        results.append({'id': token, 'text': text, 'note': rel, 'line': number})
+        if len(results) == 200:
+            truncated = True
+            break
+    return {'items': results, 'truncated': truncated, 'available': True}
 
 def preview(body):
     key = identifier(body.get('id'))

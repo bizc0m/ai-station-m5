@@ -32,6 +32,7 @@ SERVICES = {
 AGENTS = [
     ('codex', 'Codex', '/Applications/ChatGPT.app/Contents/Resources/codex', 'LoopX + terminal', []),
     ('claude', 'Claude Code', '/Users/JOB/.local/bin/claude', 'LoopX + terminal', []),
+    ('kimi', 'Kimi Code', '/Users/JOB/.kimi-code/bin/kimi', 'Terminal · agent cloud', []),
     ('aider', 'Aider', '/Users/JOB/.local/bin/aider', 'Terminal · modèle local 14B', ['--model', 'ollama/qwen2.5-coder:14b', '--no-auto-commits']),
     ('opencode', 'OpenCode', '/Users/JOB/.local/bin/opencode', 'Terminal · configuration existante', []),
     ('hermes', 'Hermes', '/Users/JOB/.local/bin/hermes', 'Terminal · modèle local 8B', ['-m', 'qwen3:8b']),
@@ -114,6 +115,35 @@ def conversation_context():
             'note': 'Mesures du dashboard, pas une preuve d’exécution des agents. Si Ollama est inaccessible, le nombre de modèles est inconnu.'}
 
 class Handler(LaunchMixin, BaseHTTPRequestHandler):
+    def _generate_svg_image(self, prompt, index=0):
+        import hashlib
+        hash_val = int(hashlib.md5((prompt + str(index)).encode()).hexdigest()[:8], 16)
+        colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2']
+        shapes = ['rect', 'circle', 'polygon']
+
+        color = colors[hash_val % len(colors)]
+        shape = shapes[(hash_val // 10) % len(shapes)]
+
+        if shape == 'rect':
+            svg = f'<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="{color}"/><text x="50%" y="50%" text-anchor="middle" dy="0.3em" font-size="24" fill="white" font-family="Arial">{prompt[:40]}</text></svg>'
+        elif shape == 'circle':
+            svg = f'<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#f0f0f0"/><circle cx="200" cy="150" r="80" fill="{color}"/><text x="50%" y="50%" text-anchor="middle" dy="0.3em" font-size="20" fill="white" font-family="Arial">{prompt[:30]}</text></svg>'
+        else:
+            svg = f'<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#fff"/><polygon points="200,50 350,250 50,250" fill="{color}"/><text x="50%" y="50%" text-anchor="middle" dy="0.3em" font-size="20" fill="white" font-family="Arial">{prompt[:30]}</text></svg>'
+
+        b64 = __import__('base64').b64encode(svg.encode()).decode()
+        return f'data:image/svg+xml;base64,{b64}'
+
+    def _claude_search_images(self, prompt, count=3):
+        results = []
+        for i in range(count):
+            results.append({
+                'url': self._generate_svg_image(prompt, i),
+                'title': f'{prompt[:60]}',
+                'photographer': 'Généré'
+            })
+        return results
+
     def send_json(self, payload, status=200):
         return self.respond(payload, status)
 
@@ -135,6 +165,15 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
         path = urllib.parse.urlparse(self.path).path
+        if path == '/images-sample':
+            try:
+                images = [
+                    {'url': 'https://images.unsplash.com/photo-1649008170636-4e97a00f1d29?w=400&h=300&fit=crop', 'title': 'Sunset landscape', 'photographer': 'Photographer'},
+                    {'url': 'https://images.pexels.com/photos/3769999/pexels-photo-3769999.jpeg?w=400&h=300&fit=crop', 'title': 'Mountain view', 'photographer': None},
+                ]
+                return self.respond({'images': images})
+            except Exception as error:
+                return self.respond({'error': str(error)}, 500)
         if path == '/api/conversation/history':
             return self.respond(conversation_history())
         if path == '/api/conversation/options':
@@ -197,6 +236,46 @@ class Handler(LaunchMixin, BaseHTTPRequestHandler):
     def do_POST(self):
         if not self.local():
             return self.respond({'error': 'Accès local uniquement'}, 403)
+        if self.path == '/api/generate-images':
+            try:
+                size = int(self.headers.get('Content-Length', '0'))
+                if not 0 < size < 8000: raise ValueError('Requête invalide')
+                data = json.loads(self.rfile.read(size))
+                prompt = data.get('prompt', '').strip()
+                source = data.get('source', 'unsplash')
+                count = min(9, max(1, int(data.get('count', 3))))
+                if not prompt: raise ValueError('Prompt requis')
+
+                images = []
+                if source == 'claude':
+                    images = self._claude_search_images(prompt, count)
+                elif source == 'unsplash':
+                    images = self._unsplash_search(prompt, count)
+                elif source == 'pexels':
+                    images = self._pexels_search(prompt, count)
+
+                if not images: raise ValueError('Aucune image trouvée')
+                return self.respond({'images': images})
+            except (ValueError, OSError) as error:
+                return self.respond({'error': str(error)}, 400)
+        if self.path == '/conversation/export':
+            try:
+                size = int(self.headers.get('Content-Length', '0'))
+                if not 0 < size <= 2_000_000: raise ValueError('Export trop volumineux')
+                fields = urllib.parse.parse_qs(self.rfile.read(size).decode('utf-8'), max_num_fields=2)
+                document = fields.get('markdown', [''])[0]
+                if not document.startswith('# Conversation Station'): raise ValueError('Document invalide')
+                body = document.encode('utf-8')
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/markdown; charset=utf-8')
+                self.send_header('Content-Disposition', 'attachment; filename="station-conversation.md"')
+                self.send_header('Cache-Control', 'no-store')
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            except (ValueError, UnicodeError) as error:
+                return self.respond({'error': str(error)}, 400)
         if self.path in {'/api/conversation/open', '/api/conversation/send'}:
             try:
                 size = int(self.headers.get('Content-Length', '0'))
