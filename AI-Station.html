@@ -1095,6 +1095,7 @@
       <div class="badge" aria-label="Version design">DESIGN v4.7</div>
       <a class="top-action" href="/Agent-Queue.html">Queue</a>
       <a class="top-action" href="/Prompt-Master-Latest.html">Prompt</a>
+      <a class="top-action" href="https://bizc0m.github.io/ai-station-m5/AI-Station-online.html" target="_blank" rel="noopener noreferrer">Online</a>
       <a class="top-action" href="http://127.0.0.1:8188/">ComfyUI</a>
     </header>
 
@@ -1690,12 +1691,32 @@ ${commands[cli] || commands.ollama}
       element?.addEventListener("change", refreshLlmScript);
     });
 
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand("copy");
+        textarea.remove();
+        return ok;
+      }
+    }
+
     document.getElementById("copyLlmScript")?.addEventListener("click", async () => {
-      await navigator.clipboard.writeText(buildLlmScript());
+      await copyText(buildLlmScript());
+      if (llmLaunchStatus) llmLaunchStatus.textContent = "Script copié.";
     });
 
     document.getElementById("copyLlmPrompt")?.addEventListener("click", async () => {
-      await navigator.clipboard.writeText(buildLlmPrompt());
+      await copyText(buildLlmPrompt());
+      if (llmLaunchStatus) llmLaunchStatus.textContent = "Prompt copié.";
     });
 
     document.getElementById("runLlmScript")?.addEventListener("click", async () => {
@@ -1758,7 +1779,7 @@ ${commands[cli] || commands.ollama}
 
     document.getElementById("quickCopy")?.addEventListener("click", async () => {
       refreshQuickPreview();
-      await navigator.clipboard.writeText(buildLlmScript());
+      await copyText(buildLlmScript());
       const quickStatus = document.getElementById("quickStatus");
       if (quickStatus) quickStatus.textContent = "Script copié.";
     });
@@ -1863,6 +1884,8 @@ ${commands[cli] || commands.ollama}
     }
 
     async function checkAgentScreenshots() {
+      const scanMissingScreenshots = false;
+      if (!scanMissingScreenshots) return;
       await Promise.all(agentTools.map(async (tool) => {
         if (tool.dataset.screenshot) return;
         const id = tool.dataset.favoriteId;

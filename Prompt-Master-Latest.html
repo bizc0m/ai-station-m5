@@ -599,13 +599,23 @@ ${requestBlock}${officialBlock}`;
     }
 
     async function copyText(text, buttonLabel) {
+      const value = text.trim();
       try {
-        await navigator.clipboard.writeText(text.trim());
+        await navigator.clipboard.writeText(value);
         copyStatus.textContent = `${buttonLabel} copie.`;
         copyStatus.className = "status-text ok";
       } catch (error) {
-        copyStatus.textContent = `Copie impossible : ${error.message}`;
-        copyStatus.className = "status-text warn";
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand("copy");
+        textarea.remove();
+        copyStatus.textContent = ok ? `${buttonLabel} copie.` : `Copie impossible : ${error.message}`;
+        copyStatus.className = ok ? "status-text ok" : "status-text warn";
       }
     }
 

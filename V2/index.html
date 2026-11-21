@@ -229,10 +229,10 @@
         <a class="button primary" href="CTxKNL_v0.7.md">Ouvrir CTxKNL</a>
         <a class="button primary" href="prompt.html">Prompt pure latest</a>
         <a class="button primary" href="latest.md">latest.md</a>
-        <a class="button" href="prompt.md">prompt.md</a>
+        <a class="button" href="latest.md">Source latest</a>
         <a class="button" href="VERSIONS.md">Versions</a>
         <a class="button" href="CTxKNL-launcher-prompt.txt">Prompt à copier</a>
-        <a class="button" href="assistant-dev-prompt.md">Source officielle</a>
+        <a class="button" href="CTxKNL_v0.7.md">Source complète</a>
         <a class="button" href="https://github.com/bizc0m/prompt-master">GitHub</a>
       </nav>
     </header>
@@ -408,10 +408,10 @@ Style :
         <li><a href="CTxKNL_v0.1.md">CTxKNL_v0.1.md</a> : ancienne version / compat.</li>
         <li><a href="VERSIONS.md">VERSIONS.md</a> : numerotation.</li>
         <li><a href="latest.md">latest.md</a> : prompt brut latest.</li>
-        <li><a href="prompt.md">prompt.md</a> : prompt latest source.</li>
-        <li><a href="prompt.html">prompt.html</a> : page pure latest qui lit prompt.md.</li>
+        <li><a href="latest.md">latest.md</a> : source unique du prompt latest.</li>
+        <li><a href="prompt.html">prompt.html</a> : page pure latest qui lit latest.md.</li>
         <li><a href="CTxKNL-launcher-prompt.txt">CTxKNL-launcher-prompt.txt</a> : prompt court à coller dans n'importe quel LLM.</li>
-        <li><a href="assistant-dev-prompt.md">assistant-dev-prompt.md</a> : source officielle complète.</li>
+        <li><a href="CTxKNL_v0.7.md">CTxKNL_v0.7.md</a> : source officielle complète.</li>
         <li><a href="README.md">README.md</a> : documentation du dépôt.</li>
       </ul>
     </section>
@@ -517,8 +517,9 @@ ${requestText}`;
     }
 
     async function copyText(text, statusEl, buttonEl) {
+      const value = text.trim();
       try {
-        await navigator.clipboard.writeText(text.trim());
+        await navigator.clipboard.writeText(value);
         statusEl.textContent = 'Prompt copié.';
         if (buttonEl) buttonEl.textContent = 'Copié';
         setTimeout(() => {
@@ -526,8 +527,17 @@ ${requestText}`;
           statusEl.textContent = '';
         }, 1800);
       } catch {
-        statusEl.textContent = 'Copie automatique bloquée : texte sélectionné.';
-        return false;
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand('copy');
+        textarea.remove();
+        statusEl.textContent = ok ? 'Prompt copié.' : 'Copie automatique bloquée : texte sélectionné.';
+        return ok;
       }
       return true;
     }
@@ -575,21 +585,21 @@ ${requestText}`;
 
     copyButton.addEventListener('click', async () => {
       const text = launcherPrompt.textContent.trim();
-      try {
-        await navigator.clipboard.writeText(text);
-        copyStatus.textContent = 'Prompt copié.';
-        copyButton.textContent = 'Copié';
-        setTimeout(() => {
-          copyButton.textContent = 'Copier';
-          copyStatus.textContent = '';
-        }, 1800);
-      } catch {
+      const copied = await copyText(text, copyStatus, copyButton);
+      if (!copied) {
         const range = document.createRange();
         range.selectNodeContents(launcherPrompt);
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
         copyStatus.textContent = 'Copie automatique bloquée : texte sélectionné.';
+      } else {
+        copyStatus.textContent = 'Prompt copié.';
+        copyButton.textContent = 'Copié';
+        setTimeout(() => {
+          copyButton.textContent = 'Copier';
+          copyStatus.textContent = '';
+        }, 1800);
       }
     });
 

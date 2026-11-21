@@ -1481,12 +1481,32 @@ ${commands[cli] || commands.ollama}
       element?.addEventListener("change", refreshLlmScript);
     });
 
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand("copy");
+        textarea.remove();
+        return ok;
+      }
+    }
+
     document.getElementById("copyLlmScript")?.addEventListener("click", async () => {
-      await navigator.clipboard.writeText(buildLlmScript());
+      await copyText(buildLlmScript());
+      if (llmLaunchStatus) llmLaunchStatus.textContent = "Script copié.";
     });
 
     document.getElementById("copyLlmPrompt")?.addEventListener("click", async () => {
-      await navigator.clipboard.writeText(buildLlmPrompt());
+      await copyText(buildLlmPrompt());
+      if (llmLaunchStatus) llmLaunchStatus.textContent = "Prompt copié.";
     });
 
     document.getElementById("runLlmScript")?.addEventListener("click", async () => {
